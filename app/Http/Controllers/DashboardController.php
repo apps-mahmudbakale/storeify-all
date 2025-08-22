@@ -52,7 +52,15 @@ class DashboardController extends Controller
             ->select(DB::raw('SUM(products.selling_price * sales.quantity) - SUM(products.buying_price * sales.quantity) as profit'))->first();
         $profit = $query->profit;
         // dd($query->profit);
-        return view('home', compact('users', 'products', 'sales', 'today_sales', 'today_cash', 'sales_cash', 'products_cash_cost', 'products_cash_selling', 'profit'));
+        $expiry_threshold = Carbon::now()->addDays(7);
+
+    $expiring_products = DB::table('products')
+        ->whereNotNull('expiry_date')
+        ->whereDate('expiry_date', '<=', $expiry_threshold)
+        ->orderBy('expiry_date', 'asc')
+        ->get();
+        $low_stock_products = Product::where('qty', '<=', 5)->orderBy('qty')->get();
+        return view('home', compact('users', 'products', 'sales', 'today_sales', 'today_cash', 'sales_cash', 'products_cash_cost', 'products_cash_selling', 'profit', 'expiring_products', 'low_stock_products'));
     }
 
     public function generalReport()

@@ -81,5 +81,5 @@ Route::group(['prefix' => 'app', 'as' => 'app.', 'middleware' => 'auth'], functi
     Route::post('logout', [LogoutController::class, 'perform'])->name('logout');
 });
 // if (env('APP_ENV') === 'production') {
-    URL::forceScheme('https');
+    // URL::forceScheme('https');
 // }

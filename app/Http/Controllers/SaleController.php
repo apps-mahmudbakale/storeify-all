@@ -81,8 +81,8 @@ class SaleController extends Controller
                 [
                     // 'quantity' => DB::raw('quantity + ' . $qty),
                     // 'amount' => DB::raw('amount + ' . $data[2]),
-                    'created_at' => DB::raw('now()'),
-                    'updated_at' => DB::raw('now()'),
+                    'created_at' => DB::raw('CURRENT_TIMESTAMP'),
+                    'updated_at' => DB::raw('CURRENT_TIMESTAMP'),
                 ]
             );
         DB::table('sales_order')
@@ -95,6 +95,7 @@ class SaleController extends Controller
 
         return redirect()->route('app.sales.create');
     }
+
 
     public function saveSale($sale)
     {
