@@ -8,7 +8,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class SaleController extends Controller
+class  SaleController extends Controller
 {
     /**
      * Display a listing of the resource.

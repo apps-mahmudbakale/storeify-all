@@ -283,8 +283,25 @@
                                                     }
                                                 })
 
-                                            })
+                                            });
 
+                                            $('#invoice').click(() => {
+                                                var url = '/app/invoice/{{ $cart->invoice }}';
+                                                Swal.fire({
+                                                    title: 'Are you sure?',
+                                                    text: "You won't be able to revert this!",
+                                                    icon: 'warning',
+                                                    showCancelButton: true,
+                                                    confirmButtonColor: '#3085d6',
+                                                    cancelButtonColor: '#d33',
+                                                    confirmButtonText: 'Yes, save and print it!'
+                                                }).then((result) => {
+                                                    if (result.isConfirmed) {
+                                                        window.location = url;
+                                                    }
+                                                })
+
+                                            });
                                         });
                                     </script>
                                 @endforeach
@@ -311,6 +328,7 @@
                             <button id='save' class="btn btn-success"><i class="fa fa-save"></i> Save</button>
                             <button id="save_print" class="btn btn-info"><i class="fa fa-print"></i> Save And
                                 Print</button>
+                            <button id='invoice' class="btn btn-success"><i class="fa fa-save"></i> Generate Invoice</button>
                         </div>
                     </div>
                     <!-- /.card-body -->

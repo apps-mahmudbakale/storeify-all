@@ -12,19 +12,20 @@ class ProductsImport implements ToCollection,  WithHeadingRow
 {
     public function collection(Collection $rows)
     {
-        // dd($rows);
         foreach ($rows as $row) {
-            // dd($row['quantity']);
+            $sellingPrice = isset($row['selling_price']) && !empty($row['selling_price']) 
+                ? $row['selling_price'] 
+                : $row['cost'] * app(StoreSettings::class)->sell_margin;
+
             Product::updateOrCreate(
                 ['name' => ucfirst($row['product'])],
                 [
                     'buying_price' => $row['cost'],
-                    'selling_price' => $row['cost'] * app(StoreSettings::class)->sell_margin,
+                    'selling_price' => $sellingPrice,
                     'expiry_date' => $row['expiry'],
                 ]
             );
-            // DB::table('products')
-            // ->where('')
+            
             Product::where('name', ucfirst($row['product']))->increment('qty', $row['quantity']);
         }
     }

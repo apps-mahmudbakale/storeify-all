@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Invoice;
+use App\Models\InvoiceOrder;
+use App\Models\Sale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -85,6 +87,57 @@ class InvoiceController extends Controller
     public function edit(Invoice $invoice)
     {
 
+    }
+
+    public function invoice($invoice)
+    {
+        $sales_order = DB::table('sales_order')
+            ->where('invoice', $invoice)
+            ->get();
+        // dd($sales_order);
+        foreach ($sales_order as $order) {
+            $sales = InvoiceOrder::create([
+                'invoice' => $invoice,
+                'product_id' => $order->product_id,
+                'quantity' => $order->quantity,
+                'amount' => $order->amount,
+                'user_id' => auth()->user()->id,
+                'price' => $order->price
+            ]);
+
+        }
+        $invoice = Invoice::create([
+            'invoice' => $invoice,
+            'created_at' => now(),
+        ]);
+        $delete = DB::table('sales_order')
+            ->where('invoice', $invoice)
+            ->where('user_id', auth()->user()->id)
+            ->delete();
+        session()->forget('invoice');
+        return redirect()->route('app.invoice.print', $invoice->invoice);
+    }
+
+    public function invoicePrint($invoice)
+    {
+        $items = DB::table('invoice_orders')
+            ->select('invoice_orders.*', 'products.name as product', 'products.selling_price')
+            ->join('products', 'products.id', '=', 'invoice_orders.product_id')
+            ->where('invoice_orders.invoice', $invoice)
+            ->where('invoice_orders.user_id', auth()->user()->id)
+            ->get();
+        $sum = DB::table('invoice_orders')
+            ->select(DB::raw('SUM(amount) as sum'))
+            ->where('invoice', $invoice)
+            ->where('user_id', auth()->user()->id)
+            ->first();
+        $user = DB::table('invoice_orders')
+            ->select('users.name')
+            ->join('users', 'users.id', '=', 'invoice_orders.user_id')
+            ->where('invoice_orders.invoice', $invoice)
+            ->first();
+
+        return view('invoices.print', compact('items', 'invoice', 'sum', 'user'));
     }
 
     /**
