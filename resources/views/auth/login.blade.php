@@ -5,7 +5,7 @@
 <div id="login-container">
     <!-- Login Header -->
     <h1 class="h2 text-dark text-center push-top-bottom animation-slideDown" style="margin-left: -29px; margin-bottom: 31px;">
-            <img src="{{ asset('logo.png')}}" style="width:100px;">
+            <img src="{{ asset('logo.png')}}" style="width:180px;">
     </h1>
     <!-- END Login Header -->
 
