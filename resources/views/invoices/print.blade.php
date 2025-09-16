@@ -21,7 +21,7 @@
     <div class="row invoice-header">
         <div class="col-12 col-sm-6 justify-content-sm-between text-center text-sm-left invoice-col">
 
-            <p><img src="Go54(Formerly%20WhoGoHost)%20-%20Invoice%20%23_2110465_files/wgh-go54.png" title="Go54(Formerly WhoGoHost)"></p>
+            <p><img src="{{asset('logo.png')}} " title=""></p>
             <h3>Invoice #{{$invoice}}</h3>
 
         </div>

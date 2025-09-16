@@ -5,7 +5,7 @@
 <div id="login-container">
     <!-- Login Header -->
     <h1 class="h2 text-dark text-center push-top-bottom animation-slideDown" style="margin-left: -29px; margin-bottom: 31px;">
-            <img src="{{!empty(app(App\Settings\StoreSettings::class)->store_logo) ? asset('storage/store/'.app(App\Settings\StoreSettings::class)->store_logo):asset('assets/img/logo.png')}}"style="width:100px;"> {{app(App\Settings\StoreSettings::class)->store_name ? : 'Storeify'}}
+            <img src="{{!empty(app(App\Settings\StoreSettings::class)->store_logo) ? asset('storage/store/'.app(App\Settings\StoreSettings::class)->store_logo):asset('logo.png')}}"style="width:100px;"> {{app(App\Settings\StoreSettings::class)->store_name ? : 'Storeify'}}
     </h1>
     <!-- END Login Header -->
 
