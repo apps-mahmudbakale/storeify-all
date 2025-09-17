@@ -58,24 +58,46 @@ class InvoiceController extends Controller
      */
     public function show(Invoice $invoice)
     {
-        $items = DB::table('sales')
-            ->select('sales.*', 'products.name as product', 'products.selling_price')
-            ->join('products', 'products.id', '=', 'sales.product_id')
-            ->where('sales.invoice', $invoice->invoice)
-            // ->where('sales.user_id', auth()->user()->id)
+//        $items = DB::table('sales')
+//            ->select('sales.*', 'products.name as product', 'products.selling_price')
+//            ->join('products', 'products.id', '=', 'sales.product_id')
+//            ->where('sales.invoice', $invoice->invoice)
+//            // ->where('sales.user_id', auth()->user()->id)
+//            ->get();
+//        $sum = DB::table('sales')
+//            ->select(DB::raw('SUM(amount) as sum'))
+//            ->where('invoice', $invoice->invoice)
+//            // ->where('user_id', auth()->user()->id)
+//            ->first();
+//        $user = DB::table('sales')
+//            ->select('users.name')
+//            ->join('users', 'users.id', '=', 'sales.user_id')
+//            ->where('sales.invoice', $invoice->invoice)
+//            ->first();
+//            // dd($items);
+//        return view('invoices.show', compact('items', 'invoice', 'sum', 'user'));
+
+
+
+        $items = DB::table('invoice_orders')
+            ->select('invoice_orders.*', 'products.name as product', 'products.selling_price')
+            ->join('products', 'products.id', '=', 'invoice_orders.product_id')
+            ->where('invoice_orders.invoice', $invoice->invoice)
+            ->where('invoice_orders.user_id', auth()->user()->id)
             ->get();
-        $sum = DB::table('sales')
+        $sum = DB::table('invoice_orders')
             ->select(DB::raw('SUM(amount) as sum'))
             ->where('invoice', $invoice->invoice)
-            // ->where('user_id', auth()->user()->id)
+            ->where('user_id', auth()->user()->id)
             ->first();
-        $user = DB::table('sales')
+        $user = DB::table('invoice_orders')
             ->select('users.name')
-            ->join('users', 'users.id', '=', 'sales.user_id')
-            ->where('sales.invoice', $invoice->invoice)
+            ->join('users', 'users.id', '=', 'invoice_orders.user_id')
+            ->where('invoice_orders.invoice', $invoice)
             ->first();
-            // dd($items);
-        return view('invoices.show', compact('items', 'invoice', 'sum', 'user'));
+        $invoice = $invoice->invoice;
+
+        return view('invoices.print', compact('items', 'invoice', 'sum', 'user'));
     }
 
     /**

@@ -22,7 +22,7 @@ class  SaleController extends Controller
 
     public function createRandomPassword()
     {
-        $station = 'K7PHARMAY';
+        $station = 'SAHADPHARMAY';
         $sum = DB::table('sales')->count() + 1;
         $pass = substr($station, 0, 3) . "" . date('d') . "" . date('m') . "" . date('y') . "-" . sprintf('%04d', $sum);
         return strtoupper($pass);

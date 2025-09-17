@@ -40,11 +40,26 @@
                             </div>
                             <div class="form-group">
                                 <label>Permissions</label>
-                                <select name="permissions[]" multiple class="form-control">
+                                <div class="row">
                                     @foreach ($permissions as $permission)
-                                        <option value='{{ $permission->id }}'>{{ $permission->name }}</option>
+                                        @php
+                                            $isChecked = in_array($permission->id, old('permissions', []));
+                                        @endphp
+                                        <div class="col-md-4 mb-3">
+                                            <div class="custom-control custom-switch">
+                                                <input type="checkbox" 
+                                                       class="custom-control-input" 
+                                                       id="permission-{{ $permission->id }}" 
+                                                       name="permissions[]" 
+                                                       value="{{ $permission->id }}"
+                                                       {{ $isChecked ? 'checked' : '' }}>
+                                                <label class="custom-control-label" for="permission-{{ $permission->id }}">
+                                                    {{ $permission->name }}
+                                                </label>
+                                            </div>
+                                        </div>
                                     @endforeach
-                                </select>
+                                </div>
                             </div>
                         </div>
                         <!-- /.card-body -->

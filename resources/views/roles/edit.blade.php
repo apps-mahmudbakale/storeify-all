@@ -42,15 +42,27 @@
                                     placeholder="Name" id="fullname">
                             </div>
                             <div class="form-group">
-                                <label>Station</label>
-                                <select name="permissions[]" multiple class="form-control">
-                                    @foreach ($permissions as $key => $permission)
-                                        <option value="{{ $permission->id }}"
-                                            {{ in_array($permission->id, old('permissions', [])) || (isset($role) && $role->permissions->contains($permission->id)) ? 'selected' : '' }}>
-                                            {{ $permission->name }}
-                                        </option>
+                                <label>Permissions</label>
+                                <div class="row">
+                                    @foreach ($permissions as $permission)
+                                        @php
+                                            $isChecked = in_array($permission->id, old('permissions', $role->permissions->pluck('id')->toArray()));
+                                        @endphp
+                                        <div class="col-md-4 mb-3">
+                                            <div class="custom-control custom-switch">
+                                                <input type="checkbox" 
+                                                       class="custom-control-input" 
+                                                       id="permission-{{ $permission->id }}" 
+                                                       name="permissions[]" 
+                                                       value="{{ $permission->id }}"
+                                                       {{ $isChecked ? 'checked' : '' }}>
+                                                <label class="custom-control-label" for="permission-{{ $permission->id }}">
+                                                    {{ $permission->name }}
+                                                </label>
+                                            </div>
+                                        </div>
                                     @endforeach
-                                </select>
+                                </div>
                             </div>
                         </div>
                         <!-- /.card-body -->

@@ -1,122 +1,162 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"><head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sahad Pharmaceuticals - Invoice #{{$invoice}}</title>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Purchase Receipt</title>
-    <style>
-        * {
-            font-size: 12px;
-            font-family: 'Times New Roman';
-        }
+    <link href="{{asset('all.min.css')}}" rel="stylesheet">
+    <link href="{{asset('theme.min.css')}}" rel="stylesheet">
+    <link href="{{asset('fontawesome-all.min.css')}}" rel="stylesheet">
+    <link href="{{asset('invoice.min.css')}}" rel="stylesheet">
+    <script src="{{asset('scripts.min.js')}}scripts.min.js"></script>
 
-        td,
-        th,
-        tr,
-        table {
-            border-top: 1px solid black;
-            border-collapse: collapse;
-        }
-
-        td.description,
-        th.description {
-            width: 75px;
-            max-width: 75px;
-        }
-
-        td.quantity,
-        th.quantity {
-            width: 40px;
-            max-width: 40px;
-            word-break: break-all;
-        }
-
-        td.price,
-        th.price {
-            width: 40px;
-            max-width: 40px;
-            word-break: break-all;
-        }
-
-        .centered {
-            text-align: center;
-            align-content: center;
-        }
-
-        .ticket {
-            width: 155px;
-            max-width: 155px;
-        }
-
-        img {
-            max-width: inherit;
-            width: inherit;
-        }
-
-        @media print {
-
-            .hidden-print,
-            .hidden-print * {
-                display: none !important;
-            }
-        }
-    </style>
 </head>
+<body data-new-gr-c-s-check-loaded="8.933.0" data-gr-ext-installed="">
 
-<body>
-    <div class="ticket" align="center" style="max-width: 1000px; width: 328px;">
-        <img src="{{ !empty(app(App\Settings\StoreSettings::class)->store_logo) ? asset('storage/store/' . app(App\Settings\StoreSettings::class)->store_logo) : asset('assets/img/logo.png') }}"
-            alt="Logo" style="width: 100px">
-        <br>
-        {{ app(App\Settings\StoreSettings::class)->store_name ?: 'Storeify' }}
-        <p class="centered">PURCHASE RECEIPT
-            <br>{{ app(App\Settings\StoreSettings::class)->store_address }}
-            <br>
-            Date: {{\Carbon\Carbon::parse($invoice->created_at)->toFormattedDayDateString()}}
-            {{ $invoice->invoice }}
-        <table style="font-size: 24px; font-weight: bold; width: inherit;">
-            <thead>
+<div class="container-fluid invoice-container">
+
+
+    <div class="row invoice-header">
+        <div class="col-12 col-sm-6 justify-content-sm-between text-center text-sm-left invoice-col">
+
+            <p><img src="{{asset('logo.png')}} " title=""></p>
+            <h3>Invoice #{{$invoice->invoice}}</h3>
+
+        </div>
+
+    </div>
+
+    <hr>
+
+
+    <div class="row justify-content-sm-between">
+        <div class="col-12 col-sm-6 order-sm-last text-sm-right invoice-col right">
+            <strong>Pay To</strong>
+            <address class="small-text">
+                Sahad Pharmaceuticals <br>
+                (TIN: 32378872-0001)<br>
+                {{--                To transfer from your bank account, <br>--}}
+                {{--                choose either Paystack or Rave payment <br>--}}
+                {{--                gateway and use the bank transfer option<br>--}}
+                {{--                to get your invoice paid instantly.--}}
+            </address>
+        </div>
+        <div class="col-12 col-sm-6 invoice-col">
+            <strong>Invoiced To</strong>
+            <address class="small-text">
+                Customer Name: <input name="name" id="" class="form-control"><br>
+                Address: <textarea name="address" class="form-control" id="address"></textarea>
+                <br>
+                Nigeria
+            </address>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 col-sm-6 order-sm-last text-sm-right invoice-col right">
+            <strong>Payment Method</strong><br>
+            <span class="small-text float-sm-right" data-role="paymethod-info">
+                                                    Bank Transfer                                           </span>
+            <br><br>
+        </div>
+        <div class="col-12 col-sm-6 invoice-col">
+            <strong>Invoice Date</strong><br>
+            <span class="small-text">
+                        {{date('d/m/y')}}<br><br>
+                    </span>
+        </div>
+    </div>
+
+    <br>
+
+
+
+    <div class="card bg-default">
+        <div class="card-header">
+            <h3 class="card-title mb-0 font-size-24"><strong>Invoice Items</strong></h3>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
                 <tr>
-                    <th class="description">Description</th>
-                    <th class="quantity">Q.</th>
-                    <th class="price">{!! app(App\Settings\StoreSettings::class)->currency !!}</th>
-                    <th class="price" style="max-width: 50px; width: 51px;">Subtotal</th>
+                    <td>#</td>
+                    <td><strong>Description</strong></td>
+                    <td><strong>QTY</strong></td>
+                    <td><strong>Unit Price</strong></td>
+                    <td><strong>Amount</strong></td>
                 </tr>
-            </thead>
-            <tbody>
+                </thead>
+                <tbody>
                 @foreach ($items as $item)
                     <tr>
-                        <td class="description" style="text-align: center;">{{ $item->product }}</td>
-                        <td class="quantity" style="text-align: center;">{{ $item->quantity }}</td>
-                        <td class="price" style="text-align: center;">{!! app(App\Settings\StoreSettings::class)->currency !!}
-                            {{ $item->selling_price }}</td>
-                        <td class="price" style="text-align: center;">{!! app(App\Settings\StoreSettings::class)->currency !!} {{ $item->amount }}</td>
+                        <td>{{$loop->iteration}}</td>
+                        <td>{{$item->product}}</td>
+                        <td>{{$item->quantity}}</td>
+                        <td class="text-center">{!! app(App\Settings\StoreSettings::class)->currency !!} {{ $item->selling_price }}</td>
+                        <td>{!! app(App\Settings\StoreSettings::class)->currency !!} {{ $item->amount }}</td>
                     </tr>
                 @endforeach
+                @php
+                    $subtotal = $items->sum('amount');
+                    $vat = 0;
+                    $total = $subtotal + $vat;
+                @endphp
                 <tr>
-                    <td>Total:</td>
                     <td></td>
                     <td></td>
-                    <td>{!! app(App\Settings\StoreSettings::class)->currency !!} {{ number_format($sum->sum) }}</td>
+                    <td></td>
+                    <td class="total-row text-right"><strong>Sub Total</strong></td>
+                    <td class="total-row text-center">{!! app(App\Settings\StoreSettings::class)->currency !!} {{ number_format($subtotal, 2) }}</td>
                 </tr>
-            </tbody>
-        </table>
-        <br>
-        <p class="centered">Transaction Processed By
-            <br>{{ ucfirst($user->name) }}
-        </p>
-        <p class="centered">Thanks for your purchase!
-            <br> {!! app(App\Settings\StoreSettings::class)->store_name ?: 'Storeify' !!}
-        </p>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td class="total-row text-right"><strong>VAT (0%)</strong></td>
+                    <td class="total-row text-center">{!! app(App\Settings\StoreSettings::class)->currency !!} {{ number_format($vat, 2) }}</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td class="total-row text-right"><strong>Credit</strong></td>
+                    <td class="total-row text-center">{!! app(App\Settings\StoreSettings::class)->currency !!} 0.00</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td class="total-row text-right"><strong>Total</strong></td>
+                    <td class="total-row text-center">{!! app(App\Settings\StoreSettings::class)->currency !!} {{ number_format($total, 2) }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
-    <button id="btnPrint" class="hidden-print">Print</button>
-    <button onclick="window.history.back()" class="hidden-print">Back</button>
-    <script>
-        const $btnPrint = document.querySelector("#btnPrint");
-        $btnPrint.addEventListener("click", () => {
-            window.print();
-        });
-    </script>
-</body>
+
+
+    <div class="float-right btn-group btn-group-sm d-print-none">
+        <a href="javascript:window.print()" class="btn btn-default"><i class="fas fa-print"></i> Print</a>
+        {{--        <a href="https://www.whogohost.com/host/dl.php?type=i&amp;id=2110465" class="btn btn-default"><i class="fas fa-download"></i> Download</a>--}}
+    </div>
+
+
+</div>
+
+{{--<p class="text-center d-print-none"><a href="https://www.whogohost.com/host/clientarea.php?action=invoices">« Back to Client Area</a></p><p class="text-center d-print-none"><a href="https://www.whogohost.com/host/clientarea.php?action=invoices">« Back to Client Area</a></p>--}}
+
+<div id="fullpage-overlay" class="w-hidden" style="display: none;">
+    <div class="outer-wrapper">
+        <div class="inner-wrapper">
+            <img src="Go54(Formerly%20WhoGoHost)%20-%20Invoice%20%23_2110465_files/overlay-spinner.svg" alt="">
+            <br>
+            <span class="msg"></span>
+        </div>
+    </div>
+</div>
+
+
+
+<div id="lightboxOverlay" class="lightboxOverlay" style="display: none;"></div><div id="lightbox" class="lightbox" style="display: none;"><div class="lb-outerContainer"><div class="lb-container"><img class="lb-image" src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="><div class="lb-nav"><a class="lb-prev" href=""></a><a class="lb-next" href=""></a></div><div class="lb-loader"><a class="lb-cancel"></a></div></div></div><div class="lb-dataContainer"><div class="lb-data"><div class="lb-details"><span class="lb-caption"></span><span class="lb-number"></span></div><div class="lb-closeContainer"><a class="lb-close"></a></div></div></div></div></body><grammarly-desktop-integration data-grammarly-shadow-root="true"></grammarly-desktop-integration></html>

@@ -58,8 +58,11 @@ class DashboardController extends Controller
         ->whereNotNull('expiry_date')
         ->whereDate('expiry_date', '<=', $expiry_threshold)
         ->orderBy('expiry_date', 'asc')
-        ->get();
-        $low_stock_products = Product::where('qty', '<=', 5)->orderBy('qty')->get();
+        ->paginate(5);
+        
+    $low_stock_products = Product::where('qty', '<=', 5)
+        ->orderBy('qty')
+        ->paginate(5);
         return view('home', compact('users', 'products', 'sales', 'today_sales', 'today_cash', 'sales_cash', 'products_cash_cost', 'products_cash_selling', 'profit', 'expiring_products', 'low_stock_products'));
     }
 

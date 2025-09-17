@@ -177,37 +177,63 @@
                                 <h6>Notifications</h6>
                             </div>
                             <div class="card-body">
-                                @if ($expiring_products->count())
-                                    <ul class="list-group">
-                                        @foreach ($expiring_products as $product)
-                                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                <div>
-                                                    <strong>{{ $product->name }}</strong><br>
-                                                    <small>Expires on:
-                                                        {{ \Carbon\Carbon::parse($product->expiry_date)->format('M d, Y') }}</small>
+                                <div class="row">
+                                    @if ($expiring_products->count())
+                                        <div class="col-md-6">
+                                            <div class="card h-100 d-flex flex-column">
+                                                <div class="card-header bg-danger text-white">
+                                                    <h6 class="mb-0">Expiring Soon</h6>
                                                 </div>
-                                                <span class="badge badge-danger badge-pill">Expiring Soon</span>
-                                            </li>
-                                        @endforeach
-                                    </ul>
-                                @else
-                                    {{-- <p class="text-muted mb-0">No products expiring within 7 days.</p> --}}
-                                @endif
-                                @if ($low_stock_products->count())
-                                    <hr>
-                                    <h6 class="mt-3">Low Stock Alerts</h6>
-                                    <ul class="list-group">
-                                        @foreach ($low_stock_products as $product)
-                                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                <div>
-                                                    <strong>{{ $product->name }}</strong><br>
-                                                    <small>Only {{ $product->qty }} in stock</small>
+                                                <div class="card-body p-0 flex-grow-1">
+                                                    <ul class="list-group list-group-flush">
+                                                        @foreach ($expiring_products as $product)
+                                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                                <div>
+                                                                    <strong>{{ $product->name }}</strong><br>
+                                                                    <small>Expires: {{ \Carbon\Carbon::parse($product->expiry_date)->format('M d, Y') }}</small>
+                                                                </div>
+                                                                <span class="badge badge-danger badge-pill">Expiring</span>
+                                                            </li>
+                                                        @endforeach
+                                                    </ul>
                                                 </div>
-                                                <span class="badge badge-warning badge-pill">Low Stock</span>
-                                            </li>
-                                        @endforeach
-                                    </ul>
-                                @endif
+                                                @if($expiring_products->hasPages())
+                                                    <div class="card-footer">
+                                                        {{ $expiring_products->onEachSide(1)->links('pagination::bootstrap-4') }}
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    @if ($low_stock_products->count())
+                                        <div class="col-md-6">
+                                            <div class="card h-100 d-flex flex-column">
+                                                <div class="card-header bg-warning text-dark">
+                                                    <h6 class="mb-0">Low Stock Alerts</h6>
+                                                </div>
+                                                <div class="card-body p-0 flex-grow-1">
+                                                    <ul class="list-group list-group-flush">
+                                                        @foreach ($low_stock_products as $product)
+                                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                                <div>
+                                                                    <strong>{{ $product->name }}</strong><br>
+                                                                    <small>Remaining: {{ $product->qty }} units</small>
+                                                                </div>
+                                                                <span class="badge badge-warning badge-pill">Low Stock</span>
+                                                            </li>
+                                                        @endforeach
+                                                    </ul>
+                                                </div>
+                                                @if($low_stock_products->hasPages())
+                                                    <div class="card-footer">
+                                                        {{ $low_stock_products->onEachSide(1)->links('pagination::bootstrap-4') }}
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
                             </div>
                         </div>
                     </div>
