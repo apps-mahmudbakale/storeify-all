@@ -18,4 +18,3 @@ cmds = [
 
 [variables]
 PHP_EXTENSIONS = "gd zip"
-s
