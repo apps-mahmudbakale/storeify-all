@@ -1,6 +1,5 @@
 [build]
-builder = "NIXPACKS"
-ignoreBuildStep = ["node"]   # 🚀 prevents npm/vite from running
+builder = "PHP"   # 🚀 Only use PHP, disable Node auto-detection
 
 [deploy]
 startCommand = "php artisan serve --host=0.0.0.0 --port=$PORT"
@@ -19,3 +18,4 @@ cmds = [
 
 [variables]
 PHP_EXTENSIONS = "gd zip"
+s
