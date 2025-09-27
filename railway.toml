@@ -1,5 +1,6 @@
 [build]
 builder = "NIXPACKS"
+ignoreBuildStep = ["node"]   # 🚀 prevents npm/vite from running
 
 [deploy]
 startCommand = "php artisan serve --host=0.0.0.0 --port=$PORT"
