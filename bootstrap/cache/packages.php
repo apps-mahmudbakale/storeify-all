@@ -84,13 +84,13 @@
   ),
   'opcodesio/log-viewer' => 
   array (
-    'providers' => 
-    array (
-      0 => 'Opcodes\\LogViewer\\LogViewerServiceProvider',
-    ),
     'aliases' => 
     array (
       'LogViewer' => 'Opcodes\\LogViewer\\Facades\\LogViewer',
+    ),
+    'providers' => 
+    array (
+      0 => 'Opcodes\\LogViewer\\LogViewerServiceProvider',
     ),
   ),
   'owen-it/laravel-auditing' => 
@@ -141,13 +141,13 @@
   ),
   'spatie/laravel-signal-aware-command' => 
   array (
-    'providers' => 
-    array (
-      0 => 'Spatie\\SignalAwareCommand\\SignalAwareCommandServiceProvider',
-    ),
     'aliases' => 
     array (
       'Signal' => 'Spatie\\SignalAwareCommand\\Facades\\Signal',
+    ),
+    'providers' => 
+    array (
+      0 => 'Spatie\\SignalAwareCommand\\SignalAwareCommandServiceProvider',
     ),
   ),
 );
