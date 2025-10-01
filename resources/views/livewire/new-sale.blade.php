@@ -233,7 +233,9 @@
                                             })
 
                                             $('#save').click(() => {
-                                                var url = 'save/{{ $cart->invoice }}';
+                                                var buyer_name = $('#buyer_name').val();
+                                                var buyer_dept = $('#buyer_dept').val();
+                                                var url = 'save/{{ $cart->invoice }}?buyer_name=' + encodeURIComponent(buyer_name) + '&buyer_dept=' + encodeURIComponent(buyer_dept);
                                                 Swal.fire({
                                                     title: 'Are you sure?',
                                                     text: "You won't be able to revert this!",
@@ -268,7 +270,9 @@
                                             });
 
                                             $('#save_print').click(() => {
-                                                var url = 'print/{{ $cart->invoice }}';
+                                                var buyer_name = $('#buyer_name').val();
+                                                var buyer_dept = $('#buyer_dept').val();
+                                                var url = 'print/{{ $cart->invoice }}?buyer_name=' + encodeURIComponent(buyer_name) + '&buyer_dept=' + encodeURIComponent(buyer_dept);
                                                 Swal.fire({
                                                     title: 'Are you sure?',
                                                     text: "You won't be able to revert this!",
@@ -286,7 +290,9 @@
                                             });
 
                                             $('#invoice').click(() => {
-                                                var url = '/app/invoice/{{ $cart->invoice }}';
+                                                var buyer_name = $('#buyer_name').val();
+                                                var buyer_dept = $('#buyer_dept').val();
+                                                var url = '/app/invoice/{{ $cart->invoice }}?buyer_name=' + encodeURIComponent(buyer_name) + '&buyer_dept=' + encodeURIComponent(buyer_dept);
                                                 Swal.fire({
                                                     title: 'Are you sure?',
                                                     text: "You won't be able to revert this!",
@@ -320,6 +326,18 @@
                             </tbody>
                         </table>
                         <br>
+                        
+                        <!-- Buyer Information Section -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="buyer_name"><strong>Buyer Name:</strong></label>
+                                <input type="text" id="buyer_name" class="form-control" placeholder="Enter buyer name">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="buyer_dept"><strong>Buyer Department:</strong></label>
+                                <input type="text" id="buyer_dept" class="form-control" placeholder="Enter buyer department">
+                            </div>
+                        </div>
 
                         <br>
 

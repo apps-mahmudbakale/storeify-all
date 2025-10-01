@@ -76,6 +76,16 @@
             <br>
             Date: <?php echo date('d/m/Y'); ?>
             {{ $invoice }}
+            @if(isset($buyer) && ($buyer->buyer_name || $buyer->buyer_dept))
+            <br><br>
+            <strong>Buyer Information:</strong>
+            @if($buyer->buyer_name)
+            <br>Name: {{ $buyer->buyer_name }}
+            @endif
+            @if($buyer->buyer_dept)
+            <br>Department: {{ $buyer->buyer_dept }}
+            @endif
+            @endif
         <table style="font-size: 24px; font-weight: bold; width: inherit;">
             <thead>
                 <tr>

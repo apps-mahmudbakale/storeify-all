@@ -49,13 +49,21 @@
         <div class="col-sm-12">
             <form action="{{route('app.custom.report')}}" method="POST" class="row">
                 @csrf
-                <div class="col-md-6">
+                <div class="col-md-3">
                     From
-                    <input type="date" name="from" class="form-control" required>
+                    <input type="date" name="from" class="form-control">
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-3">
                     To
-                    <input type="date" name="to" class="form-control" required>
+                    <input type="date" name="to" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    Buyer Name
+                    <input type="text" name="buyer_name" class="form-control" placeholder="Enter buyer name">
+                </div>
+                <div class="col-md-3">
+                    Buyer Department
+                    <input type="text" name="buyer_dept" class="form-control" placeholder="Enter buyer department">
                 </div>
                 <div class="col-md-3">
                     <br>
@@ -79,6 +87,8 @@
                             <th>Quantity</th>
                             <th>Sold Rate</th>
                             <th>Amount</th>
+                            <th>Buyer Name</th>
+                            <th>Buyer Dept</th>
                             <th>Sold By</th>
                             <th>Date</th>
                         </tr>
@@ -92,6 +102,8 @@
                         <td>{{$sale->quantity}}</td>
                         <td>{!! app(App\Settings\StoreSettings::class)->currency !!}  {{number_format($sale->price)}}</td>
                         <td>{!! app(App\Settings\StoreSettings::class)->currency !!}  {{number_format($sale->amount)}}</td>
+                        <td>{{$sale->buyer_name ?? 'N/A'}}</td>
+                        <td>{{$sale->buyer_dept ?? 'N/A'}}</td>
                         <td>{{$sale->user}}</td>
                         <td>{{\Carbon\Carbon::parse($sale->created_at)->toFormattedDayDateString()}}</td>
                         </tr>

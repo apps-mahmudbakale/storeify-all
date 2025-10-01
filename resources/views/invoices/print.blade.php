@@ -51,6 +51,18 @@
                 <br>
                 Nigeria
             </address>
+            @if(isset($buyer) && ($buyer->buyer_name || $buyer->buyer_dept))
+            <br>
+            <strong>Buyer Information</strong>
+            <address class="small-text">
+                @if($buyer->buyer_name)
+                Name: {{ $buyer->buyer_name }}<br>
+                @endif
+                @if($buyer->buyer_dept)
+                Department: {{ $buyer->buyer_dept }}
+                @endif
+            </address>
+            @endif
         </div>
     </div>
 

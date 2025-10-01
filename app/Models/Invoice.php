@@ -11,5 +11,7 @@ class Invoice extends Model
 
     protected $fillable = [
             'invoice',
+            'buyer_name',
+            'buyer_dept',
     ];
 }

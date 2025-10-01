@@ -97,7 +97,7 @@ class  SaleController extends Controller
     }
 
 
-    public function saveSale($sale)
+    public function saveSale(Request $request, $sale)
     {
 
         $sales_order = DB::table('sales_order')
@@ -111,7 +111,9 @@ class  SaleController extends Controller
                 'quantity' => $order->quantity,
                 'amount' => $order->amount,
                 'user_id' => auth()->user()->id,
-                'price' => $order->price
+                'price' => $order->price,
+                'buyer_name' => $request->input('buyer_name'),
+                'buyer_dept' => $request->input('buyer_dept')
             ]);
             $product = DB::table('products')
                 ->where('id',  $order->product_id)
@@ -119,6 +121,8 @@ class  SaleController extends Controller
         }
         $invoice = Invoice::create([
             'invoice' => $sale,
+            'buyer_name' => $request->input('buyer_name'),
+            'buyer_dept' => $request->input('buyer_dept'),
             'created_at' => now(),
         ]);
        $delete = DB::table('sales_order')
@@ -128,7 +132,7 @@ class  SaleController extends Controller
         session()->forget('invoice');
         return redirect()->route('app.sales.create')->with('success', 'Sales Saved');
     }
-    public function saveSalePrint($invoice)
+    public function saveSalePrint(Request $request, $invoice)
     {
         $sales_order = DB::table('sales_order')
             ->where('invoice', $invoice)
@@ -141,7 +145,9 @@ class  SaleController extends Controller
                 'quantity' => $order->quantity,
                 'amount' => $order->amount,
                 'user_id' => auth()->user()->id,
-                'price' => $order->price
+                'price' => $order->price,
+                'buyer_name' => $request->input('buyer_name'),
+                'buyer_dept' => $request->input('buyer_dept')
             ]);
             $product = DB::table('products')
                 ->where('id',  $order->product_id)
@@ -149,6 +155,8 @@ class  SaleController extends Controller
         }
         $invoices = Invoice::create([
             'invoice' => $invoice,
+            'buyer_name' => $request->input('buyer_name'),
+            'buyer_dept' => $request->input('buyer_dept'),
             'created_at' => now(),
         ]);
         DB::table('sales_order')->where('invoice', $invoice)->where('user_id',auth()->user()->id)->delete();
@@ -187,8 +195,13 @@ class  SaleController extends Controller
             ->join('users', 'users.id', '=', 'sales.user_id')
             ->where('sales.invoice', $invoice)
             ->first();
+        $buyer = DB::table('sales')
+            ->select('buyer_name', 'buyer_dept')
+            ->where('invoice', $invoice)
+            ->where('user_id', auth()->user()->id)
+            ->first();
 
-        return view('sales.print', compact('items', 'invoice', 'sum', 'user'));
+        return view('sales.print', compact('items', 'invoice', 'sum', 'user', 'buyer'));
     }
 
     public function returnShow($invoice)

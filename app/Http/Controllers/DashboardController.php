@@ -69,7 +69,7 @@ class DashboardController extends Controller
     public function generalReport()
     {
         $sales = DB::table('sales')
-            ->select('sales.*', 'products.name as product', 'users.name as user')
+            ->select('sales.*', 'products.name as product', 'users.name as user', 'sales.buyer_name', 'sales.buyer_dept')
             ->join('products', 'products.id', '=', 'sales.product_id')
             ->join('users', 'users.id', '=', 'sales.user_id')
             ->orderBy('sales.created_at', 'asc')
@@ -91,7 +91,7 @@ class DashboardController extends Controller
     {
         $sales = Sale::leftJoin('products', 'sales.product_id', '=', 'products.id')
             ->leftJoin('users', 'sales.user_id', '=', 'users.id')
-            ->select('products.name as product', 'sales.amount', 'sales.created_at', 'sales.quantity', 'sales.invoice', 'users.name as user')
+            ->select('products.name as product', 'sales.amount', 'sales.created_at', 'sales.quantity', 'sales.invoice', 'users.name as user', 'sales.buyer_name', 'sales.buyer_dept')
             ->get();
         $sum    = DB::table('sales')
             ->selectRaw('sum(amount) as total')
@@ -106,7 +106,7 @@ class DashboardController extends Controller
     public function endOfDayReport()
     {
         $sales = DB::table('sales')
-            ->select('sales.*', 'products.name as product', 'users.name as user')
+            ->select('sales.*', 'products.name as product', 'users.name as user', 'sales.buyer_name', 'sales.buyer_dept')
             ->join('products', 'products.id', '=', 'sales.product_id')
             ->join('users', 'users.id', '=', 'sales.user_id')
             ->whereRaw('Date(sales.created_at) = CURRENT_DATE')
@@ -122,7 +122,7 @@ class DashboardController extends Controller
     public function exportEndOfDayReportPdf()
     {
         $sales = DB::table('sales')
-        ->select('sales.*', 'products.name as product', 'users.name as user')
+        ->select('sales.*', 'products.name as product', 'users.name as user', 'sales.buyer_name', 'sales.buyer_dept')
         ->join('products', 'products.id', '=', 'sales.product_id')
         ->join('users', 'users.id', '=', 'sales.user_id')
         ->whereRaw('Date(sales.created_at) = CURRENT_DATE')

@@ -111,7 +111,7 @@ class InvoiceController extends Controller
 
     }
 
-    public function invoice($invoice)
+    public function invoice(Request $request, $invoice)
     {
         $sales_order = DB::table('sales_order')
             ->where('invoice', $invoice)
@@ -130,10 +130,12 @@ class InvoiceController extends Controller
         }
         $invoice = Invoice::create([
             'invoice' => $invoice,
+            'buyer_name' => $request->input('buyer_name'),
+            'buyer_dept' => $request->input('buyer_dept'),
             'created_at' => now(),
         ]);
         $delete = DB::table('sales_order')
-            ->where('invoice', $invoice)
+            ->where('invoice', $invoice->invoice)
             ->where('user_id', auth()->user()->id)
             ->delete();
         session()->forget('invoice');
@@ -158,8 +160,12 @@ class InvoiceController extends Controller
             ->join('users', 'users.id', '=', 'invoice_orders.user_id')
             ->where('invoice_orders.invoice', $invoice)
             ->first();
+        $buyer = DB::table('invoices')
+            ->select('buyer_name', 'buyer_dept')
+            ->where('invoice', $invoice)
+            ->first();
 
-        return view('invoices.print', compact('items', 'invoice', 'sum', 'user'));
+        return view('invoices.print', compact('items', 'invoice', 'sum', 'user', 'buyer'));
     }
 
     /**
