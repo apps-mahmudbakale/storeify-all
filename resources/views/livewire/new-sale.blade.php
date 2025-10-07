@@ -326,15 +326,15 @@
                             </tbody>
                         </table>
                         <br>
-                        
+
                         <!-- Buyer Information Section -->
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label for="buyer_name"><strong>Buyer Name:</strong></label>
+                                <label for="buyer_name"><strong>Staff Name:</strong></label>
                                 <input type="text" id="buyer_name" class="form-control" placeholder="Enter buyer name">
                             </div>
                             <div class="col-md-6">
-                                <label for="buyer_dept"><strong>Buyer Department:</strong></label>
+                                <label for="buyer_dept"><strong>Department:</strong></label>
                                 <input type="text" id="buyer_dept" class="form-control" placeholder="Enter buyer department">
                             </div>
                         </div>
