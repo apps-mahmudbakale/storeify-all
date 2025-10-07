@@ -6,10 +6,14 @@
                     <h3 class="card-title">Products</h3>
                     <a href="{{ route('app.products.export') }}" class="btn btn-warning  float-right"><i
                         class="fa fa-file-export"></i> Export Products</a>
+                        @can('create-products')
                         <a href="{{ route('app.products.import') }}" class="btn btn-primary float-right"><i
                         class="fa fa-file-import"></i> Import Products</a>
+                    @endcan
+                    @can('create-products')
                     <a href="{{ route('app.products.create') }}" class="btn btn-success float-right"><i
                             class="fa fa-plus-circle"></i></a>
+                    @endcan
 
                 </div>
                 <!-- /.card-header -->
@@ -60,10 +64,14 @@
                                             {{-- <td>{{$product->store->name}}</td> --}}
                                             <td>
                                                 <div class="btn-group">
+                                                    @can('update-products')
                                                     <a href="{{route('app.products.edit', $product->id)}}" class="btn btn-info btn-sm">
                                                         <i class="fa fa-edit"></i></a>
+                                                    @endcan
+                                                    @can('delete-products')
                                                         <button class="btn btn-danger btn-sm" id="del{{ $product->id }}"
                                                             data-value="{{ $product->id }}"><i class="fa fa-trash"></i></button>
+                                                        @endcan
                                                         <script>
                                                             document.querySelector('#del{{ $product->id }}').addEventListener('click', function(e) {
                                                                 // alert(this.getAttribute('data-value'));
