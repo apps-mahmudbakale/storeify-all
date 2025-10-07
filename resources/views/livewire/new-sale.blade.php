@@ -346,7 +346,7 @@
                             <button id='save' class="btn btn-success"><i class="fa fa-save"></i> Save</button>
                             <button id="save_print" class="btn btn-info"><i class="fa fa-print"></i> Save And
                                 Print</button>
-                            <button id='invoice' class="btn btn-success"><i class="fa fa-save"></i> Generate Invoice</button>
+{{--                            <button id='invoice' class="btn btn-success"><i class="fa fa-save"></i> Generate Invoice</button>--}}
                         </div>
                     </div>
                     <!-- /.card-body -->
