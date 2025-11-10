@@ -14,6 +14,7 @@ class Product extends Model
         'buying_price',
         'selling_price',
         'qty',
+        'min_qty',
         'expiry_date'
     ];
 

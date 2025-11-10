@@ -49,7 +49,7 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         // dd(array_merge($request->except('expiry_date'), ['expiry_date' => date($request->expiry_date)]));
-        $products = Product::create(array_merge($request->except('expiry_date'), ['expiry_date' => date($request->expiry_date)]));
+        $products = Product::create(array_merge($request->except('expiry_date'), ['expiry_date' => date($request->expiry_date), 'selling_price' => $request->selling_price ?? 0]));
 
         return redirect()->route('app.products.index')->with('success', 'Product Added');
     }

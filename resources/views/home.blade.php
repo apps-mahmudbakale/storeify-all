@@ -58,7 +58,7 @@
                                         class="fas fa-arrow-circle-right"></i></a>
                             </div>
                         </div>
-                        <div class="col-lg-3 col-md-4 col-4">
+                        {{-- <div class="col-lg-3 col-md-4 col-4">
                             <!-- small box -->
                             <div class="small-box bg-primary">
                                 <div class="inner">
@@ -72,8 +72,8 @@
                                 <a href="{{ route('app.products.index') }}" class="small-box-footer">More info <i
                                         class="fas fa-arrow-circle-right"></i></a>
                             </div>
-                        </div>
-                        <div class="col-lg-3 col-md-4 col-4">
+                        </div> --}}
+                        {{-- <div class="col-lg-3 col-md-4 col-4">
                             <!-- small box -->
                             <div class="small-box bg-danger">
                                 <div class="inner">
@@ -90,7 +90,7 @@
                                     More info <i class="fas fa-arrow-circle-right"></i>
                                 </a>
                             </div>
-                        </div>
+                        </div> --}}
 
                         <!-- ./col -->
                         <div class="col-lg-3 col-md-4 col-4">
@@ -139,7 +139,7 @@
                                         class="fas fa-arrow-circle-right"></i></a>
                             </div>
                         </div>
-                        <div class="col-lg-3 col-md-4 col-4">
+                        {{-- <div class="col-lg-3 col-md-4 col-4">
                             <!-- small box -->
                             <div class="small-box bg-warning">
                                 <div class="inner">
@@ -153,7 +153,7 @@
                                 <a href="{{ route('app.sales.index') }}" class="small-box-footer">More info <i
                                         class="fas fa-arrow-circle-right"></i></a>
                             </div>
-                        </div>
+                        </div> --}}
                         <div class="col-lg-3 col-md-4 col-4">
                             <!-- small box -->
                             <div class="small-box bg-success">

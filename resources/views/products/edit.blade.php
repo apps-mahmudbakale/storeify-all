@@ -43,13 +43,17 @@
                                 <label>Buying Price</label>
                                 <input type="number" name="buying_price" id="buying" value="{{old('name', isset($product) ? $product->buying_price : '')}}" class="form-control" placeholder="Buying Price">
                             </div>
-                            <div class="form-group">
+                            {{-- <div class="form-group">
                                 <label>Selling Price</label>
                                 <input type="text" name="selling_price" id="selling"  value="{{old('name', isset($product) ? $product->selling_price : '')}}" class="form-control" placeholder="Selling Price">
-                            </div>
+                            </div> --}}
                             <div class="form-group">
                                 <label>Quantity in Stock</label>
                                 <input type="number" name="qty" value="{{old('name', isset($product) ? $product->qty : '')}}" class="form-control" placeholder="Quantity in Stock">
+                            </div>
+                            <div class="form-group">
+                                <label>Minimum Quantity</label>
+                                <input type="number" name="min_qty" value="{{old('min_qty', isset($product) ? $product->min_qty : '')}}" class="form-control" placeholder="Minimum Quantity Alert">
                             </div>
                             <div class="form-group">
                                 <label>Expiry Date</label>
