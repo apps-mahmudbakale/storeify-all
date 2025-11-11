@@ -51,6 +51,15 @@
                                 <input type="number" name="qty" class="form-control" placeholder="Quantity in Stock">
                             </div>
                             <div class="form-group">
+                                <label>Unit</label>
+                                <select name="unit" class="form-control">
+                                    <option value="pcs">Pieces (pcs)</option>
+                                    <option value="packs">Packs</option>
+                                    <option value="bottles">Bottles</option>
+                                    <option value="cartons">Cartons</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
                                 <label>Minimum Quantity</label>
                                 <input type="number" name="min_qty" class="form-control" placeholder="Minimum Quantity Alert">
                             </div>

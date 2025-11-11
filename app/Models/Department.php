@@ -5,18 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Product extends Model
+class Department extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'name',
-        'buying_price',
-        'selling_price',
-        'qty',
-        'min_qty',
-        'unit',
-        'expiry_date'
     ];
 
+    public function staff()
+    {
+        return $this->hasMany(Staff::class);
+    }
 }

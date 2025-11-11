@@ -46,6 +46,7 @@
                                             <th>Name</th>
                                             <th>Buying Price</th>
                                             <th>Quantity</th>
+                                            <th>Unit</th>
                                             <th>Expiry</th>
                                             {{-- <th>Store</th> --}}
                                             <th></th>
@@ -58,6 +59,7 @@
                                             <td>{{$product->name}}</td>
                                             <td>{!! app(App\Settings\StoreSettings::class)->currency !!} {{number_format($product->buying_price)}}</td>
                                             <td>{{$product->qty}}</td>
+                                            <td>{{ucfirst($product->unit)}}</td>
                                             <td>{{\Carbon\Carbon::parse($product->expiry_date)->diffForHumans()}}</td>
                                             {{-- <td>{{$product->store->name}}</td> --}}
                                             <td>

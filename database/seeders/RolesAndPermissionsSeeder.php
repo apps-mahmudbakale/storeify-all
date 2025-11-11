@@ -37,9 +37,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'settings',
             'invoices',
             'products',
-
-
-
+            'departments',
+            'staff',
         ];
 
         foreach ($permissions as $permission) {

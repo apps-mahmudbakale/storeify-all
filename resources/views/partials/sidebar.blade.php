@@ -46,6 +46,22 @@
                                   </a>
                               </li>
                               @endcan
+                              @can('read-users')
+                              <li class="nav-item">
+                                  <a href="{{ route('app.departments.index') }}" class="nav-link">
+                                      <i class="fa fa-sitemap nav-icon"></i>
+                                      <p>Departments</p>
+                                  </a>
+                              </li>
+                              @endcan
+                              @can('read-users')
+                              <li class="nav-item">
+                                  <a href="{{ route('app.staff.index') }}" class="nav-link">
+                                      <i class="fa fa-users nav-icon"></i>
+                                      <p>Staff Members</p>
+                                  </a>
+                              </li>
+                              @endcan
                               {{-- <li class="nav-item">
                                   <a href="{{ route('app.stations.index') }}" class="nav-link">
                                       <i class="fa fa-building nav-icon"></i>

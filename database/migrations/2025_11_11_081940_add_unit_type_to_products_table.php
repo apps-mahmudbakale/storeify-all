@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class ModifySellingPriceInProductsTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -14,7 +14,7 @@ class ModifySellingPriceInProductsTable extends Migration
     public function up()
     {
         Schema::table('products', function (Blueprint $table) {
-            $table->decimal('selling_price', 8, 2)->nullable()->change();
+            //
         });
     }
 
@@ -26,7 +26,7 @@ class ModifySellingPriceInProductsTable extends Migration
     public function down()
     {
         Schema::table('products', function (Blueprint $table) {
-            $table->decimal('selling_price', 8, 2)->nullable(false)->change();
+            //
         });
     }
-}
+};

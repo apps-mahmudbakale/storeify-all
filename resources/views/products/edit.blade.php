@@ -52,6 +52,15 @@
                                 <input type="number" name="qty" value="{{old('name', isset($product) ? $product->qty : '')}}" class="form-control" placeholder="Quantity in Stock">
                             </div>
                             <div class="form-group">
+                                <label>Unit</label>
+                                <select name="unit" class="form-control">
+                                    <option value="pcs" {{old('unit', isset($product) ? $product->unit : '') === 'pcs' ? 'selected' : ''}}>Pieces (pcs)</option>
+                                    <option value="packs" {{old('unit', isset($product) ? $product->unit : '') === 'packs' ? 'selected' : ''}}>Packs</option>
+                                    <option value="bottles" {{old('unit', isset($product) ? $product->unit : '') === 'bottles' ? 'selected' : ''}}>Bottles</option>
+                                    <option value="cartons" {{old('unit', isset($product) ? $product->unit : '') === 'cartons' ? 'selected' : ''}}>Cartons</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
                                 <label>Minimum Quantity</label>
                                 <input type="number" name="min_qty" value="{{old('min_qty', isset($product) ? $product->min_qty : '')}}" class="form-control" placeholder="Minimum Quantity Alert">
                             </div>

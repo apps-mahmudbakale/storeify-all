@@ -331,11 +331,21 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="buyer_name"><strong>Staff Name:</strong></label>
-                                <input type="text" id="buyer_name" class="form-control" placeholder="Enter buyer name">
+                                <select id="buyer_name" class="form-control">
+                                    <option value="">-- Select staff --</option>
+                                    @foreach($staff as $s)
+                                        <option value="{{ $s->name }}" {{ $s->name === auth()->user()->name ? 'selected' : '' }}>{{ $s->name }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                             <div class="col-md-6">
                                 <label for="buyer_dept"><strong>Department:</strong></label>
-                                <input type="text" id="buyer_dept" class="form-control" placeholder="Enter buyer department">
+                                <select id="buyer_dept" class="form-control">
+                                    <option value="">-- Select department --</option>
+                                    @foreach($departments as $dept)
+                                        <option value="{{ $dept }}">{{ $dept }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
 

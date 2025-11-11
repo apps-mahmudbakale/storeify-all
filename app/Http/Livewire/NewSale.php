@@ -4,6 +4,7 @@ namespace App\Http\Livewire;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
+use App\Models\Staff;
 
 class NewSale extends Component
 {
@@ -21,6 +22,24 @@ class NewSale extends Component
             ->where('invoice', $invoice)
             ->where('sales_order.user_id', auth()->user()->id)
             ->first();
-        return view('livewire.new-sale', ['carts' => $carts, 'getSum' =>$getSum]);
+    // load staff list from Staff model and departments list for dropdowns
+    $staff = Staff::select('id', 'name')->orderBy('name')->get();
+
+        // departments as a simple static list (change to DB-backed if you prefer)
+        $departments = [
+            'Pharmacy',
+            'Billing',
+            'Warehousing',
+            'Laboratory',
+            'Front Desk',
+            'Administration'
+        ];
+
+        return view('livewire.new-sale', [
+            'carts' => $carts,
+            'getSum' => $getSum,
+            'staff' => $staff,
+            'departments' => $departments,
+        ]);
     }
 }
