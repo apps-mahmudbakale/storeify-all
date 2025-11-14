@@ -7,8 +7,8 @@
         <th>Quantity</th>
         <th>Sold Rate</th>
         <th>Amount</th>
-        <th>Buyer Name</th>
-        <th>Buyer Dept</th>
+        <th>Staff Name</th>
+        <th>Department</th>
         <th>Sold By</th>
         <th>Date</th>
     </tr>

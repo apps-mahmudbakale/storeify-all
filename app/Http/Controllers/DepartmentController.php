@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Department;
 use Illuminate\Http\Request;
+use App\Imports\DepartmentImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class DepartmentController extends Controller
 {
@@ -20,59 +22,66 @@ class DepartmentController extends Controller
 
     public function create()
     {
-        $this->authorize('create', Department::class);
+
         return view('departments.create');
     }
 
     public function store(Request $request)
     {
-        $this->authorize('create', Department::class);
 
         $request->validate(['name' => 'required|string|unique:departments,name']);
 
         Department::create(['name' => $request->name]);
 
         return redirect()
-            ->route('departments.index')
+            ->route('app.departments.index')
             ->with('success', 'Department created successfully');
     }
 
     public function edit(Department $department)
     {
-        $this->authorize('update', $department);
+
         return view('departments.edit', compact('department'));
     }
 
     public function update(Request $request, Department $department)
     {
-        $this->authorize('update', $department);
+
 
         $request->validate([
-            'name' => 'required|string|unique:departments,name,'.$department->id
+            'name' => 'required|string|unique:departments,name,' . $department->id
         ]);
 
         $department->update(['name' => $request->name]);
 
         return redirect()
-            ->route('departments.index')
+            ->route('app.departments.index')
             ->with('success', 'Department updated successfully');
+    }
+
+    public function importView()
+    {
+        return view('departments.import');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv'
+        ]);
+
+        Excel::import(new DepartmentImport, $request->file('file'));
+
+        return back()->with('success', 'Departments imported successfully!');
     }
 
     public function destroy(Department $department)
     {
-        $this->authorize('delete', $department);
-
-        // Check if department has staff members
-        if ($department->staff()->exists()) {
-            return redirect()
-                ->route('departments.index')
-                ->with('error', 'Cannot delete department with associated staff members');
-        }
 
         $department->delete();
 
         return redirect()
-            ->route('departments.index')
+            ->route('app.departments.index')
             ->with('success', 'Department deleted successfully');
     }
 }

@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Staff;
 use App\Models\Department;
+use App\Imports\StaffImport;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class StaffController extends Controller
 {
@@ -34,30 +36,18 @@ class StaffController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'department_id' => 'nullable|exists:departments,id',
-            'email' => 'required|string|email|max:255|unique:users,email',
-            'password' => 'required|string|min:8|confirmed',
+            'staff_no' => 'required|string|max:50|unique:staff,staff_no',
         ]);
 
-        // Create user first
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-        ]);
 
         // Then create staff record
         $staff = Staff::create([
             'name' => $validated['name'],
-            'user_id' => $user->id,
-            'department_id' => $validated['department_id'],
+            'staff_no' => $validated['staff_no'],
         ]);
 
-        // Assign default role if needed
-        $user->assignRole('staff');
-
         return redirect()
-            ->route('staff.index')
+            ->route('app.staff.index')
             ->with('success', 'Staff member created successfully');
     }
 
@@ -75,47 +65,44 @@ class StaffController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'department_id' => 'nullable|exists:departments,id',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $staff->user_id,
-            'password' => 'nullable|string|min:8|confirmed',
+            'staff_no' => 'required|string|max:50|unique:staff,staff_no,'.$staff->id,
         ]);
 
-        // Update user
-        $userData = [
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-        ];
-
-        if (!empty($validated['password'])) {
-            $userData['password'] = Hash::make($validated['password']);
-        }
-
-        $staff->user->update($userData);
 
         // Update staff record
         $staff->update([
             'name' => $validated['name'],
-            'department_id' => $validated['department_id'],
+           'staff_no' => $validated['staff_no'],
         ]);
 
         return redirect()
-            ->route('staff.index')
+            ->route('app.staff.index')
             ->with('success', 'Staff member updated successfully');
     }
 
+    public function import(Request $request)
+{
+    $request->validate([
+        'file' => 'required|mimes:xlsx,xls,csv'
+    ]);
+
+    Excel::import(new StaffImport, $request->file('file'));
+
+    return back()->with('success', 'Staff imported successfully!');
+}
+
+public function importView()
+{
+    return view('staff.import');
+}
+
     public function destroy(Staff $staff)
     {
-        $this->authorize('delete', $staff);
-
-        // Delete associated user if exists
-        if ($staff->user) {
-            $staff->user->delete();
-        }
 
         $staff->delete();
 
         return redirect()
-            ->route('staff.index')
+            ->route('app.staff.index')
             ->with('success', 'Staff member deleted successfully');
     }
 }

@@ -1,56 +1,68 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="mb-0">Edit Staff Member</h4>
-                </div>
-                <div class="card-body">
-                    <form action="{{ route('staff.update', $staff) }}" method="POST">
-                        @csrf
-                        @method('PUT')
-                        
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Full Name</label>
-                            <input type="text" class="form-control @error('name') is-invalid @enderror" 
-                                   id="name" name="name" value="{{ old('name', $staff->name) }}" required>
-                            @error('name')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="department_id" class="form-label">Department</label>
-                            <select class="form-select @error('department_id') is-invalid @enderror" 
-                                    id="department_id" name="department_id">
-                                <option value="">-- Select Department --</option>
-                                @foreach($departments as $department)
-                                    <option value="{{ $department->id }}" 
-                                        {{ (old('department_id', $staff->department_id) == $department->id) ? 'selected' : '' }}>
-                                        {{ $department->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('department_id')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        
-                        <div class="d-flex justify-content-between">
-                            <a href="{{ route('staff.index') }}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left"></i> Cancel
-                            </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Update Staff
-                            </button>
-                        </div>
-                    </form>
+    <div class="content-wrapper">
+
+        <!-- Page Header -->
+        <div class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h1 class="m-0 text-dark">Edit Staff</h1>
+                    </div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item"><a href="{{ route('app.dashboard') }}">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('app.staff.index') }}">Staff</a></li>
+                            <li class="breadcrumb-item active">Edit Staff</li>
+                        </ol>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- Page Content -->
+        <section class="content">
+            <div class="container-fluid">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Update Staff</h3>
+                    </div>
+
+                    <form action="{{ route('app.staff.update', $staff->id) }}" method="POST">
+                        @csrf
+                        @method('PUT')
+
+                        <div class="card-body">
+
+                            <div class="form-group">
+                                <label>Name</label>
+                                <input type="text"
+                                       name="name"
+                                       class="form-control"
+                                       value="{{ $staff->name }}"
+                                       required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Staff No</label>
+                                <input type="text"
+                                       name="staff_no"
+                                       class="form-control"
+                                       value="{{ $staff->staff_no }}"
+                                       required>
+                            </div>
+
+                        </div>
+
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary">Update</button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </section>
+
     </div>
-</div>
 @endsection

@@ -35,6 +35,7 @@ Route::get('syncData', [SaleController::class, 'store']);
 Route::get('syncStore', [SaleController::class, 'syncStore']);
 Route::post('synced', [SaleController::class, 'synced']);
 
+
 Auth::routes();
 
 /* Route Dashboards */
@@ -48,10 +49,19 @@ Route::group(['prefix' => 'app', 'as' => 'app.', 'middleware' => 'auth'], functi
     Route::resource('products', ProductController::class);
     Route::get('product/import', [ProductController::class, 'importView'])->name('products.import');
     Route::get('product/export', [ProductController::class, 'export'])->name('products.export');
-    
+
     /* Department and Staff Management */
     Route::resource('departments', \App\Http\Controllers\DepartmentController::class);
+    Route::get('/department/import', [\App\Http\Controllers\DepartmentController::class, 'importView'])
+        ->name('departments.import.view');
+
+    Route::post('/department/import', [\App\Http\Controllers\DepartmentController::class, 'import'])
+        ->name('departments.import');
     Route::resource('staff', \App\Http\Controllers\StaffController::class);
+    Route::post('/staffs/import', [\App\Http\Controllers\StaffController::class, 'import'])
+        ->name('staff.import');
+    Route::get('/staffs/import', [\App\Http\Controllers\StaffController::class, 'importView'])
+        ->name('staff.import.view');
     Route::post('product', [ProductController::class, 'import'])->name('import.products');
     Route::resource('requests', RequestsController::class);
     Route::post('requests/approve/{id}', [RequestsController::class, 'approve'])->name('requests.approve');

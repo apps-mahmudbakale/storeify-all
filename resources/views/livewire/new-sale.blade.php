@@ -334,7 +334,7 @@
                                 <select id="buyer_name" class="form-control">
                                     <option value="">-- Select staff --</option>
                                     @foreach($staff as $s)
-                                        <option value="{{ $s->name }}" {{ $s->name === auth()->user()->name ? 'selected' : '' }}>{{ $s->name }}</option>
+                                        <option value="{{ $s->name }}" {{ $s->name === auth()->user()->name ? 'selected' : '' }}>{{ $s->name }} ({{$s->staff_no}})</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -343,7 +343,7 @@
                                 <select id="buyer_dept" class="form-control">
                                     <option value="">-- Select department --</option>
                                     @foreach($departments as $dept)
-                                        <option value="{{ $dept }}">{{ $dept }}</option>
+                                        <option value="{{ $dept->name }}">{{ $dept->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
