@@ -59,7 +59,7 @@
                                         <input type='hidden' value='{{ $cart->product_id }}'
                                             id='prid{{ $cart->id }}'>
                                         <td id="item{{ $cart->id }}">{{ $cart->name }}</td>
-                                        <td>&#8358; <input type='number' id='price{{$cart->id}}' value='{{ $cart->selling_price }}' style='width:110px; display:inherit;' class='form-control'></td>
+                                        <td>&#8358; <input type='number' id='price{{$cart->id}}' value='{{ $cart->buying_price }}' style='width:110px; display:inherit;' class='form-control'></td>
                                         <td><input type='number' id="qty{{ $cart->id }}" style='width:69px;'
                                                 class='form-control' value='{{ $cart->quantity }}'></td>
                                         <td>&#8358; <span
