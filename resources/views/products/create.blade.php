@@ -46,6 +46,7 @@
                                    <option>Dialysis Items</option>
                                    <option>Laboratory Items</option>
                                    <option>Pharmacy</option>
+                                   <option>Radiology</option>
                                    <option>Stationaries</option>
                                 </select>
                             </div>
