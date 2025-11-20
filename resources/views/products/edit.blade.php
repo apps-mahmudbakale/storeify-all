@@ -43,11 +43,11 @@
                                 <label>Category</label>
                                 <select name="product_category" class="form-control">
                                    <option>Bio Med</option>
-                                   <option>Consumables</option>
+                                   <option>Medical Consumables</option>
                                    <option>Dialysis Items</option>
                                    <option>Laboratory Items</option>
                                    <option>Pharmacy</option>
-                                   <option>Staionaries</option>
+                                   <option>Stationaries</option>
                                 </select>
                             </div>
                             <div class="form-group">
