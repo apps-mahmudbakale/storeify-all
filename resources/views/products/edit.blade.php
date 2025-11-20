@@ -39,6 +39,17 @@
                                 <label>Name</label>
                                 <input type="text" name="name" value="{{old('name', isset($product) ? $product->name : '')}}" class="form-control" placeholder="Name">
                             </div>
+                             <div class="form-group">
+                                <label>Category</label>
+                                <select name="product_category" class="form-control">
+                                   <option>Bio Med</option>
+                                   <option>Consumables</option>
+                                   <option>Dialysis Items</option>
+                                   <option>Laboratory Items</option>
+                                   <option>Pharmacy</option>
+                                   <option>Staionaries</option>
+                                </select>
+                            </div>
                             <div class="form-group">
                                 <label>Buying Price</label>
                                 <input type="number" name="buying_price" id="buying" value="{{old('name', isset($product) ? $product->buying_price : '')}}" class="form-control" placeholder="Buying Price">

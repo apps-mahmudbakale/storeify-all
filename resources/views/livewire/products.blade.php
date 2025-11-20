@@ -44,6 +44,7 @@
                                         <tr>
                                             <th>S/N</th>
                                             <th>Name</th>
+                                            <th>Category</th>
                                             <th>Buying Price</th>
                                             <th>Quantity</th>
                                             <th>Unit</th>
@@ -57,6 +58,7 @@
                                             <tr>
                                             <td>{{$loop->iteration}}</td>
                                             <td>{{$product->name}}</td>
+                                            <td>{{$product->product_category ?? ''}}</td>
                                             <td>{!! app(App\Settings\StoreSettings::class)->currency !!} {{number_format($product->buying_price)}}</td>
                                             <td>{{$product->qty}}</td>
                                             <td>{{ucfirst($product->unit)}}</td>
