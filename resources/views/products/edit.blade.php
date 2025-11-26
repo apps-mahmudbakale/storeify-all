@@ -54,6 +54,7 @@
                                     <option>Pharmacy</option>
                                     <option>Radiology</option>
                                     <option>Stationaries</option>
+                                    <option value="Others">Others</option>
                                     <option⁠>Sanitary</option>
                                 </select>
                             </div>
