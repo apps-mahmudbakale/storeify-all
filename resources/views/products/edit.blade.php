@@ -55,7 +55,7 @@
                                     <option>Radiology</option>
                                     <option value="Sanitary">Sanitary</option>
                                     <option>Stationaries</option>
-                                    <option value="Others">Others</option>
+                                    
                                 </select>
                             </div>
                             <div class="form-group">
