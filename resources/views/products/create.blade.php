@@ -45,13 +45,13 @@
                                     <option>Medical Consumables</option>
                                     <option>Dialysis Items</option>
                                     <option>Laboratory Items</option>
-                                    <option>⁠Maintenance</option>
-                                    <option>⁠⁠Miscellaneous</option>
+                                    <option>Maintenance</option>
+                                    <option>Miscellaneous</option>
                                     <option>Pharmacy</option>
                                     <option>Radiology</option>
                                     <option value="Sanitary">Sanitary</option>
                                     <option>Stationaries</option>
-                                    
+
                                 </select>
                             </div>
                             <div class="form-group">

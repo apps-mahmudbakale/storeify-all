@@ -49,7 +49,6 @@
                                             <th>Quantity</th>
                                             <th>Unit</th>
                                             <th>Expiry</th>
-                                            {{-- <th>Store</th> --}}
                                             <th></th>
                                         </tr>
                                     </thead>

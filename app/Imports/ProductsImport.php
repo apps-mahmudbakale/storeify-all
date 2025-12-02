@@ -28,9 +28,10 @@ class ProductsImport implements ToCollection,  WithHeadingRow
                     'buying_price' => $row['cost'],
                     'selling_price' => $sellingPrice,
                     'expiry_date' => $row['expiry'],
+                    'product_category' => $row['category'],
                 ]
             );
-            
+
             Product::where('name', ucfirst($row['product']))->increment('qty', $row['quantity']);
         }
     }

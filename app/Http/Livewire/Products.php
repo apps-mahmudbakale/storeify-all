@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 class Products extends Base
 {
     public $sortBy = 'products.name';
+    public $perPage ='100';
     public function render()
     {
         if ($this->search) {
@@ -18,7 +19,7 @@ class Products extends Base
                 ->Orwhere('selling_price', 'like', '%' . $this->search . '%')
                 ->Orwhere('qty', 'like', '%' . $this->search . '%')
                 ->Orwhere('expiry_date', 'like', '%' . $this->search . '%')
-                ->paginate(10);
+                ->paginate(100);
 
             return view(
                 'livewire.products',
