@@ -89,7 +89,7 @@ class  SaleController extends Controller
                     'updated_at' => DB::raw('CURRENT_TIMESTAMP'),
                 ]
             );
-   
+
         DB::table('sales_order')
             ->where('product_id', $data[0])
             ->where('user_id', auth()->user()->id)
