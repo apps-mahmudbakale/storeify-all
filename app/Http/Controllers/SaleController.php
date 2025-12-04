@@ -73,18 +73,23 @@ class  SaleController extends Controller
     public function cart($invoice)
     {
         $data = explode(',', base64_decode($invoice));
-        // dd($data);
         $qty = 1;
+        $product = DB::table('products')
+            ->where('id', $data[0])
+            ->first();
+
         $cart = DB::table('sales_order')
             ->updateOrInsert(
                 ['product_id' => $data[0], 'invoice' => $data[1], 'price' => $data[2], 'user_id' => auth()->user()->id],
                 [
                     // 'quantity' => DB::raw('quantity + ' . $qty),
                     // 'amount' => DB::raw('amount + ' . $data[2]),
+                    'product_category' => $product->product_category,
                     'created_at' => DB::raw('CURRENT_TIMESTAMP'),
                     'updated_at' => DB::raw('CURRENT_TIMESTAMP'),
                 ]
             );
+   
         DB::table('sales_order')
             ->where('product_id', $data[0])
             ->where('user_id', auth()->user()->id)

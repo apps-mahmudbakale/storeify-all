@@ -16,7 +16,7 @@ class Products extends Base
             $products = Product::query()
                 ->where('name', 'like', '%' . $this->search . '%')
                 ->Orwhere('buying_price', 'like', '%' . $this->search . '%')
-                ->Orwhere('selling_price', 'like', '%' . $this->search . '%')
+                ->Orwhere('product_category', 'like', '%' . $this->search . '%')
                 ->Orwhere('qty', 'like', '%' . $this->search . '%')
                 ->Orwhere('expiry_date', 'like', '%' . $this->search . '%')
                 ->paginate(100);

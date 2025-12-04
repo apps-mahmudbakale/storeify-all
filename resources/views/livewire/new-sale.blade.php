@@ -46,6 +46,7 @@
                                 <tr>
                                     <th>S/N</th>
                                     <th>Item Name</th>
+                                    <th>Category</th>
                                     <th>Selling Price</th>
                                     <th>Quantity</th>
                                     <th>Amount</th>
@@ -57,9 +58,9 @@
                                 {{-- {{dd($cart)}} --}}
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
-                                        <input type='hidden' value='{{ $cart->product_id }}'
-                                            id='prid{{ $cart->id }}'>
+                                        <input type='hidden' value='{{ $cart->product_id }}' id='prid{{ $cart->id }}'>
                                         <td id="item{{ $cart->id }}">{{ $cart->name }}</td>
+                                        <td>{{ $cart->product_category ?? 'N/A' }}</td>
                                         <td>&#8358; <input type='number' id='price{{$cart->id}}' value='{{ $cart->price }}' style='width:110px; display:inherit;' class='form-control'></td>
                                         <td><input type='number' id="qty{{ $cart->id }}" style='width:69px;'
                                                 class='form-control' value='{{ $cart->quantity }}'></td>
