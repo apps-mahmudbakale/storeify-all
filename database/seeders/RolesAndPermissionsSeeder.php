@@ -28,6 +28,7 @@ class RolesAndPermissionsSeeder extends Seeder
         $roles = [
             'admin',
             'user',
+            'car-owner',
         ];
         $entities = [
             'users',
@@ -43,13 +44,13 @@ class RolesAndPermissionsSeeder extends Seeder
 
         foreach ($permissions as $permission) {
             foreach ($entities as $entity) {
-                 Permission::create(['name' => $permission.'-'.$entity ]);
+                 Permission::firstOrCreate(['name' => $permission.'-'.$entity ]);
             }
 
         }
 
         foreach ($roles as $role) {
-            Role::create(['name' => $role]);
+            Role::firstOrCreate(['name' => $role]);
         }
 
         $role = Role::findByName('admin');

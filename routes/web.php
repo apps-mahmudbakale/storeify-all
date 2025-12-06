@@ -10,7 +10,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\LogoutController;
 use App\Http\Controllers\InvoiceController;
-use App\Http\Controllers\ProductController;
+use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\StationController;
 use App\Http\Controllers\RequestsController;
 use App\Http\Controllers\SettingsController;
@@ -46,9 +46,9 @@ Route::group(['prefix' => 'app', 'as' => 'app.', 'middleware' => 'auth'], functi
     Route::resource('roles', RoleController::class);
     Route::resource('stations', StationController::class);
     Route::resource('stores', StoreController::class);
-    Route::resource('products', ProductController::class);
-    Route::get('product/import', [ProductController::class, 'importView'])->name('products.import');
-    Route::get('product/export', [ProductController::class, 'export'])->name('products.export');
+    Route::resource('products', VehicleController::class);
+    Route::get('product/import', [VehicleController::class, 'importView'])->name('products.import');
+    Route::get('product/export', [VehicleController::class, 'export'])->name('products.export');
 
     /* Department and Staff Management */
     Route::resource('departments', \App\Http\Controllers\DepartmentController::class);
@@ -62,7 +62,7 @@ Route::group(['prefix' => 'app', 'as' => 'app.', 'middleware' => 'auth'], functi
         ->name('staff.import');
     Route::get('/staffs/import', [\App\Http\Controllers\StaffController::class, 'importView'])
         ->name('staff.import.view');
-    Route::post('product', [ProductController::class, 'import'])->name('import.products');
+    Route::post('product', [VehicleController::class, 'import'])->name('import.products');
     Route::resource('requests', RequestsController::class);
     Route::post('requests/approve/{id}', [RequestsController::class, 'approve'])->name('requests.approve');
     Route::get('requests/acknowledge/{id}', [RequestsController::class, 'acknowledge'])->name('requests.acknowledge');

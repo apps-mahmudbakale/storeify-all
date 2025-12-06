@@ -50,4 +50,9 @@ class User extends Authenticatable implements AuditableInterface
     {
         return $this->belongsTo(Station::class);
     }
+
+    public function cars()
+    {
+        return $this->hasMany(Car::class);
+    }
 }

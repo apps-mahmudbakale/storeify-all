@@ -30,54 +30,78 @@
                         <h3 class="card-title">Create Product</h3>
                     </div>
                     <!-- /.card-header -->
-                    <form action="{{route('app.products.store')}}" method="POST">
+                    <form action="{{route('app.products.store')}}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <!-- form start -->
                         <div class="card-body">
                             <div class="form-group">
-                                <label>Name</label>
-                                <input type="text" name="name" class="form-control" placeholder="Name">
+                                <label>Make</label>
+                                <input type="text" name="make" class="form-control" placeholder="Make">
                             </div>
                              <div class="form-group">
-                                <label>Category</label>
-                                <select name="product_category" class="form-control">
-                                   <option>Bio Med</option>
-                                   <option>Medical Consumables</option>
-                                   <option>Dialysis Items</option>
-                                   <option>Laboratory Items</option>
-                                   <option>Pharmacy</option>
-                                   <option>Radiology</option>
-                                   <option>Stationaries</option>
+                                <label>Body Type</label>
+                                <input type="text" name="bodyType" class="form-control" placeholder="Body Type">
+                            </div>
+                            <div class="form-group">
+                                <label>Min Price</label>
+                                <input type="number" name="minPrice" class="form-control" placeholder="Min Price">
+                            </div>
+                            <div class="form-group">
+                                <label>Max Price</label>
+                                <input type="number" name="maxPrice" class="form-control" placeholder="Max Price">
+                            </div>
+                            <div class="form-group">
+                                <label>Transmission</label>
+                                <select name="transmission" class="form-control">
+                                    <option value="Manual">Manual</option>
+                                    <option value="Automatic">Automatic</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>Buying Price</label>
-                                <input type="text" name="buying_price" id="buying" class="form-control" placeholder="Buying Price">
-                            </div>
-                            {{-- <div class="form-group">
-                                <label>Selling Price</label>
-                                <input type="text" name="selling_price" id="selling"  class="form-control" placeholder="Selling Price">
-                            </div> --}}
-                            <div class="form-group">
-                                <label>Quantity in Stock</label>
-                                <input type="number" name="qty" class="form-control" placeholder="Quantity in Stock">
-                            </div>
-                            <div class="form-group">
-                                <label>Unit</label>
-                                <select name="unit" class="form-control">
-                                    <option value="pcs">Pieces (pcs)</option>
-                                    <option value="packs">Packs</option>
-                                    <option value="bottles">Bottles</option>
-                                    <option value="cartons">Cartons</option>
+                                <label>Fuel Type</label>
+                                <select name="fuelType" class="form-control">
+                                    <option value="Petrol">Petrol</option>
+                                    <option value="Diesel">Diesel</option>
+                                    <option value="Electric">Electric</option>
+                                    <option value="Hybrid">Hybrid</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>Minimum Quantity</label>
-                                <input type="number" name="min_qty" class="form-control" placeholder="Minimum Quantity Alert">
+                                <label>Owner</label>
+                                <select name="user_id" class="form-control">
+                                    <option value="">Select Owner</option>
+                                    @foreach($owners as $owner)
+                                        <option value="{{ $owner->id }}">{{ $owner->name }} ({{ $owner->email }})</option>
+                                    @endforeach
+                                </select>
                             </div>
                             <div class="form-group">
-                                <label>Expiry Date</label>
-                                <input type="date" name="expiry_date" class="form-control" placeholder="Expiry Date">
+                                <label>Features</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="features[]" value="AC">
+                                    <label class="form-check-label">AC</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="features[]" value="GPS">
+                                    <label class="form-check-label">GPS</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="features[]" value="Sunroof">
+                                    <label class="form-check-label">Sunroof</label>
+                                    <div class="form-group">
+                                <label>Images</label>
+                                <div class="input-group">
+                                    <div class="custom-file">
+                                        <input type="file" class="custom-file-input" name="image" />
+                                        <label class="custom-file-label">Choose file</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="features[]" value="Bluetooth">
+                                    <label class="form-check-label">Bluetooth</label>
+                                </div>
                             </div>
                         </div>
                         <!-- /.card-body -->
@@ -91,16 +115,6 @@
                 <!-- /.row (main row) -->
             </div><!-- /.container-fluid -->
         </section>
-        <script>
-            var buying = document.getElementById('buying');
-            var selling = document.getElementById('selling');
-
-            buying.addEventListener('keyup', ()=>{
-                // alert(buying.value);
-                selling.value = buying.value * {{ app(App\Settings\StoreSettings::class)->sell_margin}}
-            });
-
-        </script>
         <!-- /.content -->
     </div>
     <!-- /.content-wrapper -->

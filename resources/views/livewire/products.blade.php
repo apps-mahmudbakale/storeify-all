@@ -3,12 +3,12 @@
         <div class="container-fluid">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Products</h3>
+                    <h3 class="card-title">Vehicles</h3>
                     <a href="{{ route('app.products.export') }}" class="btn btn-warning  float-right"><i
-                        class="fa fa-file-export"></i> Export Products</a>
+                        class="fa fa-file-export"></i> Export Vehicles</a>
                         @can('create-products')
                         <a href="{{ route('app.products.import') }}" class="btn btn-primary float-right"><i
-                        class="fa fa-file-import"></i> Import Products</a>
+                        class="fa fa-file-import"></i> Import vehicles</a>
                     @endcan
                     @can('create-products')
                     <a href="{{ route('app.products.create') }}" class="btn btn-success float-right"><i
@@ -43,13 +43,14 @@
                                     <thead>
                                         <tr>
                                             <th>S/N</th>
-                                            <th>Name</th>
-                                            <th>Category</th>
-                                            <th>Buying Price</th>
-                                            <th>Quantity</th>
-                                            <th>Unit</th>
-                                            <th>Expiry</th>
-                                            {{-- <th>Store</th> --}}
+                                            <th>Image</th>
+                                            <th>Owner</th>
+                                            <th>Make</th>
+                                            <th>Body Type</th>
+                                            <th>Price Range</th>
+                                            <th>Transmission</th>
+                                            <th>Fuel Type</th>
+                                            <th>Features</th>
                                             <th></th>
                                         </tr>
                                     </thead>
@@ -57,12 +58,26 @@
                                             @foreach($products as $product)
                                             <tr>
                                             <td>{{$loop->iteration}}</td>
-                                            <td>{{$product->name}}</td>
-                                            <td>{{$product->product_category ?? ''}}</td>
-                                            <td>{!! app(App\Settings\StoreSettings::class)->currency !!} {{number_format($product->buying_price)}}</td>
-                                            <td>{{$product->qty}}</td>
-                                            <td>{{ucfirst($product->unit)}}</td>
-                                            <td>{{\Carbon\Carbon::parse($product->expiry_date)->diffForHumans()}}</td>
+                                            <td>
+                                            @if(!empty($product->image))
+                                                <img src="data:image/jpeg;base64,{{ $product->image }}" class="img-circle img-size-32 mr-2" style="object-fit: cover;" />
+                                            @else
+                                                <img src="{{ asset('dist/img/default-150x150.png') }}" class="img-circle img-size-32 mr-2" alt="Default Image" />
+                                            @endif
+                                            </td>
+                                            <td>{{ $product->user->name ?? 'N/A' }}</td>
+                                            <td>{{$product->make}}</td>
+                                            <td>{{$product->bodyType}}</td>
+                                            <td>{!! app(App\Settings\StoreSettings::class)->currency !!} {{number_format($product->minPrice)}} - {{number_format($product->maxPrice)}}</td>
+                                            <td>{{$product->transmission}}</td>
+                                            <td>{{$product->fuelType}}</td>
+                                            <td>
+                                                @if(is_array($product->features))
+                                                    {{ implode(', ', $product->features) }}
+                                                @else
+                                                    {{ $product->features }}
+                                                @endif
+                                            </td>
                                             {{-- <td>{{$product->store->name}}</td> --}}
                                             <td>
                                                 <div class="btn-group">

@@ -54,16 +54,10 @@ class DashboardController extends Controller
         // dd($query->profit);
         $expiry_threshold = Carbon::now()->addDays(7);
 
-    $expiring_products = DB::table('products')
-        ->whereNotNull('expiry_date')
-        ->whereDate('expiry_date', '<=', $expiry_threshold)
-        ->orderBy('expiry_date', 'asc')
-        ->paginate(5);
+    $expiring_products = array();
 
-    $low_stock_products = Product::whereRaw('qty <= min_qty')
-        ->orderBy('qty')
-        ->paginate(5);
-        return view('home', compact('users', 'products', 'sales', 'today_sales', 'today_cash', 'sales_cash', 'products_cash_cost', 'products_cash_selling', 'profit', 'expiring_products', 'low_stock_products'));
+    $low_stock_products = [];
+        return view('home', compact('users', 'products', 'sales', 'today_sales', 'today_cash', 'sales_cash', 'products_cash_cost', 'products_cash_selling', 'profit', ));
     }
 
     public function generalReport()

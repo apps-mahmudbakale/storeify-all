@@ -2,31 +2,43 @@
 
 namespace App\Http\Livewire;
 
-use App\Models\Product;
+use App\Models\Car;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 
 class Products extends Base
 {
-    public $sortBy = 'products.name';
+    public $sortBy = 'cars.make';
     public function render()
     {
         if ($this->search) {
-            $products = Product::query()
-                ->where('name', 'like', '%' . $this->search . '%')
-                ->Orwhere('buying_price', 'like', '%' . $this->search . '%')
-                ->Orwhere('selling_price', 'like', '%' . $this->search . '%')
-                ->Orwhere('qty', 'like', '%' . $this->search . '%')
-                ->Orwhere('expiry_date', 'like', '%' . $this->search . '%')
-                ->paginate(10);
+            $query = Car::query()->with('user');
+
+            if (auth()->user()->hasRole('car-owner') && !auth()->user()->hasRole('admin')) {
+                $query->where('user_id', auth()->id());
+            }
+
+            $products = $query->where(function ($q) {
+                $q->where('make', 'like', '%' . $this->search . '%')
+                ->Orwhere('bodyType', 'like', '%' . $this->search . '%')
+                ->Orwhere('minPrice', 'like', '%' . $this->search . '%')
+                ->Orwhere('maxPrice', 'like', '%' . $this->search . '%')
+                ->Orwhere('transmission', 'like', '%' . $this->search . '%')
+                ->Orwhere('fuelType', 'like', '%' . $this->search . '%');
+            })->paginate(10);
 
             return view(
                 'livewire.products',
                 ['products' => $products]
             );
         } else {
-            $products = Product::query()
-                ->orderBy($this->sortBy, $this->sortDirection)
+            $query = Car::query()->with('user');
+            
+            if (auth()->user()->hasRole('car-owner') && !auth()->user()->hasRole('admin')) {
+                $query->where('user_id', auth()->id());
+            }
+
+            $products = $query->orderBy($this->sortBy, $this->sortDirection)
                 ->paginate($this->perPage);
             return view(
                 'livewire.products',

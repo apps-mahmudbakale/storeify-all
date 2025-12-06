@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Car;
 use App\Models\Store;
-use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Exports\ProductsExport;
 use App\Imports\ProductsImport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Requests\ProductsFormRequest;
 
-class ProductController extends Controller
+class VehicleController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -36,8 +36,8 @@ class ProductController extends Controller
      */
     public function create()
     {
-
-        return view('products.create');
+        $owners = \App\Models\User::role('car-owner')->get();
+        return view('products.create', compact('owners'));
     }
 
     /**
@@ -48,10 +48,16 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        // dd(array_merge($request->except('expiry_date'), ['expiry_date' => date($request->expiry_date)]));
-        $products = Product::create(array_merge($request->except('expiry_date'), ['expiry_date' => date($request->expiry_date), 'selling_price' => $request->selling_price ?? 0]));
-
-        return redirect()->route('app.products.index')->with('success', 'Product Added');
+        $data = $request->all();
+        if ($request->hasFile('image')) {
+            $imageFile = $request->file('image');
+            $data['image'] = base64_encode(file_get_contents($imageFile->getRealPath()));
+        }
+        if (!$request->has('user_id')) {
+            $data['user_id'] = auth()->id();
+        }
+        $car = Car::create($data);
+        return redirect()->route('app.products.index')->with('success', 'Vehicle Added');
     }
 
     public function import(Request $request)
@@ -72,10 +78,10 @@ class ProductController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Product  $product
+     * @param  \App\Models\Car  $product
      * @return \Illuminate\Http\Response
      */
-    public function show(Product $product)
+    public function show(Car $product)
     {
         //
     }
@@ -84,39 +90,43 @@ class ProductController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Product  $product
+     * @param  \App\Models\Car  $product
      * @return \Illuminate\Http\Response
      */
-    public function edit(Product $product)
+    public function edit(Car $product)
     {
-
-        return view('products.edit', compact('product'));
+        $owners = \App\Models\User::role('car-owner')->get();
+        return view('products.edit', compact('product', 'owners'));
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Product  $product
+     * @param  \App\Models\Car  $product
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Product $product)
+    public function update(Request $request, Car $product)
     {
-        $product->update($request->all());
-
-        return redirect()->route('app.products.index')->with('success', 'Product Updated');
+        $data = $request->all();
+        if ($request->hasFile('image')) {
+            $imageFile = $request->file('image');
+            $data['image'] = base64_encode(file_get_contents($imageFile->getRealPath()));
+        }
+        $product->update($data);
+        return redirect()->route('app.products.index')->with('success', 'Vehicle Updated');
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Product  $product
+     * @param  \App\Models\Car  $product
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Product $product)
+    public function destroy(Car $product)
     {
         $product->delete();
 
-        return back()->with('success', 'Product Deleted');
+        return back()->with('success', 'Vehicle Deleted');
     }
 }
