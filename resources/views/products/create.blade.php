@@ -7,13 +7,13 @@
             <div class="container-fluid">
                 <div class="row mb-2">
                     <div class="col-sm-6">
-                        <h1 class="m-0 text-dark">Products</h1>
+                        <h1 class="m-0 text-dark">Vehicles</h1>
                     </div><!-- /.col -->
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right">
                             <li class="breadcrumb-item"><a href="{{ route('app.dashboard') }}">Dashboard</a></li>
-                            <li class="breadcrumb-item"><a href="{{ route('app.products.index') }}">Products</a></li>
-                            <li class="breadcrumb-item active">Create Product</li>
+                            <li class="breadcrumb-item"><a href="{{ route('app.products.index') }}">Vehicles</a></li>
+                            <li class="breadcrumb-item active">Create Vehicle</li>
                         </ol>
                     </div><!-- /.col -->
                 </div><!-- /.row -->
@@ -27,7 +27,7 @@
                 <!-- New User form elements -->
                 <div class="card card-primary">
                     <div class="card-header">
-                        <h3 class="card-title">Create Product</h3>
+                        <h3 class="card-title">Create Vehicle</h3>
                     </div>
                     <!-- /.card-header -->
                     <form action="{{route('app.products.store')}}" method="POST" enctype="multipart/form-data">
