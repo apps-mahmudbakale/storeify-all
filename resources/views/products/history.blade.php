@@ -57,7 +57,7 @@
                                                     @foreach ($audit->getModified() as $attribute => $modified)
                                                         @if(in_array($attribute, ['qty', 'buying_price', 'selling_price', 'name', 'min_qty', 'expiry_date', 'product_category', 'unit']))
                                                             <li>
-                                                                <strong>{{ ucfirst(str_replace('_', ' ', $attribute)) }}:</strong>
+                                                                <strong>{{ ucfirst(str_replace('_', ' ', $attribute == 'product_category' ? 'category' : $attribute)) }}:</strong>
                                                                 <span class="text-danger">{{ $modified['old'] ?? 'N/A' }}</span>
                                                                 <i class="fas fa-arrow-right mx-1"></i>
                                                                 <span class="text-success">{{ $modified['new'] ?? 'N/A' }}</span>
