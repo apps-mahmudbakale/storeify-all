@@ -62,7 +62,7 @@ class ProductController extends Controller
 
     public function export()
     {
-        return Excel::download(new ProductsExport, 'K7-Pharmacy-products-export'.date('d-m-Y').'.xlsx');
+        return Excel::download(new ProductsExport, 'storeify-products-export'.date('d-m-Y').'.xlsx');
     }
 
     public function importView()
@@ -118,5 +118,11 @@ class ProductController extends Controller
         $product->delete();
 
         return back()->with('success', 'Product Deleted');
+    }
+
+    public function history(Product $product)
+    {
+        $audits = $product->audits()->with('user')->orderBy('created_at', 'desc')->get();
+        return view('products.history', compact('product', 'audits'));
     }
 }
