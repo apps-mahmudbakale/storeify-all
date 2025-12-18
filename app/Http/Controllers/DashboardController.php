@@ -177,4 +177,45 @@ class DashboardController extends Controller
     {
         return view('sync');
     }
+
+    public function categoryReportView()
+    {
+        $stockReport = Product::select('product_category as category')
+            ->selectRaw('count(*) as total_items')
+            ->selectRaw('sum(qty) as total_qty')
+            ->selectRaw('sum(qty * buying_price) as total_cost_value')
+            ->selectRaw('sum(qty * selling_price) as total_retail_value')
+            ->groupBy('product_category')
+            ->get();
+
+        return view('reports.category', compact('stockReport'));
+    }
+
+    public function categoryReport(Request $request)
+    {
+        $stockReport = Product::select('product_category as category')
+            ->selectRaw('count(*) as total_items')
+            ->selectRaw('sum(qty) as total_qty')
+            ->selectRaw('sum(qty * buying_price) as total_cost_value')
+            ->selectRaw('sum(qty * selling_price) as total_retail_value')
+            ->groupBy('product_category')
+            ->get();
+
+        $salesQuery = DB::table('sales')
+            ->join('products', 'products.id', '=', 'sales.product_id')
+            ->select('products.product_category as category')
+            ->selectRaw('count(sales.id) as total_sales')
+            ->selectRaw('sum(sales.quantity) as items_sold')
+            ->selectRaw('sum(sales.amount) as total_revenue');
+
+        if ($request->has('from') && !empty($request->from) && $request->has('to') && !empty($request->to)) {
+            $startDate = Carbon::createFromFormat('Y-m-d', $request->from)->startOfDay();
+            $endDate = Carbon::createFromFormat('Y-m-d', $request->to)->endOfDay();
+            $salesQuery->whereBetween('sales.created_at', [$startDate, $endDate]);
+        }
+
+        $salesReport = $salesQuery->groupBy('products.product_category')->get();
+
+        return view('reports.category', compact('stockReport', 'salesReport'));
+    }
 }
