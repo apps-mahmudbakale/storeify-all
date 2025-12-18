@@ -119,4 +119,10 @@ class ProductController extends Controller
 
         return back()->with('success', 'Product Deleted');
     }
+
+    public function history(Product $product)
+    {
+        $audits = $product->audits()->with('user')->orderBy('created_at', 'desc')->get();
+        return view('products.history', compact('product', 'audits'));
+    }
 }

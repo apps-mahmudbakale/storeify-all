@@ -65,6 +65,9 @@
                                             {{-- <td>{{$product->store->name}}</td> --}}
                                             <td>
                                                 <div class="btn-group">
+                                                    <a href="{{route('app.products.history', $product->id)}}" class="btn btn-secondary btn-sm" title="History">
+                                                        <i class="fa fa-history"></i>
+                                                    </a>
                                                     @can('update-products')
                                                     <a href="{{route('app.products.edit', $product->id)}}" class="btn btn-info btn-sm">
                                                         <i class="fa fa-edit"></i></a>
