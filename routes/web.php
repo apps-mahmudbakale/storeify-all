@@ -91,6 +91,8 @@ Route::group(['prefix' => 'app', 'as' => 'app.', 'middleware' => 'auth'], functi
     Route::post('customReport', [DashboardController::class, 'customReport'])->name('custom.report');
     Route::get('categoryReport', [DashboardController::class, 'categoryReportView'])->name('category.report.view');
     Route::post('categoryReport', [DashboardController::class, 'categoryReport'])->name('category.report');
+    Route::get('categoryReport/excel', [DashboardController::class, 'exportCategoryReportExcel'])->name('category.report.excel');
+    Route::get('categoryReport/pdf', [DashboardController::class, 'exportCategoryReportPdf'])->name('category.report.pdf');
     Route::resource('invoices', InvoiceController::class);
     Route::get('invoice/{invoice}', [InvoiceController::class, 'invoice']);
     Route::get('invoice/print/{invoice}', [InvoiceController::class, 'invoicePrint'])->name('invoice.print');

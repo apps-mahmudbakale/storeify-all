@@ -180,26 +180,48 @@ class DashboardController extends Controller
 
     public function categoryReportView()
     {
+        $categories = Product::select('product_category')
+            ->whereNotNull('product_category')
+            ->distinct()
+            ->pluck('product_category');
+
         $stockReport = Product::select('product_category as category')
             ->selectRaw('count(*) as total_items')
             ->selectRaw('sum(qty) as total_qty')
             ->selectRaw('sum(qty * buying_price) as total_cost_value')
-            ->selectRaw('sum(qty * selling_price) as total_retail_value')
             ->groupBy('product_category')
             ->get();
 
-        return view('reports.category', compact('stockReport'));
+        $salesReport = DB::table('sales')
+            ->join('products', 'products.id', '=', 'sales.product_id')
+            ->select('products.product_category as category')
+            ->selectRaw('count(sales.id) as total_sales')
+            ->selectRaw('sum(sales.quantity) as items_sold')
+            ->selectRaw('sum(sales.amount) as total_revenue')
+            ->whereDate('sales.created_at', Carbon::today())
+            ->groupBy('products.product_category')
+            ->get();
+
+        return view('reports.category', compact('stockReport', 'salesReport', 'categories'));
     }
 
     public function categoryReport(Request $request)
     {
-        $stockReport = Product::select('product_category as category')
+        $categories = Product::select('product_category')
+            ->whereNotNull('product_category')
+            ->distinct()
+            ->pluck('product_category');
+
+        $stockQuery = Product::select('product_category as category')
             ->selectRaw('count(*) as total_items')
             ->selectRaw('sum(qty) as total_qty')
-            ->selectRaw('sum(qty * buying_price) as total_cost_value')
-            ->selectRaw('sum(qty * selling_price) as total_retail_value')
-            ->groupBy('product_category')
-            ->get();
+            ->selectRaw('sum(qty * buying_price) as total_cost_value');
+
+        if ($request->has('category') && !empty($request->category)) {
+            $stockQuery->where('product_category', $request->category);
+        }
+
+        $stockReport = $stockQuery->groupBy('product_category')->get();
 
         $salesQuery = DB::table('sales')
             ->join('products', 'products.id', '=', 'sales.product_id')
@@ -214,8 +236,57 @@ class DashboardController extends Controller
             $salesQuery->whereBetween('sales.created_at', [$startDate, $endDate]);
         }
 
+        if ($request->has('category') && !empty($request->category)) {
+            $salesQuery->where('products.product_category', $request->category);
+        }
+
         $salesReport = $salesQuery->groupBy('products.product_category')->get();
 
-        return view('reports.category', compact('stockReport', 'salesReport'));
+        return view('reports.category', compact('stockReport', 'salesReport', 'categories'));
+    }
+
+    public function exportCategoryReportExcel(Request $request)
+    {
+        return Excel::download(new \App\Exports\CategoryReportExport($request->all()), 'Category-Report.xlsx');
+    }
+
+    public function exportCategoryReportPdf(Request $request)
+    {
+        $category = $request->category ?? null;
+        $from = $request->from ?? null;
+        $to = $request->to ?? null;
+
+        $stockQuery = Product::select('product_category as category')
+            ->selectRaw('count(*) as total_items')
+            ->selectRaw('sum(qty) as total_qty')
+            ->selectRaw('sum(qty * buying_price) as total_cost_value');
+
+        if ($category) {
+            $stockQuery->where('product_category', $category);
+        }
+
+        $stockReport = $stockQuery->groupBy('product_category')->get();
+
+        $salesQuery = DB::table('sales')
+            ->join('products', 'products.id', '=', 'sales.product_id')
+            ->select('products.product_category as category')
+            ->selectRaw('count(sales.id) as total_sales')
+            ->selectRaw('sum(sales.quantity) as items_sold')
+            ->selectRaw('sum(sales.amount) as total_revenue');
+
+        if ($from && $to) {
+            $startDate = Carbon::createFromFormat('Y-m-d', $from)->startOfDay();
+            $endDate = Carbon::createFromFormat('Y-m-d', $to)->endOfDay();
+            $salesQuery->whereBetween('sales.created_at', [$startDate, $endDate]);
+        }
+
+        if ($category) {
+            $salesQuery->where('products.product_category', $category);
+        }
+
+        $salesReport = $salesQuery->groupBy('products.product_category')->get();
+
+        $pdf = PDF::loadView('reports.category_report_pdf', compact('stockReport', 'salesReport'));
+        return $pdf->download('Category-Report-' . date('d-m-Y') . '.pdf');
     }
 }
