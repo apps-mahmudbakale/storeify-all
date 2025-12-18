@@ -23,9 +23,6 @@ class SettingsController extends Controller
             'store_address' => 'required',
             'store_logo' => 'nullable|file|image',
             'sell_margin' => 'required|numeric|min:0',
-            'bank_name' => 'nullable|string',
-            'account_name' => 'nullable|string',
-            'account_number' => 'nullable|string',
 
         ]);
 
@@ -40,9 +37,6 @@ class SettingsController extends Controller
         $settings->store_logo = $logo;
         $settings->store_address = $request->store_address;
         $settings->sell_margin = $request->sell_margin;
-        $settings->bank_name = $request->bank_name;
-        $settings->account_name = $request->account_name;
-        $settings->account_number = $request->account_number;
         $settings->save();
         return redirect()->route('app.settings.index')->with('Store Settings Has Been Updated');
     }

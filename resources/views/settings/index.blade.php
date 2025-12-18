@@ -64,26 +64,6 @@
                                                 Selling Margin
                                                 <input type="text" class="form-control"  name="sell_margin" value="{{ $settings->sell_margin }}">
                                             </div>
-                                            <div class="row">
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        Bank Name
-                                                        <input type="text" class="form-control" name="bank_name" value="{{ $settings->bank_name }}">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        Account Name
-                                                        <input type="text" class="form-control" name="account_name" value="{{ $settings->account_name }}">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        Account Number
-                                                        <input type="text" class="form-control" name="account_number" value="{{ $settings->account_number }}">
-                                                    </div>
-                                                </div>
-                                            </div>
                                             <div class="form-group">
                                                 <br>
                                                 <button type="submit" class="btn btn-primary">Save</button>
