@@ -57,6 +57,29 @@
                           </a>
                       </li>
                   @endcan
+                  <li class="nav-item has-treeview">
+                      <a href="#" class="nav-link">
+                          <i class="nav-icon fas fa-shopping-cart"></i>
+                          <p>
+                              Sales Management
+                              <i class="fas fa-angle-left right"></i>
+                          </p>
+                      </a>
+                      <ul class="nav nav-treeview">
+                          <li class="nav-item">
+                              <a href="{{ route('app.sales.index') }}" class="nav-link">
+                                  <i class="fa fa-list nav-icon"></i>
+                                  <p>Sales List</p>
+                              </a>
+                          </li>
+                          <li class="nav-item">
+                              <a href="{{ route('app.sales.create') }}" class="nav-link">
+                                  <i class="fa fa-plus-circle nav-icon"></i>
+                                  <p>New Sale</p>
+                              </a>
+                          </li>
+                      </ul>
+                  </li>
                   @can('read-reports')
                       <li class="nav-item has-treeview">
                           <a href="#" class="nav-link">

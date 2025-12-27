@@ -67,6 +67,7 @@ Route::group(['prefix' => 'app', 'as' => 'app.', 'middleware' => 'auth'], functi
     Route::post('requests/approve/{id}', [RequestsController::class, 'approve'])->name('requests.approve');
     Route::get('requests/acknowledge/{id}', [RequestsController::class, 'acknowledge'])->name('requests.acknowledge');
     Route::resource('sales', SaleController::class);
+    Route::get('sales/{saleId}/timeline', \App\Http\Livewire\SaleTimeline::class)->name('sales.timeline');
     Route::post('sales/search', [SaleController::class, 'searchItem'])->name('sales.search');
     Route::get('sales/cart/{invoice}', [SaleController::class, 'cart'])->name('sales.cart');
     Route::get('sales/remove/{product}', [SaleController::class, 'removeProduct'])->name('sales.remove');

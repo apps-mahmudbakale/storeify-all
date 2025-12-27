@@ -11,56 +11,33 @@ class Sales extends Base
     public $sortBy = 'products.name';
     public function render()
     {
-        if(auth()->user()->hasRole('admin|store')){
-            if ($this->search) {
-                $sales = DB::table('sales')
-                    ->select('sales.*','products.name as product','users.name as user')
-                    ->join('products', 'products.id', '=', 'sales.product_id')
-                    ->join('users', 'users.id', '=', 'sales.user_id')
-                    ->where('products.name', 'like', '%' . $this->search . '%')
-                    ->paginate(10);
+        $query = DB::table('sales')
+            ->select(
+                'sales.*',
+                'products.make as car_make',
+                'products.bodyType as car_body',
+                'seller.name as owner_name',
+                'users.name as sold_by'
+            )
+            ->leftJoin('cars as products', 'products.id', '=', 'sales.product_id')
+            ->leftJoin('users as seller', 'seller.id', '=', 'products.user_id')
+            ->join('users', 'users.id', '=', 'sales.user_id');
 
-                return view(
-                    'livewire.sales',
-                    ['sales' => $sales]
-                );
-            } else {
-                $sales = DB::table('sales')
-                    ->select('sales.*','products.name as product','users.name as user')
-                    ->join('products', 'products.id', '=', 'sales.product_id')
-                    ->join('users', 'users.id', '=', 'sales.user_id')
-                    ->orderBy($this->sortBy, $this->sortDirection)
-                    ->paginate($this->perPage);
-                return view(
-                    'livewire.sales',
-                    ['sales' => $sales]
-                );
-            }
-        }else{
-            if ($this->search) {
-                $sales = DB::table('sales')
-                    ->select('sales.*','products.name as product','users.name')
-                    ->join('products', 'products.id', '=', 'sales.product_id')
-                    ->join('users', 'users.id', '=', 'sales.user_id')
-                    ->where('products.name', 'like', '%' . $this->search . '%')
-                    ->paginate(10);
-                return view(
-                    'livewire.sales',
-                    ['sales' => $sales]
-                );
-            } else {
-                $sales = DB::table('sales')
-                    ->select('sales.*','products.name as product','users.name as user')
-                    ->join('products', 'products.id', '=', 'sales.product_id')
-                    ->join('users', 'users.id', '=', 'sales.user_id')
-                    ->where('sales.user_id', auth()->user()->id)
-                    ->orderBy($this->sortBy, $this->sortDirection)
-                    ->paginate($this->perPage);
-                return view(
-                    'livewire.sales',
-                    ['sales' => $sales]
-                );
-            }
+        if (!auth()->user()->hasRole('admin|store')) {
+            $query->where('sales.user_id', auth()->user()->id);
         }
+
+        if ($this->search) {
+            $query->where(function($q) {
+                $q->where('products.make', 'like', '%' . $this->search . '%')
+                  ->orWhere('sales.buyer_name', 'like', '%' . $this->search . '%')
+                  ->orWhere('sales.invoice', 'like', '%' . $this->search . '%');
+            });
+        }
+
+        $sales = $query->orderBy($this->sortBy == 'products.name' ? 'products.make' : $this->sortBy, $this->sortDirection)
+            ->paginate($this->perPage);
+
+        return view('livewire.sales', ['sales' => $sales]);
     }
 }

@@ -44,28 +44,30 @@ class  SaleController extends Controller
 
     public function searchItem(Request $request)
     {
-
         $keyword = trim($request->search_keyword, "");
 
-        $products = DB::table('products')
-            ->where(DB::raw('lower(name)'), 'like', '%' . strtolower($keyword) . '%')
-            ->where('qty', '>=', '1')
+        $products = DB::table('cars')
+            ->where(function($query) use ($keyword) {
+                $query->where(DB::raw('lower(make)'), 'like', '%' . strtolower($keyword) . '%')
+                      ->orWhere(DB::raw('lower(bodyType)'), 'like', '%' . strtolower($keyword) . '%');
+            })
             ->get();
-        // dd($products);
+
         echo '<ul class="nav flex-column">';
-        if ($products) {
+        if ($products->count() > 0) {
             foreach ($products as $product) {
-                $url = base64_encode($product->id . ',' . session()->get('invoice') . ',' . $product->buying_price);
+                // Using minPrice as a default selling price for the cart logic
+                $url = base64_encode($product->id . ',' . session()->get('invoice') . ',' . $product->minPrice);
                 echo '<li class="nav-item">
                 <a href="' . route('app.sales.cart', $url) . '" class="nav-link">
-                  <strong>' . $product->name . '</strong>
-                  <span class="float-right badge bg-primary">&#8358; ' . number_format($product->buying_price, 2) . '</span>
+                  <strong>' . $product->make . ' (' . $product->bodyType . ')</strong>
+                  <span class="float-right badge bg-primary">&#8358; ' . number_format($product->minPrice, 2) . '</span>
                 </a>
               </li>';
             }
             echo '</ul>';
-        }else{
-            echo '<p>No products found</p>';
+        } else {
+            echo '<p class="p-2">No cars found</p>';
         }
     }
 
@@ -99,67 +101,110 @@ class  SaleController extends Controller
 
     public function saveSale(Request $request, $sale)
     {
+        DB::transaction(function () use ($request, $sale) {
+            $sales_order = DB::table('sales_order')
+                ->where('invoice', $sale)
+                ->get();
 
-        $sales_order = DB::table('sales_order')
-            ->where('invoice', $sale)
-            ->get();
-            // dd($sales_order);
-        foreach ($sales_order as $order) {
-            $sales = Sale::create([
+            $deposit = $request->input('deposit', 0);
+            $totalAmount = $sales_order->sum('amount');
+            $balance = $totalAmount - $deposit;
+
+            foreach ($sales_order as $order) {
+                $saleRecord = Sale::create([
+                    'invoice' => $sale,
+                    'product_id' => $order->product_id,
+                    'quantity' => $order->quantity,
+                    'amount' => $order->amount,
+                    'user_id' => auth()->user()->id,
+                    'price' => $order->price,
+                    'buyer_name' => $request->input('customer_name'),
+                    'buyer_dept' => '',
+                    'deposit' => $deposit, // We store the total deposit on the sale level, or distributed? 
+                    // Usually for car sales, it's one car per sale. Let's assume 1 car.
+                    'balance_remaining' => $balance
+                ]);
+
+                if ($deposit > 0) {
+                    \App\Models\SalePayment::create([
+                        'sale_id' => $saleRecord->id,
+                        'amount' => $deposit,
+                        'payment_date' => now(),
+                        'notes' => 'Initial deposit'
+                    ]);
+                }
+
+                DB::table('cars')
+                    ->where('id',  $order->product_id)
+                    ->update(['qty' => DB::raw('qty - ' . $order->quantity)]);
+            }
+
+            Invoice::create([
                 'invoice' => $sale,
-                'product_id' => $order->product_id,
-                'quantity' => $order->quantity,
-                'amount' => $order->amount,
-                'user_id' => auth()->user()->id,
-                'price' => $order->price,
-                'buyer_name' => $request->input('buyer_name'),
-                'buyer_dept' => $request->input('buyer_dept')
+                'buyer_name' => $request->input('customer_name'),
+                'buyer_dept' => '',
+                'created_at' => now(),
             ]);
-            $product = DB::table('products')
-                ->where('id',  $order->product_id)
-                ->update(['qty' => DB::raw('qty - ' . $order->quantity)]);
-        }
-        $invoice = Invoice::create([
-            'invoice' => $sale,
-            'buyer_name' => $request->input('buyer_name'),
-            'buyer_dept' => $request->input('buyer_dept'),
-            'created_at' => now(),
-        ]);
-       $delete = DB::table('sales_order')
-        ->where('invoice', $sale)
-        ->where('user_id', auth()->user()->id)
-        ->delete();
+
+            DB::table('sales_order')
+                ->where('invoice', $sale)
+                ->where('user_id', auth()->user()->id)
+                ->delete();
+        });
+
         session()->forget('invoice');
         return redirect()->route('app.sales.create')->with('success', 'Sales Saved');
     }
     public function saveSalePrint(Request $request, $invoice)
     {
-        $sales_order = DB::table('sales_order')
-            ->where('invoice', $invoice)
-            ->where('user_id', auth()->user()->id)
-            ->get();
-        foreach ($sales_order as $order) {
-            $sales = Sale::create([
+        DB::transaction(function () use ($request, $invoice) {
+            $sales_order = DB::table('sales_order')
+                ->where('invoice', $invoice)
+                ->where('user_id', auth()->user()->id)
+                ->get();
+
+            $deposit = $request->input('deposit', 0);
+            $totalAmount = $sales_order->sum('amount');
+            $balance = $totalAmount - $deposit;
+
+            foreach ($sales_order as $order) {
+                $saleRecord = Sale::create([
+                    'invoice' => $invoice,
+                    'product_id' => $order->product_id,
+                    'quantity' => $order->quantity,
+                    'amount' => $order->amount,
+                    'user_id' => auth()->user()->id,
+                    'price' => $order->price,
+                    'buyer_name' => $request->input('customer_name'),
+                    'buyer_dept' => '',
+                    'deposit' => $deposit,
+                    'balance_remaining' => $balance
+                ]);
+
+                if ($deposit > 0) {
+                    \App\Models\SalePayment::create([
+                        'sale_id' => $saleRecord->id,
+                        'amount' => $deposit,
+                        'payment_date' => now(),
+                        'notes' => 'Initial deposit'
+                    ]);
+                }
+
+                DB::table('cars')
+                    ->where('id',  $order->product_id)
+                    ->update(['qty' => DB::raw('qty - ' . $order->quantity)]);
+            }
+
+            Invoice::create([
                 'invoice' => $invoice,
-                'product_id' => $order->product_id,
-                'quantity' => $order->quantity,
-                'amount' => $order->amount,
-                'user_id' => auth()->user()->id,
-                'price' => $order->price,
-                'buyer_name' => $request->input('buyer_name'),
-                'buyer_dept' => $request->input('buyer_dept')
+                'buyer_name' => $request->input('customer_name'),
+                'buyer_dept' => '',
+                'created_at' => now(),
             ]);
-            $product = DB::table('products')
-                ->where('id',  $order->product_id)
-                ->update(['qty' => DB::raw('qty - ' . $order->quantity)]);
-        }
-        $invoices = Invoice::create([
-            'invoice' => $invoice,
-            'buyer_name' => $request->input('buyer_name'),
-            'buyer_dept' => $request->input('buyer_dept'),
-            'created_at' => now(),
-        ]);
-        DB::table('sales_order')->where('invoice', $invoice)->where('user_id',auth()->user()->id)->delete();
+
+            DB::table('sales_order')->where('invoice', $invoice)->where('user_id', auth()->user()->id)->delete();
+        });
+
         session()->forget('invoice');
         return redirect()->route('app.sales.print', $invoice);
     }
@@ -180,8 +225,8 @@ class  SaleController extends Controller
     public function printInvoice($invoice)
     {
         $items = DB::table('sales')
-            ->select('sales.*', 'products.name as product', 'products.selling_price')
-            ->join('products', 'products.id', '=', 'sales.product_id')
+            ->select('sales.*', 'products.make as product')
+            ->join('cars as products', 'products.id', '=', 'sales.product_id')
             ->where('sales.invoice', $invoice)
             ->where('sales.user_id', auth()->user()->id)
             ->get();
@@ -208,8 +253,8 @@ class  SaleController extends Controller
     {
 
         $items = DB::table('sales')
-            ->select('sales.*', 'products.name as product', 'products.selling_price')
-            ->join('products', 'products.id', '=', 'sales.product_id')
+            ->select('sales.*', 'products.make as product')
+            ->join('cars as products', 'products.id', '=', 'sales.product_id')
             ->where('sales.invoice', $invoice)
             ->get();
         // dd($items);

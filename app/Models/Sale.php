@@ -20,8 +20,25 @@ class Sale extends Model implements AuditableInterface
         'user_id',
         'price',
         'buyer_name',
-        'buyer_dept'
+        'buyer_dept',
+        'deposit',
+        'balance_remaining'
     ];
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(SalePayment::class);
+    }
 
 
 

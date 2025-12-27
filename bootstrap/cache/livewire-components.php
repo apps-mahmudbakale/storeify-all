@@ -8,6 +8,7 @@
   'requests' => 'App\\Http\\Livewire\\Requests',
   'return-sale' => 'App\\Http\\Livewire\\ReturnSale',
   'roles' => 'App\\Http\\Livewire\\Roles',
+  'sale-timeline' => 'App\\Http\\Livewire\\SaleTimeline',
   'sales' => 'App\\Http\\Livewire\\Sales',
   'staff' => 'App\\Http\\Livewire\\Staff',
   'stations' => 'App\\Http\\Livewire\\Stations',

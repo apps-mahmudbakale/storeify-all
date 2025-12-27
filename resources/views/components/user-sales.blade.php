@@ -33,11 +33,13 @@
                                         <tr>
                                             <th>S/N</th>
                                             <th>Invoice</th>
-                                            <th>Product Name</th>
-                                            <th>Quantity</th>
-                                            <th>Amount</th>
-                                            <th>Sold By</th>
-                                            <th>Sold Date</th>
+                                            <th>Car</th>
+                                            <th>Buyer</th>
+                                            <th>Owner</th>
+                                            <th>Total</th>
+                                            <th>Deposit</th>
+                                            <th>Balance</th>
+                                            <th>Date</th>
                                             <th></th>
                                         </tr>
                                     </thead>
@@ -46,13 +48,19 @@
                                             <tr>
                                             <td>{{$loop->iteration}}</td>
                                             <td>{{$sale->invoice}}</td>
-                                            <td>{{$sale->product}}</td>
-                                            <td>{{$sale->quantity}}</td>
-                                            <td>{{$sale->amount}}</td>
-                                            <td>{{$sale->user}}</td>
-                                            <td>{{\Carbon\Carbon::parse($sale->created_at)->diffForHumans()}}</td>
+                                            <td>{{$sale->car_make}} ({{$sale->car_body}})</td>
+                                            <td>{{$sale->buyer_name}}</td>
+                                            <td>{{$sale->owner_name}}</td>
+                                            <td>{{number_format($sale->amount, 2)}}</td>
+                                            <td>{{number_format($sale->deposit, 2)}}</td>
+                                            <td>{{number_format($sale->balance_remaining, 2)}}</td>
+                                            <td>{{\Carbon\Carbon::parse($sale->created_at)->format('d M Y')}}</td>
                                             <td>
-                                                @can('delete-sales')
+                                                <div class="btn-group">
+                                                    <a href="{{ route('app.sales.timeline', $sale->id) }}" class="btn btn-info btn-sm">
+                                                        <i class="fa fa-history"></i> Timeline
+                                                    </a>
+                                                    @can('delete-sales')
                                                 <div class="btn-group">
                                                         <button class="btn btn-danger btn-sm" id="del{{ $sale->id }}"
                                                             data-value="{{ $sale->id }}"><i class="fa fa-trash"></i></button>

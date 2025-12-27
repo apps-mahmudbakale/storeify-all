@@ -45,10 +45,10 @@
                             <thead>
                                 <tr>
                                     <th>S/N</th>
-                                    <th>Item Name</th>
-                                    <th>Selling Price</th>
-                                    <th>Quantity</th>
-                                    <th>Amount</th>
+                                    <th>Car Details</th>
+                                    <th>Price (negotiated)</th>
+                                    <th>Units</th>
+                                    <th>Total Amount</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -59,8 +59,11 @@
                                         <td>{{ $loop->iteration }}</td>
                                         <input type='hidden' value='{{ $cart->product_id }}'
                                             id='prid{{ $cart->id }}'>
-                                        <td id="item{{ $cart->id }}">{{ $cart->name }}</td>
-                                        <td>&#8358; <input type='number' id='price{{$cart->id}}' value='{{ $cart->price }}' style='width:110px; display:inherit;' class='form-control'></td>
+                                        <td id="item{{ $cart->id }}">
+                                            <strong>{{ $cart->make }}</strong><br>
+                                            <small class="text-muted">{{ $cart->bodyType }}</small>
+                                        </td>
+                                        <td>&#8358; <input type='number' id='price{{$cart->id}}' value='{{ $cart->price }}' style='width:130px; display:inherit;' class='form-control'></td>
                                         <td><input type='number' id="qty{{ $cart->id }}" style='width:69px;'
                                                 class='form-control' value='{{ $cart->quantity }}'></td>
                                         <td>&#8358; <span
@@ -234,9 +237,9 @@
                                             })
 
                                             $('#save').click(() => {
-                                                var buyer_name = $('#buyer_name').val();
-                                                var buyer_dept = $('#buyer_dept').val();
-                                                var url = 'save/{{ $cart->invoice }}?buyer_name=' + encodeURIComponent(buyer_name) + '&buyer_dept=' + encodeURIComponent(buyer_dept);
+                                                var customer_name = $('#customer_name').val();
+                                                var deposit = $('#initial_deposit').val() || 0;
+                                                var url = 'save/{{ $cart->invoice }}?customer_name=' + encodeURIComponent(customer_name) + '&deposit=' + deposit;
                                                 Swal.fire({
                                                     title: 'Are you sure?',
                                                     text: "You won't be able to revert this!",
@@ -271,9 +274,9 @@
                                             });
 
                                             $('#save_print').click(() => {
-                                                var buyer_name = $('#buyer_name').val();
-                                                var buyer_dept = $('#buyer_dept').val();
-                                                var url = 'print/{{ $cart->invoice }}?buyer_name=' + encodeURIComponent(buyer_name) + '&buyer_dept=' + encodeURIComponent(buyer_dept);
+                                                var customer_name = $('#customer_name').val();
+                                                var deposit = $('#initial_deposit').val() || 0;
+                                                var url = 'print/{{ $cart->invoice }}?customer_name=' + encodeURIComponent(customer_name) + '&deposit=' + deposit;
                                                 Swal.fire({
                                                     title: 'Are you sure?',
                                                     text: "You won't be able to revert this!",
@@ -291,9 +294,9 @@
                                             });
 
                                             $('#invoice').click(() => {
-                                                var buyer_name = $('#buyer_name').val();
-                                                var buyer_dept = $('#buyer_dept').val();
-                                                var url = '/app/invoice/{{ $cart->invoice }}?buyer_name=' + encodeURIComponent(buyer_name) + '&buyer_dept=' + encodeURIComponent(buyer_dept);
+                                                var customer_name = $('#customer_name').val();
+                                                var deposit = $('#initial_deposit').val() || 0;
+                                                var url = '/app/invoice/{{ $cart->invoice }}?customer_name=' + encodeURIComponent(customer_name) + '&deposit=' + deposit;
                                                 Swal.fire({
                                                     title: 'Are you sure?',
                                                     text: "You won't be able to revert this!",
@@ -329,24 +332,14 @@
                         <br>
 
                         <!-- Buyer Information Section -->
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="buyer_name"><strong>Staff Name:</strong></label>
-                                <select id="buyer_name" class="form-control">
-                                    <option value="">-- Select staff --</option>
-                                    @foreach($staff as $s)
-                                        <option value="{{ $s->name }}" {{ $s->name === auth()->user()->name ? 'selected' : '' }}>{{ $s->name }} ({{$s->staff_no}})</option>
-                                    @endforeach
-                                </select>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <label for="customer_name"><strong>Customer Name:</strong></label>
+                                <input type="text" id="customer_name" class="form-control" placeholder="Enter customer name">
                             </div>
-                            <div class="col-md-6">
-                                <label for="buyer_dept"><strong>Department:</strong></label>
-                                <select id="buyer_dept" class="form-control">
-                                    <option value="">-- Select department --</option>
-                                    @foreach($departments as $dept)
-                                        <option value="{{ $dept->name }}">{{ $dept->name }}</option>
-                                    @endforeach
-                                </select>
+                            <div class="col-md-4">
+                                <label for="initial_deposit"><strong>Initial Deposit:</strong></label>
+                                <input type="number" id="initial_deposit" class="form-control" placeholder="0.00" step="0.01">
                             </div>
                         </div>
 

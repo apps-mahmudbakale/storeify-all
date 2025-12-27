@@ -101,7 +101,7 @@
                         <td class="description" style="text-align: center;">{{ $item->product }}</td>
                         <td class="quantity" style="text-align: center;">{{ $item->quantity }}</td>
                         <td class="price" style="text-align: center;">{!! app(App\Settings\StoreSettings::class)->currency !!}
-                            {{ $item->selling_price }}</td>
+                            {{ $item->price }}</td>
                         <td class="price" style="text-align: center;">{!! app(App\Settings\StoreSettings::class)->currency !!} {{ $item->amount }}</td>
                     </tr>
                 @endforeach

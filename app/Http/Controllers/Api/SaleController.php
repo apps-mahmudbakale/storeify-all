@@ -23,7 +23,7 @@ class SaleController extends Controller
         // dd($request->user);
 
         $product = Product::find($request->prid);
-        $items = DB::table('products')
+        $items = DB::table('cars')
             ->where('id', $request->prid)
             ->first();
 
