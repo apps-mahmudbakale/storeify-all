@@ -84,7 +84,7 @@ class DashboardController extends Controller
 
     public function exportGeneralReportExcel()
     {
-        return Excel::download(new GeneralReportExport, 'K7-Pharmacy-General-Rport.xlsx');
+        return Excel::download(new GeneralReportExport, 'Sahad-Hospitals-Inventory-Rport.xlsx');
     }
 
     public function exportGeneralReportPdf()
@@ -99,7 +99,7 @@ class DashboardController extends Controller
         $inWords = new NumberFormatter("En", NumberFormatter::SPELLOUT);
         $words = $inWords->format($sum->total);
         $pdf = PDF::loadView('reports.general_report_pdf', compact('sales', 'sum', 'words'));
-        return $pdf->download('K7-Pharmacy-GeneralReport.pdf');
+        return $pdf->download('Sahad-Hospitals-Inventory-GeneralReport.pdf');
 
     }
 
@@ -116,7 +116,7 @@ class DashboardController extends Controller
 
     public function exportEndOfDayReportExcel()
     {
-        return Excel::download(new EndDayReportExport, 'K7-Pharmacy-End-of-Day-Report-'.date('d-m-Y').'.xlsx');
+        return Excel::download(new EndDayReportExport, 'Sahad-Hospitals-Inventory-End-of-Day-Report-'.date('d-m-Y').'.xlsx');
     }
 
     public function exportEndOfDayReportPdf()
@@ -128,7 +128,7 @@ class DashboardController extends Controller
         ->whereRaw('Date(sales.created_at) = CURRENT_DATE')
         ->get();
         $pdf = PDF::loadView('reports.endDay_report_pdf', compact('sales'));
-        return $pdf->download('K7-Pharmacy-EndOfDayReport-'.date('d-m-Y').'.pdf');
+        return $pdf->download('Sahad-Hospitals-Inventory-EndOfDayReport-'.date('d-m-Y').'.pdf');
     }
 
     public function customReportView()

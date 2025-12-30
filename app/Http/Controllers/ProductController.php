@@ -62,7 +62,7 @@ class ProductController extends Controller
 
     public function export()
     {
-        return Excel::download(new ProductsExport, 'K7-Pharmacy-products-export'.date('d-m-Y').'.xlsx');
+        return Excel::download(new ProductsExport, 'Sahad-Hospitals-Inventory-Export'.date('d-m-Y').'.xlsx');
     }
 
     public function importView()
