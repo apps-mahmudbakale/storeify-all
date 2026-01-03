@@ -50,6 +50,7 @@ Route::group(['prefix' => 'app', 'as' => 'app.', 'middleware' => 'auth'], functi
     Route::get('product/export', [ProductController::class, 'export'])->name('products.export');
     Route::post('product', [ProductController::class, 'import'])->name('import.products');
     Route::resource('requests', RequestsController::class);
+    Route::get('product/history/{product}', [ProductController::class, 'history'])->name('products.history');
     Route::post('requests/approve/{id}', [RequestsController::class, 'approve'])->name('requests.approve');
     Route::get('requests/acknowledge/{id}', [RequestsController::class, 'acknowledge'])->name('requests.acknowledge');
     Route::resource('sales', SaleController::class);
