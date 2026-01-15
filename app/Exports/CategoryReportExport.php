@@ -26,7 +26,7 @@ class CategoryReportExport implements FromView
         $stockQuery = Product::select('product_category as category')
             ->selectRaw('count(*) as total_items')
             ->selectRaw('sum(qty) as total_qty')
-            ->selectRaw('sum(qty * buying_price) as total_cost_value');
+            ->selectRaw('sum(CAST(qty AS DECIMAL(10,2)) * CAST(buying_price AS DECIMAL(10,2))) as total_cost_value');
 
         if ($category) {
             $stockQuery->where('product_category', $category);
