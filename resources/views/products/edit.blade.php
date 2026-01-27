@@ -42,6 +42,12 @@
                                     placeholder="Name">
                             </div>
                             <div class="form-group">
+                                <label>Barcode</label>
+                                <input type="text" name="barcode"
+                                    value="{{ old('barcode', isset($product) ? $product->barcode : '') }}" class="form-control"
+                                    placeholder="Barcode">
+                            </div>
+                            <div class="form-group">
                                 <label>Category</label>
                                 <select name="product_category" class="form-control">
                                     <option selected>{{ $product->product_category }}</option>

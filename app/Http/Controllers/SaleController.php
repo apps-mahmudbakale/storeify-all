@@ -48,7 +48,10 @@ class  SaleController extends Controller
         $keyword = trim($request->search_keyword, "");
 
         $products = DB::table('products')
-            ->where(DB::raw('lower(name)'), 'like', '%' . strtolower($keyword) . '%')
+            ->where(function($q) use ($keyword) {
+                $q->where(DB::raw('lower(name)'), 'like', '%' . strtolower($keyword) . '%')
+                  ->orWhere('barcode', 'like', '%' . $keyword . '%');
+            })
             ->where('qty', '>=', '1')
             ->get();
         // dd($products);
@@ -58,7 +61,7 @@ class  SaleController extends Controller
                 $url = base64_encode($product->id . ',' . session()->get('invoice') . ',' . $product->buying_price);
                 echo '<li class="nav-item">
                 <a href="' . route('app.sales.cart', $url) . '" class="nav-link">
-                  <strong>' . $product->name . '</strong>
+                  <strong>' . $product->name . '</strong>' . ($product->barcode ? ' <small class="text-muted">[' . $product->barcode . ']</small>' : '') . '
                   <span class="float-right badge bg-primary">&#8358; ' . number_format($product->buying_price, 2) . '</span>
                 </a>
               </li>';

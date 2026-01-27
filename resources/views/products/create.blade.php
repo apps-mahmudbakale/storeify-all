@@ -38,6 +38,10 @@
                                 <label>Name</label>
                                 <input type="text" name="name" class="form-control" placeholder="Name">
                             </div>
+                            <div class="form-group">
+                                <label>Barcode</label>
+                                <input type="text" name="barcode" class="form-control" placeholder="Barcode">
+                            </div>
                              <div class="form-group">
                                 <label>Category</label>
                                 <select name="product_category" class="form-control">

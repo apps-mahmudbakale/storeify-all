@@ -15,6 +15,7 @@ class Products extends Base
         if ($this->search) {
             $products = Product::query()
                 ->where('name', 'like', '%' . $this->search . '%')
+                ->Orwhere('barcode', 'like', '%' . $this->search . '%')
                 ->Orwhere('buying_price', 'like', '%' . $this->search . '%')
                 ->Orwhere('product_category', 'like', '%' . $this->search . '%')
                 ->Orwhere('qty', 'like', '%' . $this->search . '%')
