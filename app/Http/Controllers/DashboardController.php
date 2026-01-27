@@ -41,15 +41,12 @@ class DashboardController extends Controller
         $today_sales = Sale::whereDate('created_at', Carbon::today())->count();
         $today_cash = Sale::whereDate('created_at', Carbon::today())->sum('amount');
         $sales_cash = Sale::sum('amount');
-        $products_cash_cost = Product::all()->sum(function ($t) {
-            return $t->buying_price * $t->qty;
-        });
-        $products_cash_selling = Product::all()->sum(function ($t) {
-            return $t->selling_price * $t->qty;
-        });
+        $products_cash_cost = DB::table('products')->selectRaw('SUM(CAST(qty AS DECIMAL(10,2)) * CAST(buying_price AS DECIMAL(10,2))) as total')->first()->total ?? 0;
+        $products_cash_selling = DB::table('products')->selectRaw('SUM(CAST(qty AS DECIMAL(10,2)) * CAST(selling_price AS DECIMAL(10,2))) as total')->first()->total ?? 0;
+
         $query = DB::table('sales')
             ->join('products', 'products.id', '=', 'sales.product_id')
-            ->select(DB::raw('SUM(products.selling_price * sales.quantity) - SUM(products.buying_price * sales.quantity) as profit'))->first();
+            ->select(DB::raw('SUM(CAST(products.selling_price AS DECIMAL(10,2)) * CAST(sales.quantity AS DECIMAL(10,2))) - SUM(CAST(products.buying_price AS DECIMAL(10,2)) * CAST(sales.quantity AS DECIMAL(10,2))) as profit'))->first();
         $profit = $query->profit;
         // dd($query->profit);
         $expiry_threshold = Carbon::now()->addDays(7);
