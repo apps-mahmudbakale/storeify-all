@@ -132,7 +132,10 @@ class DashboardController extends Controller
     {
         $products = Product::get();
         $users = User::where('name', '!=', 'Admin')->get();
-        return view('reports.custom', compact('products', 'users'));
+        $buyer_names = DB::table('sales')->whereNotNull('buyer_name')->distinct()->pluck('buyer_name');
+        $buyer_depts = DB::table('sales')->whereNotNull('buyer_dept')->distinct()->pluck('buyer_dept');
+
+        return view('reports.custom', compact('products', 'users', 'buyer_names', 'buyer_depts'));
     }
     public function customReport(Request $request, CustomReport $report)
     {
@@ -140,7 +143,13 @@ class DashboardController extends Controller
         $words = $reports['words'];
         $sales = $reports['filter'];
         $sum = $reports['sum'];
-        return view('reports.custom', compact('sales', 'words', 'sum'));
+
+        $products = Product::get();
+        $users = User::where('name', '!=', 'Admin')->get();
+        $buyer_names = DB::table('sales')->whereNotNull('buyer_name')->distinct()->pluck('buyer_name');
+        $buyer_depts = DB::table('sales')->whereNotNull('buyer_dept')->distinct()->pluck('buyer_dept');
+
+        return view('reports.custom', compact('sales', 'words', 'sum', 'products', 'users', 'buyer_names', 'buyer_depts'));
     }
     public function customReportExcel($data)
     {

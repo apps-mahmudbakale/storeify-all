@@ -20,6 +20,8 @@
     <!-- Scripts -->
     {{-- @vite(['resources/css/app.css', 'resources/js/app.js']) --}}
     <link rel="stylesheet" href="{{ asset('css/sweetalert2.min.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.5.2/dist/select2-bootstrap4.min.css">
     <script src="{{ asset('js/app.js') }}"></script>
 </head>
 <!-- ADD THE CLASS layout-top-nav TO REMOVE THE SIDEBAR. -->
@@ -49,25 +51,54 @@
         <div class="col-sm-12">
             <form action="{{route('app.custom.report')}}" method="POST" class="row">
                 @csrf
-                <div class="col-md-3">
+                <div class="col-md-2">
                     From
-                    <input type="date" name="from" class="form-control">
+                    <input type="date" name="from" class="form-control" value="{{ request('from') }}">
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     To
-                    <input type="date" name="to" class="form-control">
+                    <input type="date" name="to" class="form-control" value="{{ request('to') }}">
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     Buyer Name
-                    <input type="text" name="buyer_name" class="form-control" placeholder="Enter buyer name">
+                    <select name="buyer_name" class="form-control select2">
+                        <option value="">Select Buyer</option>
+                        @foreach($buyer_names as $name)
+                            <option value="{{ $name }}" {{ request('buyer_name') == $name ? 'selected' : '' }}>{{ $name }}</option>
+                        @endforeach
+                    </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     Buyer Department
-                    <input type="text" name="buyer_dept" class="form-control" placeholder="Enter buyer department">
+                    <select name="buyer_dept" class="form-control select2">
+                        <option value="">Select Department</option>
+                        @foreach($buyer_depts as $dept)
+                            <option value="{{ $dept }}" {{ request('buyer_dept') == $dept ? 'selected' : '' }}>{{ $dept }}</option>
+                        @endforeach
+                    </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
+                    Product
+                    <select name="product" class="form-control select2">
+                        <option value="">Select Product</option>
+                        @foreach($products as $product)
+                            <option value="{{ $product->id }}" {{ request('product') == $product->id ? 'selected' : '' }}>{{ $product->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    Sold By
+                    <select name="user" class="form-control select2">
+                        <option value="">Select Staff</option>
+                        @foreach($users as $user)
+                            <option value="{{ $user->id }}" {{ request('user') == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-2">
                     <br>
                    <button type="submit" class="btn btn-success">Filter</button>
+                   <a href="{{ route('app.custom.report.view') }}" class="btn btn-secondary">Reset</a>
                 </div>
             </form>
         </div>
@@ -166,6 +197,18 @@
         </div>
         @endif
     </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.select2').select2({
+                theme: 'bootstrap4',
+                width: '100%',
+                placeholder: "Select an option",
+                allowClear: true
+            });
+        });
+    </script>
 </body>
 
 </html>

@@ -20,12 +20,16 @@ class CustomReport
             $query->where('users.id', $request->user);
         }
 
+        if ($request->has('product') && !empty($request->product)) {
+            $query->where('products.id', $request->product);
+        }
+
         if ($request->has('buyer_name') && !empty($request->buyer_name)) {
-            $query->where('sales.buyer_name', 'LIKE', '%' . $request->buyer_name . '%');
+            $query->where('sales.buyer_name', $request->buyer_name);
         }
 
         if ($request->has('buyer_dept') && !empty($request->buyer_dept)) {
-            $query->where('sales.buyer_dept', 'LIKE', '%' . $request->buyer_dept . '%');
+            $query->where('sales.buyer_dept', $request->buyer_dept);
         }
 
         if ($request->has('from') && !empty($request->from) && $request->has('to') && !empty($request->to)) {
@@ -48,11 +52,19 @@ class CustomReport
         }
 
         if ($request->has('buyer_name') && !empty($request->buyer_name)) {
-            $sum->where('sales.buyer_name', 'LIKE', '%' . $request->buyer_name . '%');
+            $sum->where('sales.buyer_name', $request->buyer_name);
         }
 
         if ($request->has('buyer_dept') && !empty($request->buyer_dept)) {
-            $sum->where('sales.buyer_dept', 'LIKE', '%' . $request->buyer_dept . '%');
+            $sum->where('sales.buyer_dept', $request->buyer_dept);
+        }
+
+        if ($request->has('user') && !empty($request->user)) {
+            $sum->where('users.id', $request->user);
+        }
+
+        if ($request->has('product') && !empty($request->product)) {
+            $sum->where('products.id', $request->product);
         }
 
         $sumResult = $sum->first();
