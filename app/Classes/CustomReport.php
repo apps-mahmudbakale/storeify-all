@@ -40,11 +40,11 @@ class CustomReport
 
         // Build sum query
         $sum = DB::table('sales')
-            ->selectRaw('sum(sales.amount) as total')
+            ->selectRaw('sum(sales.amount) as total, sum(sales.quantity) as total_qty')
             ->join('products', 'products.id', '=', 'sales.product_id')
             ->join('users', 'users.id', '=', 'sales.user_id');
 
-        // Apply date filter to sum if provided
+        // Apply filters to sum
         if ($request->has('from') && !empty($request->from) && $request->has('to') && !empty($request->to)) {
             $startDate = Carbon::createFromFormat('Y-m-d', $request->from)->startOfDay();
             $endDate = Carbon::createFromFormat('Y-m-d', $request->to)->endOfDay();
@@ -69,6 +69,7 @@ class CustomReport
 
         $sumResult = $sum->first();
         $total = $sumResult->total ?? 0;
+        $totalQty = $sumResult->total_qty ?? 0;
         
         $inWords = new NumberFormatter("En", NumberFormatter::SPELLOUT);
         $words = $total > 0 ? $inWords->format($total) : 'zero';
@@ -76,7 +77,8 @@ class CustomReport
         return  [
             'filter' =>  $query->get(),
             'words' => $words,
-            'sum' => $total
+            'sum' => $total,
+            'qty_sum' => $totalQty
         ];
     }
 }

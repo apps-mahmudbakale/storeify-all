@@ -143,13 +143,14 @@ class DashboardController extends Controller
         $words = $reports['words'];
         $sales = $reports['filter'];
         $sum = $reports['sum'];
+        $qty_sum = $reports['qty_sum'];
 
         $products = Product::get();
         $users = User::where('name', '!=', 'Admin')->get();
         $buyer_names = DB::table('sales')->whereNotNull('buyer_name')->distinct()->pluck('buyer_name');
         $buyer_depts = DB::table('sales')->whereNotNull('buyer_dept')->distinct()->pluck('buyer_dept');
 
-        return view('reports.custom', compact('sales', 'words', 'sum', 'products', 'users', 'buyer_names', 'buyer_depts'));
+        return view('reports.custom', compact('sales', 'words', 'sum', 'qty_sum', 'products', 'users', 'buyer_names', 'buyer_depts'));
     }
     public function customReportExcel($data)
     {

@@ -140,6 +140,15 @@
                         </tr>
                        @endforeach
                     </tbody>
+                    <tfoot style="font-weight: bold; background-color: #f8f9fa;">
+                        <tr>
+                            <td colspan="3" class="text-right">Total:</td>
+                            <td>{{ number_format($qty_sum ?? 0) }}</td>
+                            <td></td>
+                            <td>{!! app(App\Settings\StoreSettings::class)->currency !!} {{ number_format($sum ?? 0, 2) }}</td>
+                            <td colspan="4"></td>
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
             <!-- /.col -->
