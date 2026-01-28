@@ -29,73 +29,83 @@
             </div>
             <!-- /.card-header -->
             <div class="card-body">
-              @role('admin')
-              <form action="{{route('app.returns.store')}}" method="POST">
-                @csrf
-                <table class="table table-bordered">
-                  <thead>
-                    <th></th>
-                    <th>Item</th>
-                    <th>Price</th>
-                    <th>Qty</th>
-                    <th>Return Qty</th>
-                  </thead>
-                  <tbody>
+              @if(session('error'))
+                  <div class="alert alert-danger">{{ session('error') }}</div>
+              @endif
+              @if(session('success'))
+                  <div class="alert alert-success">{{ session('success') }}</div>
+              @endif
 
-                    @foreach ($items as $item)
-                    <input type="hidden" value="{{$item->invoice}}" name="invoice" id="">
-                      @if(in_array($item->product_id,$requests))
-                      <tr class="error">
-                        <td>
-                          <input type="checkbox" value="{{$item->product_id}}" name="items[]" id="">
-                        </td>
-                        <td>{{$item->product}}</td>
-                        <td>{!! app(App\Settings\StoreSettings::class)->currency !!} {{number_format($item->selling_price)}}</td>
-                        <td>{{$item->quantity}}</td>
-                        <td><input type="number" value="{{$item->quantity}}"  class="form-control" name="rqty[]" id=""></td>
-                      </tr>
-                      @else
-                      <tr>
-                        <td>
-                          <input type="checkbox" disabled value="{{$item->product_id}}" name="items[]" id="">
-                        </td>
-                        <td>{{$item->product}}</td>
-                        <td>{!! app(App\Settings\StoreSettings::class)->currency !!} {{number_format($item->selling_price)}}</td>
-                        <td>{{$item->quantity}}</td>
-                        <td><input type="number" disabled value="{{$item->quantity}}"  class="form-control" name="rqty[]" id=""></td>
-                      </tr>
+              <div class="row mb-4">
+                  <div class="col-md-6">
+                      <h5>Invoice: <strong>{{ $invoice }}</strong></h5>
+                  </div>
+                  <div class="col-md-6 text-right">
+                      @if($isDone)
+                          <span class="badge badge-success px-4 py-2">RETURN COMPLETED</span>
+                      @elseif($returnRequests->isNotEmpty())
+                          <span class="badge badge-warning px-4 py-2">RETURN PENDING APPROVAL</span>
                       @endif
-                    @endforeach
-                  </tbody>
-                </table>
-                @if($done->status == false)
-                <button type="submit" class="btn btn-success">Approve Return Request</button>
-                @endif
-              </form>
-              @else
-                <form action="{{route('app.returns.store')}}" method="POST">
-                  @csrf
-                  <table class="table table-bordered">
-                    <thead>
-                      <th>Item</th>
-                      <th>Price</th>
-                      <th>Qty</th>
-                      <th>Return Qty</th>
-                    </thead>
-                    <tbody>
-                      @foreach ($items as $item)
-                      <input type="hidden" value="{{$item->invoice}}" name="invoice" id="">
-                        <tr>
-                          <td>{{$item->product}}</td>
-                          <td>{!! app(App\Settings\StoreSettings::class)->currency !!} {{number_format($item->selling_price)}}</td>
-                          <td>{{$item->quantity}}</td>
-                          <td>{{$item->return_qty}}</td>
-                        </tr>
-                      @endforeach
-                    </tbody>
-                  </table>
-                </form>
-                @endrole
+                  </div>
+              </div>
+
+              <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>Item Name</th>
+                    <th class="text-right">Sale Price</th>
+                    <th class="text-center">Remaining Qty</th>
+                    <th class="text-center">Returned Qty</th>
+                    <th class="text-center">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @php $hasPending = false; @endphp
+                  @foreach ($items as $item)
+                    @php 
+                      $request = $returnRequests->get($item->product_id);
+                      if ($request && !$request->status) $hasPending = true;
+                    @endphp
+                    <tr>
+                      <td>{{$item->product}}</td>
+                      <td class="text-right">{!! app(App\Settings\StoreSettings::class)->currency !!} {{number_format($item->selling_price, 2)}}</td>
+                      <td class="text-center">{{$item->quantity}}</td>
+                      <td class="text-center">
+                          {{ $request ? $request->return_qty : 0 }}
+                      </td>
+                      <td class="text-center">
+                          @if($request)
+                              @if($request->status)
+                                  <span class="badge badge-success">Approved</span>
+                              @else
+                                  <span class="badge badge-warning">Pending</span>
+                              @endif
+                          @else
+                              <span class="text-muted">-</span>
+                          @endif
+                      </td>
+                    </tr>
+                  @endforeach
+                </tbody>
+              </table>
+
+              @if($hasPending && auth()->user()->hasRole('admin'))
+                <div class="mt-4">
+                    <form action="{{route('app.returns.approve')}}" method="POST" onsubmit="return confirm('Are you sure you want to approve this return and update inventory?');">
+                      @csrf
+                      <input type="hidden" name="invoice" value="{{ $invoice }}">
+                      <button type="submit" class="btn btn-success btn-lg btn-block">
+                          <i class="fas fa-check-circle mr-1"></i> Approve & Process Return
+                      </button>
+                    </form>
+                </div>
+              @endif
+
+              <div class="mt-3">
+                  <a href="{{ route('app.returns.index') }}" class="btn btn-secondary">
+                      <i class="fas fa-arrow-left mr-1"></i> Back to List
+                  </a>
+              </div>
             </div>
             <!-- /.card-body -->
         </div>

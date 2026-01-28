@@ -38,107 +38,176 @@ class ReturnSaleController extends Controller
      */
     public function store(Request $request)
     {
-        if(auth()->user()->hasRole('admin')){
-            foreach ($request->items as $index => $item) {
-                DB::table('return_request')
+        $request->validate([
+            'invoice' => 'required',
+            'items' => 'required|array',
+            'rqty' => 'required|array',
+        ]);
+
+        if (auth()->user()->hasRole('admin')) {
+            foreach ($request->items as $index => $productId) {
+                $returnQty = $request->rqty[$index];
+                
+                if ($returnQty <= 0) continue;
+
+                $sale = DB::table('sales')
                     ->where('invoice', $request->invoice)
-                    ->where('product_id', $request->items[$index])
-                    ->update([
-                        'return_qty' => $request->rqty[$index],
+                    ->where('product_id', $productId)
+                    ->first();
+
+                if (!$sale) continue;
+
+                // Validate return quantity against sold quantity
+                if ($returnQty > $sale->quantity) {
+                    return back()->with('error', "Return quantity for product ID {$productId} exceeds sold quantity.");
+                }
+
+                // Update or Insert return request
+                DB::table('return_request')->updateOrInsert(
+                    ['invoice' => $request->invoice, 'product_id' => $productId],
+                    [
+                        'return_qty' => DB::raw('return_qty + ' . $returnQty),
                         'status' => true,
-                        'updated_at' => now()
-                    ]);
-
-                    $sales = DB::table('sales')
-                                ->where('invoice', $request->invoice)
-                                ->where('product_id', $request->items[$index])
-                                ->first();
-                    if($sales->quantity == 1){
-                        DB::table('sales')
-                                ->where('invoice', $request->invoice)
-                                ->where('product_id', $request->items[$index])
-                                ->delete();
-                        $data = DB::table('return_request')->where('product_id', $request->items[$index])->first();
-                        DB::table('products')
-                            ->where('id', $request->items[$index])
-                            ->update(['qty' => DB::raw('qty + 1')]);
-                    }else{
-                    $product = DB::table('products')
-                                ->where('id', $request->items[$index])->first();
-                    DB::table('sales')
-                            ->where('invoice', $request->invoice)
-                            ->where('product_id', $request->items[$index])
-                            ->update(['quantity' => DB::raw('quantity -'.$request->rqty[$index]), 'amount' => round($product->selling_price * $request->rqty[$index])]);
-                    $data = DB::table('return_request')->where('product_id', $request->items[$index])->first();
-                    DB::table('products')
-                        ->where('id', $request->items[$index])
-                        ->update(['qty' => DB::raw('qty +'.$request->rqty[$index])]);
-                    }
-
-            }
-            return redirect()->route('app.returns.index')->with('success', 'Return Request Sent');
-        }else{
-            foreach ($request->items as $index => $item) {
-                DB::table('return_request')
-                    ->insert([
-                        'invoice' => $request->invoice,
-                        'product_id' => $request->items[$index],
-                        'return_qty' => $request->rqty[$index],
+                        'updated_at' => now(),
                         'created_at' => now()
-                    ]);
+                    ]
+                );
 
+                // Update Sales Record
+                $newQty = $sale->quantity - $returnQty;
+                if ($newQty <= 0) {
+                    DB::table('sales')
+                        ->where('invoice', $request->invoice)
+                        ->where('product_id', $productId)
+                        ->delete();
+                } else {
+                    $newAmount = $newQty * $sale->price;
+                    DB::table('sales')
+                        ->where('invoice', $request->invoice)
+                        ->where('product_id', $productId)
+                        ->update([
+                            'quantity' => $newQty,
+                            'amount' => $newAmount,
+                            'updated_at' => now()
+                        ]);
+                }
+
+                // Update Product Stock
+                DB::table('products')
+                    ->where('id', $productId)
+                    ->update(['qty' => DB::raw('qty + ' . $returnQty)]);
             }
-            return redirect()->route('app.returns.index')->with('success', 'Return Request Sent');
+            return redirect()->route('app.returns.index')->with('success', 'Return Processed Successfully');
+        } else {
+            foreach ($request->items as $index => $productId) {
+                $returnQty = $request->rqty[$index];
+                if ($returnQty <= 0) continue;
+
+                $sale = DB::table('sales')
+                    ->where('invoice', $request->invoice)
+                    ->where('product_id', $productId)
+                    ->first();
+
+                if (!$sale || $returnQty > $sale->quantity) continue;
+
+                DB::table('return_request')->insert([
+                    'invoice' => $request->invoice,
+                    'product_id' => $productId,
+                    'return_qty' => $returnQty,
+                    'status' => false,
+                    'created_at' => now()
+                ]);
+            }
+            return redirect()->route('app.returns.index')->with('success', 'Return Request Sent for Approval');
         }
-
-
-
-
     }
 
 
 
+    public function approve(Request $request)
+    {
+        $request->validate([
+            'invoice' => 'required',
+        ]);
+
+        $pendingReturns = DB::table('return_request')
+            ->where('invoice', $request->invoice)
+            ->where('status', false)
+            ->get();
+
+        if ($pendingReturns->isEmpty()) {
+            return back()->with('error', 'No pending return requests found for this invoice.');
+        }
+
+        DB::beginTransaction();
+        try {
+            foreach ($pendingReturns as $return) {
+                $sale = DB::table('sales')
+                    ->where('invoice', $return->invoice)
+                    ->where('product_id', $return->product_id)
+                    ->first();
+
+                if (!$sale) continue;
+
+                // Update Sales Record
+                $newQty = $sale->quantity - $return->return_qty;
+                if ($newQty <= 0) {
+                    DB::table('sales')
+                        ->where('invoice', $return->invoice)
+                        ->where('product_id', $return->product_id)
+                        ->delete();
+                } else {
+                    $newAmount = $newQty * $sale->price;
+                    DB::table('sales')
+                        ->where('invoice', $return->invoice)
+                        ->where('product_id', $return->product_id)
+                        ->update([
+                            'quantity' => $newQty,
+                            'amount' => $newAmount,
+                            'updated_at' => now()
+                        ]);
+                }
+
+                // Update Product Stock
+                DB::table('products')
+                    ->where('id', $return->product_id)
+                    ->update(['qty' => DB::raw('qty + ' . $return->return_qty)]);
+
+                // Mark as approved
+                DB::table('return_request')
+                    ->where('id', $return->id)
+                    ->update(['status' => true, 'updated_at' => now()]);
+            }
+            DB::commit();
+            return redirect()->route('app.returns.index')->with('success', 'Return Request(s) Approved and Processed');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Failed to approve returns: ' . $e->getMessage());
+        }
+    }
+
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  string  $invoice
      * @return \Illuminate\Http\Response
      */
     public function show($invoice)
     {
-        if(auth()->user()->hasRole('admin')){
-            $requests = DB::table('return_request')->where('invoice', $invoice)->pluck('product_id')->toArray();
-            $done = DB::table('return_request')->where('invoice', $invoice)->first();
-            // dd($requests);
-            $items = DB::table('sales')
-            ->select('sales.*','products.name as product', 'products.selling_price')
+        $items = DB::table('sales')
+            ->select('sales.*', 'products.name as product', 'products.selling_price')
             ->join('products', 'products.id', '=', 'sales.product_id')
             ->where('sales.invoice', $invoice)
             ->get();
-            return view('sales-return.show', compact('items', 'requests', 'done'));
-        }else{
 
-            $done = DB::table('return_request')->where('invoice', $invoice)->first();
-            if(!empty($done)){
-                $requests = DB::table('return_request')->where('invoice', $invoice)->pluck('product_id')->toArray();
-                $items = DB::table('sales')
-                ->select('sales.*','products.name as product', 'products.selling_price', 'return_request.*')
-                ->join('products', 'products.id', '=', 'sales.product_id')
-                ->join('return_request', 'return_request.product_id', '=', 'products.id')
-                ->where('sales.invoice', $invoice)
-                ->get();
-                return view('sales-return.show', compact('items', 'requests', 'done'));
-            }else{
-                $items = DB::table('sales')
-                ->select('sales.*','products.name as product', 'products.selling_price', 'return_request.*')
-                ->join('products', 'products.id', '=', 'sales.product_id')
-                ->where('sales.invoice', $invoice)
-                ->get();
-                return view('sales-return.show', compact('items'));
-            }
+        $returnRequests = DB::table('return_request')
+            ->where('invoice', $invoice)
+            ->get()
+            ->keyBy('product_id');
 
-        }
+        $isDone = $returnRequests->isNotEmpty() && $returnRequests->every(fn($r) => $r->status);
 
+        return view('sales-return.show', compact('items', 'invoice', 'returnRequests', 'isDone'));
     }
 
     /**

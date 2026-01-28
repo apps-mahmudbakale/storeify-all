@@ -17,7 +17,10 @@ class Sales extends Base
                     ->select('sales.*','products.name as product','users.name as user')
                     ->join('products', 'products.id', '=', 'sales.product_id')
                     ->join('users', 'users.id', '=', 'sales.user_id')
-                    ->where('products.name', 'like', '%' . $this->search . '%')
+                    ->where(function($q) {
+                        $q->where('products.name', 'like', '%' . $this->search . '%')
+                          ->orWhere('sales.invoice', 'like', '%' . $this->search . '%');
+                    })
                     ->paginate(10);
 
                 return view(
@@ -39,10 +42,14 @@ class Sales extends Base
         }else{
             if ($this->search) {
                 $sales = DB::table('sales')
-                    ->select('sales.*','products.name as product','users.name')
+                    ->select('sales.*','products.name as product','users.name as user')
                     ->join('products', 'products.id', '=', 'sales.product_id')
                     ->join('users', 'users.id', '=', 'sales.user_id')
-                    ->where('products.name', 'like', '%' . $this->search . '%')
+                    ->where('sales.user_id', auth()->user()->id)
+                    ->where(function($q) {
+                        $q->where('products.name', 'like', '%' . $this->search . '%')
+                          ->orWhere('sales.invoice', 'like', '%' . $this->search . '%');
+                    })
                     ->paginate(10);
                 return view(
                     'livewire.sales',

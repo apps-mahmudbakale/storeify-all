@@ -25,63 +25,64 @@
     <div class="container-fluid">
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">Items</h3>
-                @role('user')
-                <a href="{{route('app.returns.create')}}" class="btn btn-success float-right"><i class="fa fa-plus-circle"></i></a>
-                @endrole
+                <h3 class="card-title">Return Requests</h3>
+                <a href="{{route('app.returns.create')}}" class="btn btn-success float-right" title="Initiate New Return">
+                    <i class="fa fa-plus-circle mr-1"></i> New Return
+                </a>
             </div>
             <!-- /.card-header -->
             <div class="card-body">
-              @role('admin')
-              <table class="table table-bordered">
-                <thead>
-                  <th>S/N</th>
-                  <th>Invoice</th>
-                  <th>Status</th>
-                  <th></th>
-                </thead>
-                <tbody>
-                  @foreach ($requests as $request)
+              <div class="table-responsive">
+                <table class="table table-bordered table-striped table-hover">
+                  <thead>
                     <tr>
-                      <td>{{$loop->iteration}}</td>
-                      <td>{{$request->invoice}}</td>
-                      <td>
-                        @if($request->status == true)
-                        <label class="badge badge-success">approved</label>
-                        @else
-                        <label class="badge badge-secondary">pending</label>
-                        @endif
-                      </td>
-                      <td><a href="{{route('app.returns.show', $request->invoice)}}" class="btn btn-sm btn-success"><i class="fa fa-eye"></i></a></td>
-                    </tr>
-                  @endforeach
-                </tbody>
-              </table>
-              @else
-                  <table class="table table-bordered">
-                    <thead>
-                      <th>S/N</th>
+                      <th style="width: 50px;">S/N</th>
+                      <th>Date</th>
                       <th>Invoice</th>
-                      <th>Status</th>
-                    </thead>
-                    <tbody>
-                      @foreach ($requests as $request)
-                        <tr>
-                          <td>{{$loop->iteration}}</td>
-                          <td>{{$request->invoice}}</td>
-                          <td>
-                            @if($request->status == true)
-                            <label class="badge badge-success">approved</label>
-                            @else
-                            <label class="badge badge-secondary">pending</label>
-                            @endif
-                          </td>
-                          <td><a href="{{route('app.returns.show', $request->invoice)}}" class="btn btn-sm btn-success"><i class="fa fa-eye"></i></a></td>
-                        </tr>
-                      @endforeach
-                    </tbody>
-                  </table>
-                  @endrole
+                      <th class="text-center">Status</th>
+                      <th style="width: 100px;">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @forelse ($requests as $request)
+                      <tr>
+                        <td>{{$loop->iteration}}</td>
+                        <td>{{ \Carbon\Carbon::parse($request->date)->format('d M, Y') }}</td>
+                        <td><span class="font-weight-bold">{{$request->invoice}}</span></td>
+                        <td class="text-center">
+                          @if($request->status == true)
+                          <span class="badge badge-success px-3">Approved</span>
+                          @else
+                          <span class="badge badge-warning px-3">Pending</span>
+                          @endif
+                        </td>
+                        <td class="text-center">
+                          <div class="btn-group">
+                            <a href="{{route('app.returns.show', $request->invoice)}}" 
+                               class="btn btn-sm btn-info" 
+                               title="View Details">
+                              <i class="fa fa-eye"></i>
+                            </a>
+                            @role('admin')
+                              @if($request->status != true)
+                              <a href="{{route('app.returns.edit', $request->invoice)}}" 
+                                 class="btn btn-sm btn-primary" 
+                                 title="Process Return">
+                                <i class="fa fa-pencil-alt"></i>
+                              </a>
+                              @endif
+                            @endrole
+                          </div>
+                        </td>
+                      </tr>
+                    @empty
+                      <tr>
+                        <td colspan="5" class="text-center">No return requests found.</td>
+                      </tr>
+                    @endforelse
+                  </tbody>
+                </table>
+              </div>
             </div>
             <!-- /.card-body -->
         </div>

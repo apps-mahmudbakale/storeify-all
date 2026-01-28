@@ -96,7 +96,7 @@
                                   </a>
                               </li>
                           @endcan
-                          @can('read-return')
+                          @can('read-sales')
                               <li class="nav-item">
                                   <a href="{{ route('app.returns.index') }}" class="nav-link">
                                       <i class="fa fa-ban nav-icon"></i>

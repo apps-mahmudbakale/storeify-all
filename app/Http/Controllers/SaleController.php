@@ -191,25 +191,33 @@ class  SaleController extends Controller
             ->select('sales.*', 'products.name as product', 'products.selling_price')
             ->join('products', 'products.id', '=', 'sales.product_id')
             ->where('sales.invoice', $invoice)
-            ->where('sales.user_id', auth()->user()->id)
             ->get();
+
         $sum = DB::table('sales')
-            ->select(DB::raw('SUM(amount) as sum'))
             ->where('invoice', $invoice)
-            ->where('user_id', auth()->user()->id)
-            ->first();
+            ->sum('amount');
+
         $user = DB::table('sales')
             ->select('users.name')
             ->join('users', 'users.id', '=', 'sales.user_id')
             ->where('sales.invoice', $invoice)
             ->first();
+
         $buyer = DB::table('sales')
             ->select('buyer_name', 'buyer_dept')
             ->where('invoice', $invoice)
-            ->where('user_id', auth()->user()->id)
             ->first();
 
-        return view('sales.print', compact('items', 'invoice', 'sum', 'user', 'buyer'));
+        $returns = DB::table('return_request')
+            ->select('return_request.*', 'products.name as product', 'products.selling_price')
+            ->join('products', 'products.id', '=', 'return_request.product_id')
+            ->where('return_request.invoice', $invoice)
+            ->where('return_request.status', true)
+            ->get();
+
+        $sum = (object)['sum' => $sum]; // Maintain compatibility with view
+
+        return view('sales.print', compact('items', 'invoice', 'sum', 'user', 'buyer', 'returns'));
     }
 
     public function returnShow($invoice)

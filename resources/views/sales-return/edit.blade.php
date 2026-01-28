@@ -29,35 +29,81 @@
             </div>
             <!-- /.card-header -->
             <div class="card-body">
-              <form action="{{route('app.returns.store')}}" method="POST">
+              @if(session('error'))
+                  <div class="alert alert-danger">{{ session('error') }}</div>
+              @endif
+              @if(session('success'))
+                  <div class="alert alert-success">{{ session('success') }}</div>
+              @endif
+
+              <form action="{{route('app.returns.store')}}" method="POST" id="returnForm">
                 @csrf
-                <table class="table table-bordered">
-                  <thead>
-                    <th></th>
-                    <th>Item</th>
-                    <th>Price</th>
-                    <th>Qty</th>
-                    <th>Return Qty</th>
+                <input type="hidden" value="{{$items[0]->invoice ?? ''}}" name="invoice">
+                <table class="table table-bordered table-hover">
+                  <thead class="thead-light">
+                    <tr>
+                      <th style="width: 50px;">Select</th>
+                      <th>Item Name</th>
+                      <th class="text-right">Price</th>
+                      <th class="text-center">Sold Qty</th>
+                      <th class="text-center" style="width: 150px;">Return Qty</th>
+                    </tr>
                   </thead>
                   <tbody>
-
-                    @foreach ($items as $item)
-                    <input type="hidden" value="{{$item->invoice}}" name="invoice" id="">
+                    @forelse ($items as $index => $item)
                       <tr>
-                        <td>
-                          <input type="checkbox" value="{{$item->product_id}}" name="items[]" id="">
+                        <td class="text-center">
+                          <input type="checkbox" value="{{$item->product_id}}" name="items[]" id="item_{{$index}}" class="item-checkbox">
                         </td>
-                        <td>{{$item->product}}</td>
-                        <td>{!! app(App\Settings\StoreSettings::class)->currency !!} {{number_format($item->selling_price)}}</td>
-                        <td>{{$item->quantity}}</td>
-                        <td><input type="number" value="{{$item->quantity}}"  class="form-control" name="rqty[]" id=""></td>
+                        <td>
+                            <label for="item_{{$index}}" class="font-weight-normal mb-0">{{$item->product}}</label>
+                        </td>
+                        <td class="text-right">{!! app(App\Settings\StoreSettings::class)->currency !!} {{number_format($item->selling_price, 2)}}</td>
+                        <td class="text-center">{{$item->quantity}}</td>
+                        <td>
+                          <input type="number" 
+                                 value="0" 
+                                 min="0" 
+                                 max="{{$item->quantity}}" 
+                                 class="form-control form-control-sm return-qty" 
+                                 name="rqty[]" 
+                                 disabled>
+                          <small class="text-muted">Max: {{$item->quantity}}</small>
+                        </td>
                       </tr>
-                    @endforeach
+                    @empty
+                      <tr>
+                        <td colspan="5" class="text-center">No items found for this invoice.</td>
+                      </tr>
+                    @endforelse
                   </tbody>
                 </table>
-                <button type="submit" class="btn btn-success">Submit Return Request</button>
+                <div class="mt-4">
+                  <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
+                    <i class="fas fa-undo mr-1"></i> Submit Return Process
+                  </button>
+                  <a href="{{ route('app.returns.index') }}" class="btn btn-secondary">Cancel</a>
+                </div>
               </form>
             </div>
+
+            @push('js')
+            <script>
+                document.querySelectorAll('.item-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', function() {
+                        const qtyInput = this.closest('tr').querySelector('.return-qty');
+                        qtyInput.disabled = !this.checked;
+                        if (!this.checked) qtyInput.value = 0;
+                        updateSubmitButton();
+                    });
+                });
+
+                function updateSubmitButton() {
+                    const anyChecked = document.querySelectorAll('.item-checkbox:checked').length > 0;
+                    document.getElementById('submitBtn').disabled = !anyChecked;
+                }
+            </script>
+            @endpush
             <!-- /.card-body -->
         </div>
         <!-- /.card -->

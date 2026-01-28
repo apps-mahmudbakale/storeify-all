@@ -105,11 +105,27 @@
                         <td class="price" style="text-align: center;">{!! app(App\Settings\StoreSettings::class)->currency !!} {{ $item->amount }}</td>
                     </tr>
                 @endforeach
+
+                @if(isset($returns) && $returns->count() > 0)
+                    <tr>
+                        <td colspan="4" style="text-align: center; background-color: #eee; font-weight: bold;">RETURNED ITEMS</td>
+                    </tr>
+                    @foreach ($returns as $return)
+                        <tr style="color: #666; font-style: italic;">
+                            <td class="description" style="text-align: center;">{{ $return->product }}</td>
+                            <td class="quantity" style="text-align: center;">{{ $return->return_qty }}</td>
+                            <td class="price" style="text-align: center;">-{!! app(App\Settings\StoreSettings::class)->currency !!}
+                                {{ $return->selling_price }}</td>
+                            <td class="price" style="text-align: center;">-{!! app(App\Settings\StoreSettings::class)->currency !!} {{ number_format($return->return_qty * $return->selling_price, 2) }}</td>
+                        </tr>
+                    @endforeach
+                @endif
+
                 <tr>
-                    <td>Total:</td>
+                    <td style="font-weight: bold;">Net Total:</td>
                     <td></td>
                     <td></td>
-                    <td>{!! app(App\Settings\StoreSettings::class)->currency !!} {{ number_format($sum->sum) }}</td>
+                    <td style="font-weight: bold; text-align: center;">{!! app(App\Settings\StoreSettings::class)->currency !!} {{ number_format($sum->sum, 2) }}</td>
                 </tr>
             </tbody>
         </table>
