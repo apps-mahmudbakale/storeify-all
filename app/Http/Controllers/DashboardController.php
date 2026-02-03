@@ -88,7 +88,7 @@ class DashboardController extends Controller
     {
         $sales = Sale::leftJoin('products', 'sales.product_id', '=', 'products.id')
             ->leftJoin('users', 'sales.user_id', '=', 'users.id')
-            ->select('products.name as product', 'sales.amount', 'sales.created_at', 'sales.quantity', 'sales.invoice', 'users.name as user', 'sales.buyer_name', 'sales.buyer_dept')
+            ->select('products.name as product', 'products.product_category as category', 'sales.amount', 'sales.created_at', 'sales.quantity', 'sales.invoice', 'users.name as user', 'sales.buyer_name', 'sales.buyer_dept')
             ->get();
         $sum    = DB::table('sales')
             ->selectRaw('sum(amount) as total')
@@ -131,11 +131,12 @@ class DashboardController extends Controller
     public function customReportView()
     {
         $products = Product::get();
+        $categories = Product::whereNotNull('product_category')->distinct()->pluck('product_category');
         $users = User::where('name', '!=', 'Admin')->get();
         $buyer_names = DB::table('sales')->whereNotNull('buyer_name')->distinct()->pluck('buyer_name');
         $buyer_depts = DB::table('sales')->whereNotNull('buyer_dept')->distinct()->pluck('buyer_dept');
 
-        return view('reports.custom', compact('products', 'users', 'buyer_names', 'buyer_depts'));
+        return view('reports.custom', compact('products', 'categories', 'users', 'buyer_names', 'buyer_depts'));
     }
     public function customReport(Request $request, CustomReport $report)
     {
@@ -146,11 +147,12 @@ class DashboardController extends Controller
         $qty_sum = $reports['qty_sum'];
 
         $products = Product::get();
+        $categories = Product::whereNotNull('product_category')->distinct()->pluck('product_category');
         $users = User::where('name', '!=', 'Admin')->get();
         $buyer_names = DB::table('sales')->whereNotNull('buyer_name')->distinct()->pluck('buyer_name');
         $buyer_depts = DB::table('sales')->whereNotNull('buyer_dept')->distinct()->pluck('buyer_dept');
 
-        return view('reports.custom', compact('sales', 'words', 'sum', 'qty_sum', 'products', 'users', 'buyer_names', 'buyer_depts'));
+        return view('reports.custom', compact('sales', 'words', 'sum', 'qty_sum', 'products', 'categories', 'users', 'buyer_names', 'buyer_depts'));
     }
     public function customReportExcel($data)
     {

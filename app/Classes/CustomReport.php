@@ -12,7 +12,7 @@ class CustomReport
     public function filter($request)
     {
         $query = DB::table('sales')
-            ->select('sales.*', 'products.name as product', 'users.name as user', 'sales.buyer_name', 'sales.buyer_dept')
+            ->select('sales.*', 'products.name as product', 'products.product_category as category', 'users.name as user', 'sales.buyer_name', 'sales.buyer_dept')
             ->join('products', 'products.id', '=', 'sales.product_id')
             ->join('users', 'users.id', '=', 'sales.user_id');
 
@@ -30,6 +30,10 @@ class CustomReport
 
         if ($request->has('buyer_dept') && !empty($request->buyer_dept)) {
             $query->where('sales.buyer_dept', $request->buyer_dept);
+        }
+
+        if ($request->has('category') && !empty($request->category)) {
+            $query->where('products.product_category', $request->category);
         }
 
         if ($request->has('from') && !empty($request->from) && $request->has('to') && !empty($request->to)) {
@@ -65,6 +69,10 @@ class CustomReport
 
         if ($request->has('product') && !empty($request->product)) {
             $sum->where('products.id', $request->product);
+        }
+
+        if ($request->has('category') && !empty($request->category)) {
+            $sum->where('products.product_category', $request->category);
         }
 
         $sumResult = $sum->first();

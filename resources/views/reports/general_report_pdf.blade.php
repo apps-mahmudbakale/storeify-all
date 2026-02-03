@@ -62,6 +62,7 @@
                             <th>S/N</th>
                             <th>Invoice</th>
                             <th>Product Name</th>
+                            <th>Category</th>
                             <th>Quantity</th>
                             <th>Sold Rate</th>
                             <th>Amount</th>
@@ -78,6 +79,7 @@
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $sale->invoice }}</td>
                                 <td>{{ $sale->product }}</td>
+                                <td>{{ $sale->category }}</td>
                                 <td>{{ $sale->quantity }}</td>
                                 <td>{!! app(App\Settings\StoreSettings::class)->currency !!} {{ number_format($sale->price) }}</td>
                                 <td>{!! app(App\Settings\StoreSettings::class)->currency !!} {{ number_format($sale->amount) }}</td>

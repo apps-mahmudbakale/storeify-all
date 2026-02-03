@@ -28,7 +28,7 @@ class GeneralReportExport implements FromView
     {
         $sales = Sale::leftJoin('products', 'sales.product_id', '=', 'products.id')
             ->leftJoin('users', 'sales.user_id', '=', 'users.id')
-            ->select('products.name as product', 'sales.amount', 'sales.created_at', 'sales.quantity', 'sales.invoice', 'users.name as user', 'sales.buyer_name', 'sales.buyer_dept')
+            ->select('products.name as product', 'products.product_category as category', 'sales.amount', 'sales.created_at', 'sales.quantity', 'sales.invoice', 'users.name as user', 'sales.buyer_name', 'sales.buyer_dept')
             ->get();
         $sum    = DB::table('sales')
             ->selectRaw('sum(amount) as total')

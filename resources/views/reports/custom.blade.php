@@ -87,6 +87,15 @@
                     </select>
                 </div>
                 <div class="col-md-2">
+                    Category
+                    <select name="category" class="form-control select2">
+                        <option value="">Select Category</option>
+                        @foreach($categories as $category)
+                            <option value="{{ $category }}" {{ request('category') == $category ? 'selected' : '' }}>{{ $category }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-2">
                     Sold By
                     <select name="user" class="form-control select2">
                         <option value="">Select Staff</option>
@@ -115,6 +124,7 @@
                             <th>S/N</th>
                             <th>Invoice</th>
                             <th>Product Name</th>
+                            <th>Category</th>
                             <th>Quantity</th>
                             <th>Sold Rate</th>
                             <th>Amount</th>
@@ -130,6 +140,7 @@
                         <td>{{$loop->iteration}}</td>
                         <td>{{$sale->invoice}}</td>
                         <td>{{$sale->product}}</td>
+                        <td>{{$sale->category}}</td>
                         <td>{{$sale->quantity}}</td>
                         <td>{!! app(App\Settings\StoreSettings::class)->currency !!}  {{number_format($sale->price)}}</td>
                         <td>{!! app(App\Settings\StoreSettings::class)->currency !!}  {{number_format($sale->amount)}}</td>
@@ -142,7 +153,7 @@
                     </tbody>
                     <tfoot style="font-weight: bold; background-color: #f8f9fa;">
                         <tr>
-                            <td colspan="3" class="text-right">Total:</td>
+                            <td colspan="4" class="text-right">Total:</td>
                             <td>{{ number_format($qty_sum ?? 0) }}</td>
                             <td></td>
                             <td>{!! app(App\Settings\StoreSettings::class)->currency !!} {{ number_format($sum ?? 0, 2) }}</td>
