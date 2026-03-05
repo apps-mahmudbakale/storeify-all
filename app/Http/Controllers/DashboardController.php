@@ -66,7 +66,7 @@ class DashboardController extends Controller
     public function generalReport()
     {
         $sales = DB::table('sales')
-            ->select('sales.*', 'products.name as product', 'users.name as user', 'sales.buyer_name', 'sales.buyer_dept')
+            ->select('sales.*', 'products.name as product', 'users.name as user')
             ->join('products', 'products.id', '=', 'sales.product_id')
             ->join('users', 'users.id', '=', 'sales.user_id')
             ->orderBy('sales.created_at', 'asc')
@@ -103,7 +103,7 @@ class DashboardController extends Controller
     public function endOfDayReport()
     {
         $sales = DB::table('sales')
-            ->select('sales.*', 'products.name as product', 'users.name as user', 'sales.buyer_name', 'sales.buyer_dept')
+            ->select('sales.*', 'products.name as product', 'users.name as user')
             ->join('products', 'products.id', '=', 'sales.product_id')
             ->join('users', 'users.id', '=', 'sales.user_id')
             ->whereRaw('Date(sales.created_at) = CURRENT_DATE')
@@ -119,7 +119,7 @@ class DashboardController extends Controller
     public function exportEndOfDayReportPdf()
     {
         $sales = DB::table('sales')
-        ->select('sales.*', 'products.name as product', 'users.name as user', 'sales.buyer_name', 'sales.buyer_dept')
+        ->select('sales.*', 'products.name as product', 'users.name as user')
         ->join('products', 'products.id', '=', 'sales.product_id')
         ->join('users', 'users.id', '=', 'sales.user_id')
         ->whereRaw('Date(sales.created_at) = CURRENT_DATE')
