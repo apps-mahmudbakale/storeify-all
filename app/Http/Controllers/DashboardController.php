@@ -86,7 +86,8 @@ class DashboardController extends Controller
 
     public function exportGeneralReportPdf()
     {
-        $sales = Sale::leftJoin('products', 'sales.product_id', '=', 'products.id')
+        $sales = DB::table('sales')
+            ->leftJoin('products', 'sales.product_id', '=', 'products.id')
             ->leftJoin('users', 'sales.user_id', '=', 'users.id')
             ->select('products.name as product', 'products.product_category as category', 'sales.amount', 'sales.created_at', 'sales.quantity', 'sales.invoice', 'users.name as user', 'sales.buyer_name', 'sales.buyer_dept')
             ->get();
