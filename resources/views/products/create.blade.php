@@ -36,23 +36,38 @@
                         <div class="card-body">
                             <div class="form-group">
                                 <label>Name</label>
-                                <input type="text" name="name" class="form-control" placeholder="Name">
+                                <input type="text" name="name" class="form-control" placeholder="Name" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Category</label>
+                                <input type="text" name="product_category" class="form-control" placeholder="Category (e.g., Tablets, Syrup, Injection)" list="categories">
+                                <datalist id="categories">
+                                    @php
+                                        $existingCategories = \App\Models\Product::select('product_category')
+                                            ->whereNotNull('product_category')
+                                            ->distinct()
+                                            ->pluck('product_category');
+                                    @endphp
+                                    @foreach($existingCategories as $category)
+                                        <option value="{{ $category }}">
+                                    @endforeach
+                                </datalist>
                             </div>
                             <div class="form-group">
                                 <label>Buying Price</label>
-                                <input type="text" name="buying_price" id="buying" class="form-control" placeholder="Buying Price">
+                                <input type="text" name="buying_price" id="buying" class="form-control" placeholder="Buying Price" required>
                             </div>
                             <div class="form-group">
                                 <label>Selling Price</label>
-                                <input type="text" name="selling_price" id="selling"  class="form-control" placeholder="Selling Price">
+                                <input type="text" name="selling_price" id="selling"  class="form-control" placeholder="Selling Price" required>
                             </div>
                             <div class="form-group">
                                 <label>Quantity in Stock</label>
-                                <input type="number" name="qty" class="form-control" placeholder="Quantity in Stock">
+                                <input type="number" name="qty" class="form-control" placeholder="Quantity in Stock" required>
                             </div>
                             <div class="form-group">
                                 <label>Expiry Date</label>
-                                <input type="date" name="expiry_date" class="form-control" placeholder="Expiry Date">
+                                <input type="date" name="expiry_date" class="form-control" placeholder="Expiry Date" required>
                             </div>
                         </div>
                         <!-- /.card-body -->

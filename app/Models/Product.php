@@ -14,6 +14,7 @@ class Product extends Model implements Auditable
 
     protected $fillable = [
         'name',
+        'product_category',
         'buying_price',
         'selling_price',
         'qty',

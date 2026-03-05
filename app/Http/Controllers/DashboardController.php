@@ -41,15 +41,12 @@ class DashboardController extends Controller
         $today_sales = Sale::whereDate('created_at', Carbon::today())->count();
         $today_cash = Sale::whereDate('created_at', Carbon::today())->sum('amount');
         $sales_cash = Sale::sum('amount');
-        $products_cash_cost = Product::all()->sum(function ($t) {
-            return $t->buying_price * $t->qty;
-        });
-        $products_cash_selling = Product::all()->sum(function ($t) {
-            return $t->selling_price * $t->qty;
-        });
+        $products_cash_cost = DB::table('products')->selectRaw('SUM(CAST(qty AS DECIMAL(10,2)) * CAST(buying_price AS DECIMAL(10,2))) as total')->first()->total ?? 0;
+        $products_cash_selling = DB::table('products')->selectRaw('SUM(CAST(qty AS DECIMAL(10,2)) * CAST(selling_price AS DECIMAL(10,2))) as total')->first()->total ?? 0;
+
         $query = DB::table('sales')
             ->join('products', 'products.id', '=', 'sales.product_id')
-            ->select(DB::raw('SUM(products.selling_price * sales.quantity) - SUM(products.buying_price * sales.quantity) as profit'))->first();
+            ->select(DB::raw('SUM(CAST(products.selling_price AS DECIMAL(10,2)) * CAST(sales.quantity AS DECIMAL(10,2))) - SUM(CAST(products.buying_price AS DECIMAL(10,2)) * CAST(sales.quantity AS DECIMAL(10,2))) as profit'))->first();
         $profit = $query->profit;
         // dd($query->profit);
         $expiry_threshold = Carbon::now()->addDays(7);
@@ -59,8 +56,8 @@ class DashboardController extends Controller
         ->whereDate('expiry_date', '<=', $expiry_threshold)
         ->orderBy('expiry_date', 'asc')
         ->paginate(5);
-        
-    $low_stock_products = Product::where('qty', '<=', 5)
+
+    $low_stock_products = Product::whereRaw('qty <= min_qty')
         ->orderBy('qty')
         ->paginate(5);
         return view('home', compact('users', 'products', 'sales', 'today_sales', 'today_cash', 'sales_cash', 'products_cash_cost', 'products_cash_selling', 'profit', 'expiring_products', 'low_stock_products'));
@@ -69,7 +66,7 @@ class DashboardController extends Controller
     public function generalReport()
     {
         $sales = DB::table('sales')
-            ->select('sales.*', 'products.name as product', 'users.name as user')
+            ->select('sales.*', 'products.name as product', 'users.name as user', 'sales.buyer_name', 'sales.buyer_dept')
             ->join('products', 'products.id', '=', 'sales.product_id')
             ->join('users', 'users.id', '=', 'sales.user_id')
             ->orderBy('sales.created_at', 'asc')
@@ -84,14 +81,14 @@ class DashboardController extends Controller
 
     public function exportGeneralReportExcel()
     {
-        return Excel::download(new GeneralReportExport, 'K7-Pharmacy-General-Rport.xlsx');
+        return Excel::download(new GeneralReportExport, 'Sahad-Hospitals-Inventory-Rport.xlsx');
     }
 
     public function exportGeneralReportPdf()
     {
         $sales = Sale::leftJoin('products', 'sales.product_id', '=', 'products.id')
             ->leftJoin('users', 'sales.user_id', '=', 'users.id')
-            ->select('products.name as product', 'sales.amount', 'sales.created_at', 'sales.quantity', 'sales.invoice', 'users.name as user')
+            ->select('products.name as product', 'products.product_category as category', 'sales.amount', 'sales.created_at', 'sales.quantity', 'sales.invoice', 'users.name as user', 'sales.buyer_name', 'sales.buyer_dept')
             ->get();
         $sum    = DB::table('sales')
             ->selectRaw('sum(amount) as total')
@@ -99,14 +96,14 @@ class DashboardController extends Controller
         $inWords = new NumberFormatter("En", NumberFormatter::SPELLOUT);
         $words = $inWords->format($sum->total);
         $pdf = PDF::loadView('reports.general_report_pdf', compact('sales', 'sum', 'words'));
-        return $pdf->download('K7-Pharmacy-GeneralReport.pdf');
+        return $pdf->download('Sahad-Hospitals-Inventory-GeneralReport.pdf');
 
     }
 
     public function endOfDayReport()
     {
         $sales = DB::table('sales')
-            ->select('sales.*', 'products.name as product', 'users.name as user')
+            ->select('sales.*', 'products.name as product', 'users.name as user', 'sales.buyer_name', 'sales.buyer_dept')
             ->join('products', 'products.id', '=', 'sales.product_id')
             ->join('users', 'users.id', '=', 'sales.user_id')
             ->whereRaw('Date(sales.created_at) = CURRENT_DATE')
@@ -116,26 +113,30 @@ class DashboardController extends Controller
 
     public function exportEndOfDayReportExcel()
     {
-        return Excel::download(new EndDayReportExport, 'K7-Pharmacy-End-of-Day-Report-'.date('d-m-Y').'.xlsx');
+        return Excel::download(new EndDayReportExport, 'Sahad-Hospitals-Inventory-End-of-Day-Report-'.date('d-m-Y').'.xlsx');
     }
 
     public function exportEndOfDayReportPdf()
     {
         $sales = DB::table('sales')
-        ->select('sales.*', 'products.name as product', 'users.name as user')
+        ->select('sales.*', 'products.name as product', 'users.name as user', 'sales.buyer_name', 'sales.buyer_dept')
         ->join('products', 'products.id', '=', 'sales.product_id')
         ->join('users', 'users.id', '=', 'sales.user_id')
         ->whereRaw('Date(sales.created_at) = CURRENT_DATE')
         ->get();
         $pdf = PDF::loadView('reports.endDay_report_pdf', compact('sales'));
-        return $pdf->download('K7-Pharmacy-EndOfDayReport-'.date('d-m-Y').'.pdf');
+        return $pdf->download('Sahad-Hospitals-Inventory-EndOfDayReport-'.date('d-m-Y').'.pdf');
     }
 
     public function customReportView()
     {
         $products = Product::get();
+        $categories = Product::whereNotNull('product_category')->distinct()->pluck('product_category');
         $users = User::where('name', '!=', 'Admin')->get();
-        return view('reports.custom', compact('products', 'users'));
+        $buyer_names = DB::table('sales')->whereNotNull('buyer_name')->distinct()->pluck('buyer_name');
+        $buyer_depts = DB::table('sales')->whereNotNull('buyer_dept')->distinct()->pluck('buyer_dept');
+
+        return view('reports.custom', compact('products', 'categories', 'users', 'buyer_names', 'buyer_depts'));
     }
     public function customReport(Request $request, CustomReport $report)
     {
@@ -143,7 +144,15 @@ class DashboardController extends Controller
         $words = $reports['words'];
         $sales = $reports['filter'];
         $sum = $reports['sum'];
-        return view('reports.custom', compact('sales', 'words', 'sum'));
+        $qty_sum = $reports['qty_sum'];
+
+        $products = Product::get();
+        $categories = Product::whereNotNull('product_category')->distinct()->pluck('product_category');
+        $users = User::where('name', '!=', 'Admin')->get();
+        $buyer_names = DB::table('sales')->whereNotNull('buyer_name')->distinct()->pluck('buyer_name');
+        $buyer_depts = DB::table('sales')->whereNotNull('buyer_dept')->distinct()->pluck('buyer_dept');
+
+        return view('reports.custom', compact('sales', 'words', 'sum', 'qty_sum', 'products', 'categories', 'users', 'buyer_names', 'buyer_depts'));
     }
     public function customReportExcel($data)
     {
@@ -176,5 +185,117 @@ class DashboardController extends Controller
     public function sync()
     {
         return view('sync');
+    }
+
+    public function categoryReportView()
+    {
+        $categories = Product::select('product_category')
+            ->whereNotNull('product_category')
+            ->distinct()
+            ->pluck('product_category');
+
+        $stockReport = Product::select('product_category as category')
+            ->selectRaw('count(*) as total_items')
+            ->selectRaw('sum(qty) as total_qty')
+            ->selectRaw('sum(CAST(qty AS DECIMAL(10,2)) * CAST(buying_price AS DECIMAL(10,2))) as total_cost_value')
+            ->groupBy('product_category')
+            ->get();
+
+        $salesReport = DB::table('sales')
+            ->join('products', 'products.id', '=', 'sales.product_id')
+            ->select('products.product_category as category')
+            ->selectRaw('count(sales.id) as total_sales')
+            ->selectRaw('sum(sales.quantity) as items_sold')
+            ->selectRaw('sum(sales.amount) as total_revenue')
+            ->whereDate('sales.created_at', Carbon::today())
+            ->groupBy('products.product_category')
+            ->get();
+
+        return view('reports.category', compact('stockReport', 'salesReport', 'categories'));
+    }
+
+    public function categoryReport(Request $request)
+    {
+        $categories = Product::select('product_category')
+            ->whereNotNull('product_category')
+            ->distinct()
+            ->pluck('product_category');
+
+        $stockQuery = Product::select('product_category as category')
+            ->selectRaw('count(*) as total_items')
+            ->selectRaw('sum(qty) as total_qty')
+            ->selectRaw('sum(CAST(qty AS DECIMAL(10,2)) * CAST(buying_price AS DECIMAL(10,2))) as total_cost_value');
+
+        if ($request->has('category') && !empty($request->category)) {
+            $stockQuery->where('product_category', $request->category);
+        }
+
+        $stockReport = $stockQuery->groupBy('product_category')->get();
+
+        $salesQuery = DB::table('sales')
+            ->join('products', 'products.id', '=', 'sales.product_id')
+            ->select('products.product_category as category')
+            ->selectRaw('count(sales.id) as total_sales')
+            ->selectRaw('sum(sales.quantity) as items_sold')
+            ->selectRaw('sum(sales.amount) as total_revenue');
+
+        if ($request->has('from') && !empty($request->from) && $request->has('to') && !empty($request->to)) {
+            $startDate = Carbon::createFromFormat('Y-m-d', $request->from)->startOfDay();
+            $endDate = Carbon::createFromFormat('Y-m-d', $request->to)->endOfDay();
+            $salesQuery->whereBetween('sales.created_at', [$startDate, $endDate]);
+        }
+
+        if ($request->has('category') && !empty($request->category)) {
+            $salesQuery->where('products.product_category', $request->category);
+        }
+
+        $salesReport = $salesQuery->groupBy('products.product_category')->get();
+
+        return view('reports.category', compact('stockReport', 'salesReport', 'categories'));
+    }
+
+    public function exportCategoryReportExcel(Request $request)
+    {
+        return Excel::download(new \App\Exports\CategoryReportExport($request->all()), 'Category-Report.xlsx');
+    }
+
+    public function exportCategoryReportPdf(Request $request)
+    {
+        $category = $request->category ?? null;
+        $from = $request->from ?? null;
+        $to = $request->to ?? null;
+
+        $stockQuery = Product::select('product_category as category')
+            ->selectRaw('count(*) as total_items')
+            ->selectRaw('sum(qty) as total_qty')
+            ->selectRaw('sum(CAST(qty AS DECIMAL(10,2)) * CAST(buying_price AS DECIMAL(10,2))) as total_cost_value');
+
+        if ($category) {
+            $stockQuery->where('product_category', $category);
+        }
+
+        $stockReport = $stockQuery->groupBy('product_category')->get();
+
+        $salesQuery = DB::table('sales')
+            ->join('products', 'products.id', '=', 'sales.product_id')
+            ->select('products.product_category as category')
+            ->selectRaw('count(sales.id) as total_sales')
+            ->selectRaw('sum(sales.quantity) as items_sold')
+            ->selectRaw('sum(sales.amount) as total_revenue');
+
+        if ($from && $to) {
+            $startDate = Carbon::createFromFormat('Y-m-d', $from)->startOfDay();
+            $endDate = Carbon::createFromFormat('Y-m-d', $to)->endOfDay();
+            $salesQuery->whereBetween('sales.created_at', [$startDate, $endDate]);
+        }
+
+        if ($category) {
+            $salesQuery->where('products.product_category', $category);
+        }
+
+        $salesReport = $salesQuery->groupBy('products.product_category')->get();
+
+        $pdf = PDF::loadView('reports.category_report_pdf', compact('stockReport', 'salesReport'));
+        return $pdf->download('Category-Report-' . date('d-m-Y') . '.pdf');
     }
 }

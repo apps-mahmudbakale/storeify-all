@@ -150,7 +150,7 @@
 
 
     <div class="float-right btn-group btn-group-sm d-print-none">
-        @if(isset($hasUnpaidOrders) && $hasUnpaidOrders)
+        @if(!empty($hasUnpaidOrders) && $hasUnpaidOrders)
             <button type="button" class="btn btn-success" id="confirmPaymentBtn" data-invoice="{{$invoice}}">
                 <i class="fas fa-check-circle"></i> Confirm Payment
             </button>
@@ -166,7 +166,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    @if(isset($hasUnpaidOrders) && $hasUnpaidOrders)
+    @if(!empty($hasUnpaidOrders) && $hasUnpaidOrders)
     document.getElementById('confirmPaymentBtn').addEventListener('click', function() {
         const invoice = this.getAttribute('data-invoice');
         

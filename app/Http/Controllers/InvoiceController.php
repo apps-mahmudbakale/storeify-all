@@ -99,6 +99,11 @@ class InvoiceController extends Controller
                 ->first();
         }
 
+        // Check if we have items
+        if ($items->isEmpty()) {
+            return back()->with('error', 'No items found for this invoice.');
+        }
+
         $invoice = $invoice->invoice;
 
         return view('invoices.print', compact('items', 'invoice', 'sum', 'user', 'hasUnpaidOrders'));
@@ -185,6 +190,11 @@ class InvoiceController extends Controller
                 ->join('users', 'users.id', '=', 'sales.user_id')
                 ->where('sales.invoice', $invoice)
                 ->first();
+        }
+
+        // Check if we have items
+        if ($items->isEmpty()) {
+            return back()->with('error', 'No items found for this invoice.');
         }
 
         return view('invoices.print', compact('items', 'invoice', 'sum', 'user', 'hasUnpaidOrders'));

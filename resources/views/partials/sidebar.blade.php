@@ -125,6 +125,12 @@
                                       <p>Custom Report</p>
                                   </a>
                               </li>
+                              <li class="nav-item">
+                                  <a href="{{ route('app.category.report.view') }}" class="nav-link">
+                                      <i class="fa fa-tags nav-icon"></i>
+                                      <p>Category Report</p>
+                                  </a>
+                              </li>
                           </ul>
                       </li>
                   @endcan

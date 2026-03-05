@@ -35,6 +35,7 @@ Route::get('syncData', [SaleController::class, 'store']);
 Route::get('syncStore', [SaleController::class, 'syncStore']);
 Route::post('synced', [SaleController::class, 'synced']);
 
+
 Auth::routes();
 
 /* Route Dashboards */
@@ -48,6 +49,19 @@ Route::group(['prefix' => 'app', 'as' => 'app.', 'middleware' => 'auth'], functi
     Route::resource('products', ProductController::class);
     Route::get('product/import', [ProductController::class, 'importView'])->name('products.import');
     Route::get('product/export', [ProductController::class, 'export'])->name('products.export');
+
+    /* Department and Staff Management */
+    Route::resource('departments', \App\Http\Controllers\DepartmentController::class);
+    Route::get('/department/import', [\App\Http\Controllers\DepartmentController::class, 'importView'])
+        ->name('departments.import.view');
+
+    Route::post('/department/import', [\App\Http\Controllers\DepartmentController::class, 'import'])
+        ->name('departments.import');
+    Route::resource('staff', \App\Http\Controllers\StaffController::class);
+    Route::post('/staffs/import', [\App\Http\Controllers\StaffController::class, 'import'])
+        ->name('staff.import');
+    Route::get('/staffs/import', [\App\Http\Controllers\StaffController::class, 'importView'])
+        ->name('staff.import.view');
     Route::post('product', [ProductController::class, 'import'])->name('import.products');
     Route::resource('requests', RequestsController::class);
     Route::get('product/history/{product}', [ProductController::class, 'history'])->name('products.history');
@@ -75,10 +89,13 @@ Route::group(['prefix' => 'app', 'as' => 'app.', 'middleware' => 'auth'], functi
     Route::get('endDayReport', [DashboardController::class, 'endOfDayReport'])->name('endofDay.report');
     Route::get('customReport', [DashboardController::class, 'customReportView'])->name('custom.report.view');
     Route::post('customReport', [DashboardController::class, 'customReport'])->name('custom.report');
+    Route::get('categoryReport', [DashboardController::class, 'categoryReportView'])->name('category.report.view');
+    Route::post('categoryReport', [DashboardController::class, 'categoryReport'])->name('category.report');
+    Route::get('categoryReport/excel', [DashboardController::class, 'exportCategoryReportExcel'])->name('category.report.excel');
+    Route::get('categoryReport/pdf', [DashboardController::class, 'exportCategoryReportPdf'])->name('category.report.pdf');
     Route::resource('invoices', InvoiceController::class);
     Route::get('invoice/{invoice}', [InvoiceController::class, 'invoice']);
     Route::get('invoice/print/{invoice}', [InvoiceController::class, 'invoicePrint'])->name('invoice.print');
-    Route::post('invoice/confirm-payment/{invoice}', [InvoiceController::class, 'confirmPayment'])->name('invoice.confirm-payment');
     Route::resource('settings', SettingsController::class)->except('store', 'update', 'edit', 'show', 'destroy');
     Route::post('settings', [SettingsController::class, 'updateStoreSettings'])->name('update.store.settings');
     Route::post('settings/currency', [SettingsController::class, 'updateStoreCurrency'])->name('update.store.currency');
