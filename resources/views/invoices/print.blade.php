@@ -47,7 +47,7 @@
         <div class="col-12 col-sm-6 order-sm-last text-sm-right invoice-col right">
             <strong>Pay To</strong>
             <address class="small-text">
-               Sahad Pharmaceuticals <br>
+               Alliance Medical Solutions <br>
                 (TIN: 32378872-0001)<br>
 {{--                To transfer from your bank account, <br>--}}
 {{--                choose either Paystack or Rave payment <br>--}}

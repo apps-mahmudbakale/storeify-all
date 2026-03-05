@@ -24,7 +24,7 @@ class  SaleController extends Controller
     {
         $station = 'ALLIANCEMEDICAL';
         $sum = DB::table('sales')->count() + 1;
-        $pass = substr($station, 0, 3) . "" . date('d') . "" . date('m') . "" . date('y') . "-" . sprintf('%04d', $sum);
+        $pass = substr($station, 0, 3) . "" ."". sprintf('%02d', auth()->user()->id) . date('d') . "" . date('m') . "" . date('y') . "-" . sprintf('%04d', $sum);
         return strtoupper($pass);
     }
 
