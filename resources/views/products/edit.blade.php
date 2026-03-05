@@ -55,6 +55,21 @@
                                 </datalist>
                             </div>
                             <div class="form-group">
+                                <label>Unit</label>
+                                <input type="text" name="unit" value="{{old('unit', isset($product) ? $product->unit : '')}}" class="form-control" placeholder="Unit (e.g., Box, Bottle, Pack)" list="units">
+                                <datalist id="units">
+                                    @php
+                                        $existingUnits = \App\Models\Product::select('unit')
+                                            ->whereNotNull('unit')
+                                            ->distinct()
+                                            ->pluck('unit');
+                                    @endphp
+                                    @foreach($existingUnits as $unit)
+                                        <option value="{{ $unit }}">
+                                    @endforeach
+                                </datalist>
+                            </div>
+                            <div class="form-group">
                                 <label>Buying Price</label>
                                 <input type="number" name="buying_price" id="buying" value="{{old('buying_price', isset($product) ? $product->buying_price : '')}}" class="form-control" placeholder="Buying Price" required>
                             </div>
@@ -65,6 +80,10 @@
                             <div class="form-group">
                                 <label>Quantity in Stock</label>
                                 <input type="number" name="qty" value="{{old('qty', isset($product) ? $product->qty : '')}}" class="form-control" placeholder="Quantity in Stock" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Minimum Quantity Alert</label>
+                                <input type="number" name="min_qty" value="{{old('min_qty', isset($product) ? $product->min_qty : 5)}}" class="form-control" placeholder="Minimum Quantity Alert">
                             </div>
                             <div class="form-group">
                                 <label>Expiry Date</label>

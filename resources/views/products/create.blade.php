@@ -54,6 +54,21 @@
                                 </datalist>
                             </div>
                             <div class="form-group">
+                                <label>Unit</label>
+                                <input type="text" name="unit" class="form-control" placeholder="Unit (e.g., Box, Bottle, Pack)" list="units">
+                                <datalist id="units">
+                                    @php
+                                        $existingUnits = \App\Models\Product::select('unit')
+                                            ->whereNotNull('unit')
+                                            ->distinct()
+                                            ->pluck('unit');
+                                    @endphp
+                                    @foreach($existingUnits as $unit)
+                                        <option value="{{ $unit }}">
+                                    @endforeach
+                                </datalist>
+                            </div>
+                            <div class="form-group">
                                 <label>Buying Price</label>
                                 <input type="text" name="buying_price" id="buying" class="form-control" placeholder="Buying Price" required>
                             </div>
@@ -64,6 +79,10 @@
                             <div class="form-group">
                                 <label>Quantity in Stock</label>
                                 <input type="number" name="qty" class="form-control" placeholder="Quantity in Stock" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Minimum Quantity Alert</label>
+                                <input type="number" name="min_qty" class="form-control" placeholder="Minimum Quantity Alert" value="5">
                             </div>
                             <div class="form-group">
                                 <label>Expiry Date</label>
