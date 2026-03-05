@@ -12,4 +12,14 @@ class Invoice extends Model
     protected $fillable = [
             'invoice',
     ];
+
+    public function sales()
+    {
+        return $this->hasMany(Sale::class, 'invoice', 'invoice');
+    }
+
+    public function invoiceOrders()
+    {
+        return $this->hasMany(InvoiceOrder::class, 'invoice', 'invoice');
+    }
 }

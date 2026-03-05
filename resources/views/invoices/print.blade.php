@@ -15,6 +15,18 @@
 </head>
 <body data-new-gr-c-s-check-loaded="8.933.0" data-gr-ext-installed="">
 
+@if(session('success'))
+    <div class="alert alert-success d-print-none" role="alert" style="margin: 20px; padding: 15px; background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; color: #155724;">
+        <strong>Success!</strong> {{ session('success') }}
+    </div>
+@endif
+
+@if(session('error'))
+    <div class="alert alert-danger d-print-none" role="alert" style="margin: 20px; padding: 15px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; color: #721c24;">
+        <strong>Error!</strong> {{ session('error') }}
+    </div>
+@endif
+
 <div class="container-fluid invoice-container">
 
 
@@ -138,6 +150,11 @@
 
 
     <div class="float-right btn-group btn-group-sm d-print-none">
+        @if(isset($hasUnpaidOrders) && $hasUnpaidOrders)
+            <button type="button" class="btn btn-success" id="confirmPaymentBtn" data-invoice="{{$invoice}}">
+                <i class="fas fa-check-circle"></i> Confirm Payment
+            </button>
+        @endif
         <a href="javascript:window.print()" class="btn btn-default"><i class="fas fa-print"></i> Print</a>
 {{--        <a href="https://www.whogohost.com/host/dl.php?type=i&amp;id=2110465" class="btn btn-default"><i class="fas fa-download"></i> Download</a>--}}
     </div>
@@ -146,6 +163,43 @@
 </div>
 
 {{--<p class="text-center d-print-none"><a href="https://www.whogohost.com/host/clientarea.php?action=invoices">« Back to Client Area</a></p><p class="text-center d-print-none"><a href="https://www.whogohost.com/host/clientarea.php?action=invoices">« Back to Client Area</a></p>--}}
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    @if(isset($hasUnpaidOrders) && $hasUnpaidOrders)
+    document.getElementById('confirmPaymentBtn').addEventListener('click', function() {
+        const invoice = this.getAttribute('data-invoice');
+        
+        Swal.fire({
+            title: 'Confirm Payment',
+            text: "Are you sure payment has been received? This will move the invoice items to sales and update product quantities.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, confirm payment',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Create a form and submit it
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '{{ url("app/invoice/confirm-payment") }}/' + invoice;
+                
+                // Add CSRF token
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = '_token';
+                csrfInput.value = '{{ csrf_token() }}';
+                form.appendChild(csrfInput);
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
+    });
+    @endif
+</script>
 
 <div id="fullpage-overlay" class="w-hidden" style="display: none;">
     <div class="outer-wrapper">
