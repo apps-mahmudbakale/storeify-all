@@ -57,7 +57,7 @@ class DashboardController extends Controller
         ->orderBy('expiry_date', 'asc')
         ->paginate(5);
 
-    $low_stock_products = Product::whereColumn('qty', '<=', '0')
+    $low_stock_products = Product::whereColumn('qty', '<=', 0)
         ->orderBy('qty')
         ->paginate(5);
         return view('home', compact('users', 'products', 'sales', 'today_sales', 'today_cash', 'sales_cash', 'products_cash_cost', 'products_cash_selling', 'profit', 'expiring_products', 'low_stock_products'));
