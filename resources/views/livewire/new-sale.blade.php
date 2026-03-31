@@ -330,7 +330,7 @@
                         <br>
 
                         <!-- Buyer Information Section -->
-                        <div class="row mb-3">
+                        <!-- <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="buyer_name"><strong>Staff Name:</strong></label>
                                 <select id="buyer_name" class="form-control">
@@ -349,7 +349,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                        </div>
+                        </div> -->
 
                         <br>
 
