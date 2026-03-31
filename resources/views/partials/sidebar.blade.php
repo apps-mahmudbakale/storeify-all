@@ -5,7 +5,7 @@
           <img src="{{ asset('logo.png') }}"
               alt="Store Logo" class="brand-image  elevation-3" style="opacity: .8">
           <span
-              class="brand-text font-weight-light"></span>
+              class="brand-text font-weight-light">{{ app(App\Settings\StoreSettings::class)->store_name ?: 'EVLO' }}</span>
       </a>
 
       <!-- Sidebar -->
