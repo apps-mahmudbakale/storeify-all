@@ -38,11 +38,7 @@
                                 <label>Name</label>
                                 <input type="text" name="name" class="form-control" placeholder="Name">
                             </div>
-                            <div class="form-group">
-                                <label>Barcode</label>
-                                <input type="text" name="barcode" class="form-control" placeholder="Barcode">
-                            </div>
-                             <div class="form-group">
+                             <!-- <div class="form-group">
                                 <label>Category</label>
                                 <select name="product_category" class="form-control">
                                       <option>Bio Med</option>
@@ -57,7 +53,7 @@
                                     <option>Stationaries</option>
 
                                 </select>
-                            </div>
+                            </div> -->
                             <div class="form-group">
                                 <label>Buying Price</label>
                                 <input type="text" name="buying_price" id="buying" class="form-control" placeholder="Buying Price">
@@ -86,6 +82,10 @@
                             <div class="form-group">
                                 <label>Expiry Date</label>
                                 <input type="date" name="expiry_date" class="form-control" placeholder="Expiry Date">
+                            </div>
+                             <div class="form-group">
+                                <label>Barcode</label>
+                                <input type="text" name="barcode" class="form-control" placeholder="Barcode">
                             </div>
                         </div>
                         <!-- /.card-body -->
