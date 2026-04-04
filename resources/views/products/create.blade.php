@@ -63,6 +63,10 @@
                                 <input type="text" name="selling_price" id="selling"  class="form-control" placeholder="Selling Price">
                             </div>
                             <div class="form-group">
+                                <label>VAT Percentage (%)</label>
+                                <input type="number" name="vat_percentage" class="form-control" placeholder="VAT % (e.g. 7.5)" value="0" min="0" max="100" step="0.01">
+                            </div>
+                            <div class="form-group">
                                 <label>Quantity in Stock</label>
                                 <input type="number" name="qty" class="form-control" placeholder="Quantity in Stock">
                             </div>

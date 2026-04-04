@@ -1,70 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Purchase Receipt</title>
     <style>
-        * {
-            font-size: 12px;
-            font-family: 'Times New Roman';
-        }
-
-        td,
-        th,
-        tr,
-        table {
-            border-top: 1px solid black;
-            border-collapse: collapse;
-        }
-
-        td.description,
-        th.description {
-            width: 75px;
-            max-width: 75px;
-        }
-
-        td.quantity,
-        th.quantity {
-            width: 40px;
-            max-width: 40px;
-            word-break: break-all;
-        }
-
-        td.price,
-        th.price {
-            width: 40px;
-            max-width: 40px;
-            word-break: break-all;
-        }
-
-        .centered {
-            text-align: center;
-            align-content: center;
-        }
-
-        .ticket {
-            width: 155px;
-            max-width: 155px;
-        }
-
-        img {
-            max-width: inherit;
-            width: inherit;
-        }
-
-        @media print {
-
-            .hidden-print,
-            .hidden-print * {
-                display: none !important;
-            }
-        }
+        * { font-size: 12px; font-family: 'Times New Roman'; }
+        td, th, tr, table { border-top: 1px solid black; border-collapse: collapse; }
+        td.description, th.description { width: 75px; max-width: 75px; }
+        td.quantity, th.quantity { width: 40px; max-width: 40px; word-break: break-all; }
+        td.price, th.price { width: 40px; max-width: 40px; word-break: break-all; }
+        .centered { text-align: center; align-content: center; }
+        .ticket { width: 155px; max-width: 155px; }
+        img { max-width: inherit; width: inherit; }
+        @media print { .hidden-print, .hidden-print * { display: none !important; } }
     </style>
 </head>
-
 <body>
     <div class="ticket" align="center" style="max-width: 1000px; width: 328px;">
         <img src="{{ !empty(app(App\Settings\StoreSettings::class)->store_logo) ? asset('storage/store/' . app(App\Settings\StoreSettings::class)->store_logo) : asset('assets/img/logo.png') }}"
@@ -73,59 +24,53 @@
         {{ app(App\Settings\StoreSettings::class)->store_name ?: 'Storeify' }}
         <p class="centered">PURCHASE RECEIPT
             <br>{{ app(App\Settings\StoreSettings::class)->store_address }}
-            <br>
-            Date: <?php echo date('d/m/Y'); ?>
-            {{ $invoice }}
-            @if(isset($buyer) && ($buyer->buyer_name || $buyer->buyer_dept))
-            <br><br>
-            <strong>Buyer Information:</strong>
-            @if($buyer->buyer_name)
-            <br>Name: {{ $buyer->buyer_name }}
-            @endif
-            @if($buyer->buyer_dept)
-            <br>Department: {{ $buyer->buyer_dept }}
-            @endif
-            @endif
+            <br>Date: {{ date('d/m/Y') }} &nbsp; {{ $invoice }}
+        </p>
         <table style="font-size: 24px; font-weight: bold; width: inherit;">
             <thead>
                 <tr>
                     <th class="description">Description</th>
                     <th class="quantity">Q.</th>
                     <th class="price">{!! app(App\Settings\StoreSettings::class)->currency !!}</th>
-                    <th class="price" style="max-width: 50px; width: 51px;">Subtotal</th>
+                    <th class="price" style="max-width:50px;width:51px;">Subtotal</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($items as $item)
+                    @php $item_vat = $item->amount * (($item->vat_percentage ?? 0) / 100); @endphp
                     <tr>
-                        <td class="description" style="text-align: center;">{{ $item->product }}</td>
-                        <td class="quantity" style="text-align: center;">{{ $item->quantity }}</td>
-                        <td class="price" style="text-align: center;">{!! app(App\Settings\StoreSettings::class)->currency !!}
-                            {{ $item->selling_price }}</td>
-                        <td class="price" style="text-align: center;">{!! app(App\Settings\StoreSettings::class)->currency !!} {{ $item->amount }}</td>
+                        <td class="description" style="text-align:center;">{{ $item->product }}</td>
+                        <td class="quantity" style="text-align:center;">{{ $item->quantity }}</td>
+                        <td class="price" style="text-align:center;">{!! app(App\Settings\StoreSettings::class)->currency !!} {{ $item->selling_price }}</td>
+                        <td class="price" style="text-align:center;">{!! app(App\Settings\StoreSettings::class)->currency !!} {{ $item->amount }}</td>
                     </tr>
                 @endforeach
 
                 @if(isset($returns) && $returns->count() > 0)
                     <tr>
-                        <td colspan="4" style="text-align: center; background-color: #eee; font-weight: bold;">RETURNED ITEMS</td>
+                        <td colspan="4" style="text-align:center;background-color:#eee;font-weight:bold;">RETURNED ITEMS</td>
                     </tr>
                     @foreach ($returns as $return)
-                        <tr style="color: #666; font-style: italic;">
-                            <td class="description" style="text-align: center;">{{ $return->product }}</td>
-                            <td class="quantity" style="text-align: center;">{{ $return->return_qty }}</td>
-                            <td class="price" style="text-align: center;">-{!! app(App\Settings\StoreSettings::class)->currency !!}
-                                {{ $return->selling_price }}</td>
-                            <td class="price" style="text-align: center;">-{!! app(App\Settings\StoreSettings::class)->currency !!} {{ number_format($return->return_qty * $return->selling_price, 2) }}</td>
+                        <tr style="color:#666;font-style:italic;">
+                            <td class="description" style="text-align:center;">{{ $return->product }}</td>
+                            <td class="quantity" style="text-align:center;">{{ $return->return_qty }}</td>
+                            <td class="price" style="text-align:center;">-{!! app(App\Settings\StoreSettings::class)->currency !!} {{ $return->selling_price }}</td>
+                            <td class="price" style="text-align:center;">-{!! app(App\Settings\StoreSettings::class)->currency !!} {{ number_format($return->return_qty * $return->selling_price, 2) }}</td>
                         </tr>
                     @endforeach
                 @endif
 
                 <tr>
-                    <td style="font-weight: bold;">Net Total:</td>
-                    <td></td>
-                    <td></td>
-                    <td style="font-weight: bold; text-align: center;">{!! app(App\Settings\StoreSettings::class)->currency !!} {{ number_format($sum->sum, 2) }}</td>
+                    <td colspan="3" style="font-weight:bold;text-align:right;">Subtotal:</td>
+                    <td style="font-weight:bold;text-align:center;">{!! app(App\Settings\StoreSettings::class)->currency !!} {{ number_format($sum->subtotal ?? $sum->sum, 2) }}</td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="font-weight:bold;text-align:right;">VAT:</td>
+                    <td style="font-weight:bold;text-align:center;">{!! app(App\Settings\StoreSettings::class)->currency !!} {{ number_format($sum->vat ?? 0, 2) }}</td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="font-weight:bold;text-align:right;">Total:</td>
+                    <td style="font-weight:bold;text-align:center;">{!! app(App\Settings\StoreSettings::class)->currency !!} {{ number_format($sum->sum, 2) }}</td>
                 </tr>
             </tbody>
         </table>
@@ -134,15 +79,16 @@
             <br>{{ ucfirst($user->name) }}
         </p>
         <p class="centered">Thanks for your purchase!
-            <br> {!! app(App\Settings\StoreSettings::class)->store_name ?: 'Storeify' !!}
+            <br>{!! app(App\Settings\StoreSettings::class)->store_name ?: 'Storeify' !!}
         </p>
     </div>
     <button id="btnPrint" class="hidden-print">Print</button>
     <button onclick="window.history.back()" class="hidden-print">Back</button>
     <script>
-        const $btnPrint = document.querySelector("#btnPrint");
-        $btnPrint.addEventListener("click", () => {
+        // Auto-print when page loads
+        window.onload = function() {
             window.print();
-        });
+        };
     </script>
 </body>
+</html>

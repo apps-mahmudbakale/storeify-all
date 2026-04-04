@@ -188,14 +188,16 @@ class  SaleController extends Controller
     public function printInvoice($invoice)
     {
         $items = DB::table('sales')
-            ->select('sales.*', 'products.name as product', 'products.selling_price')
+            ->select('sales.*', 'products.name as product', 'products.selling_price', 'products.vat_percentage')
             ->join('products', 'products.id', '=', 'sales.product_id')
             ->where('sales.invoice', $invoice)
             ->get();
 
-        $sum = DB::table('sales')
-            ->where('invoice', $invoice)
-            ->sum('amount');
+        $subtotal = $items->sum('amount');
+        $vat = $items->sum(fn($item) => $item->amount * ($item->vat_percentage / 100));
+        $total = $subtotal + $vat;
+
+        $sum = (object)['sum' => $total, 'subtotal' => $subtotal, 'vat' => $vat];
 
         $user = DB::table('sales')
             ->select('users.name')
@@ -214,8 +216,6 @@ class  SaleController extends Controller
             ->where('return_request.invoice', $invoice)
             ->where('return_request.status', true)
             ->get();
-
-        $sum = (object)['sum' => $sum]; // Maintain compatibility with view
 
         return view('sales.print', compact('items', 'invoice', 'sum', 'user', 'buyer', 'returns'));
     }

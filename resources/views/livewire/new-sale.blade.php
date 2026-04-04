@@ -285,7 +285,8 @@
                                                     confirmButtonText: 'Yes, save and print it!'
                                                 }).then((result) => {
                                                     if (result.isConfirmed) {
-                                                        window.location = url;
+                                                        window.open(url, '_blank');
+                                                        window.location = 'cancel/{{ $cart->invoice }}';
                                                     }
                                                 })
 

@@ -18,6 +18,7 @@ class Product extends Model implements Auditable
         'product_category',
         'buying_price',
         'selling_price',
+        'vat_percentage',
         'qty',
         'min_qty',
         'unit',

@@ -75,6 +75,12 @@
                                 <input type="text" name="selling_price" id="selling"  value="{{old('name', isset($product) ? $product->selling_price : '')}}" class="form-control" placeholder="Selling Price">
                             </div> --}}
                             <div class="form-group">
+                                <label>VAT Percentage (%)</label>
+                                <input type="number" name="vat_percentage"
+                                    value="{{ old('vat_percentage', isset($product) ? $product->vat_percentage : 0) }}"
+                                    class="form-control" placeholder="VAT % (e.g. 7.5)" min="0" max="100" step="0.01">
+                            </div>
+                            <div class="form-group">
                                 <label>Quantity in Stock</label>
                                 <input type="number" name="qty"
                                     value="{{ old('name', isset($product) ? $product->qty : '') }}" class="form-control"
