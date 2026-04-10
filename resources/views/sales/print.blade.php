@@ -37,7 +37,6 @@
             </thead>
             <tbody>
                 @foreach ($items as $item)
-                    @php $item_vat = $item->amount * (($item->vat_percentage ?? 0) / 100); @endphp
                     <tr>
                         <td class="description" style="text-align:center;">{{ $item->product }}</td>
                         <td class="quantity" style="text-align:center;">{{ $item->quantity }}</td>
@@ -64,10 +63,12 @@
                     <td colspan="3" style="font-weight:bold;text-align:right;">Subtotal:</td>
                     <td style="font-weight:bold;text-align:center;">{!! app(App\Settings\StoreSettings::class)->currency !!} {{ number_format($sum->subtotal ?? $sum->sum, 2) }}</td>
                 </tr>
+                @if(($sum->vat ?? 0) > 0)
                 <tr>
-                    <td colspan="3" style="font-weight:bold;text-align:right;">VAT:</td>
-                    <td style="font-weight:bold;text-align:center;">{!! app(App\Settings\StoreSettings::class)->currency !!} {{ number_format($sum->vat ?? 0, 2) }}</td>
+                    <td colspan="3" style="font-weight:bold;text-align:right;">VAT (7.5%):</td>
+                    <td style="font-weight:bold;text-align:center;">{!! app(App\Settings\StoreSettings::class)->currency !!} {{ number_format($sum->vat, 2) }}</td>
                 </tr>
+                @endif
                 <tr>
                     <td colspan="3" style="font-weight:bold;text-align:right;">Total:</td>
                     <td style="font-weight:bold;text-align:center;">{!! app(App\Settings\StoreSettings::class)->currency !!} {{ number_format($sum->sum, 2) }}</td>

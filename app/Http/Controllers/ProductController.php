@@ -48,9 +48,18 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        // dd(array_merge($request->except('expiry_date'), ['expiry_date' => date($request->expiry_date)]));
-        $products = Product::create(array_merge($request->except('expiry_date'), ['expiry_date' => date($request->expiry_date), 'selling_price' => $request->selling_price ?? 0]));
+        $data = array_merge(
+            $request->except(['expiry_date', 'image']),
+            ['expiry_date' => date($request->expiry_date), 'selling_price' => $request->selling_price ?? 0]
+        );
 
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $mime = $file->getMimeType();
+            $data['image'] = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($file->getRealPath()));
+        }
+
+        Product::create($data);
         return redirect()->route('app.products.index')->with('success', 'Product Added');
     }
 
@@ -102,8 +111,15 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product)
     {
-        $product->update($request->all());
+        $data = $request->except('image');
 
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $mime = $file->getMimeType();
+            $data['image'] = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($file->getRealPath()));
+        }
+
+        $product->update($data);
         return redirect()->route('app.products.index')->with('success', 'Product Updated');
     }
 

@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\SaleController;
+use App\Http\Controllers\Api\ProductController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,3 +27,8 @@ Route::post('updateSale', [SaleController::class, 'update']);
 Route::get('requests', [SaleController::class, 'requests']);
 Route::post('syncProducts', [SaleController::class, 'syncProducts']);
 Route::post('syncRequest', [SaleController::class, 'syncRequest']);
+
+// Products API
+Route::get('products', [ProductController::class, 'index']);
+Route::get('products/categories', [ProductController::class, 'categories']);
+Route::get('products/{id}', [ProductController::class, 'show']);

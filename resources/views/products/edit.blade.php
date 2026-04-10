@@ -30,7 +30,7 @@
                         <h3 class="card-title">Update Product</h3>
                     </div>
                     <!-- /.card-header -->
-                    <form action="{{ route('app.products.update', $product->id) }}" method="POST">
+                    <form action="{{ route('app.products.update', $product->id) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
                         <!-- form start -->
@@ -125,6 +125,20 @@
                                     @endforeach
                                 </select>
                             </div> --}}
+                            <div class="form-group">
+                                <label>Product Image</label>
+                                <input type="file" name="image" class="form-control" accept="image/*" onchange="previewImage(this)">
+                                @if($product->image)
+                                    <div style="margin-top:8px;">
+                                        <p class="text-muted" style="font-size:12px;">Current image:</p>
+                                        <img id="previewImg" src="{{ $product->image }}" style="max-width:150px; max-height:150px; border-radius:4px; border:1px solid #ddd;">
+                                    </div>
+                                @else
+                                    <div id="imagePreview" style="margin-top:8px; display:none;">
+                                        <img id="previewImg" src="" style="max-width:150px; max-height:150px; border-radius:4px; border:1px solid #ddd;">
+                                    </div>
+                                @endif
+                            </div>
                         </div>
                         <!-- /.card-body -->
 
@@ -133,6 +147,20 @@
                         </div>
                     </form>
                 </div>
+                <script>
+                    function previewImage(input) {
+                        const img = document.getElementById('previewImg');
+                        const preview = document.getElementById('imagePreview');
+                        if (input.files && input.files[0]) {
+                            const reader = new FileReader();
+                            reader.onload = e => {
+                                img.src = e.target.result;
+                                if (preview) preview.style.display = 'block';
+                            };
+                            reader.readAsDataURL(input.files[0]);
+                        }
+                    }
+                </script>
                 <!-- /.card -->
                 <!-- /.row (main row) -->
             </div><!-- /.container-fluid -->

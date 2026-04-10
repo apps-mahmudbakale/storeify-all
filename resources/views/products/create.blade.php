@@ -30,7 +30,7 @@
                         <h3 class="card-title">Create Product</h3>
                     </div>
                     <!-- /.card-header -->
-                    <form action="{{route('app.products.store')}}" method="POST">
+                    <form action="{{route('app.products.store')}}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <!-- form start -->
                         <div class="card-body">
@@ -91,6 +91,13 @@
                                 <label>Barcode</label>
                                 <input type="text" name="barcode" class="form-control" placeholder="Barcode">
                             </div>
+                            <div class="form-group">
+                                <label>Product Image</label>
+                                <input type="file" name="image" class="form-control" accept="image/*" onchange="previewImage(this)">
+                                <div id="imagePreview" style="margin-top:8px; display:none;">
+                                    <img id="previewImg" src="" style="max-width:150px; max-height:150px; border-radius:4px; border:1px solid #ddd;">
+                                </div>
+                            </div>
                         </div>
                         <!-- /.card-body -->
 
@@ -106,12 +113,18 @@
         <script>
             var buying = document.getElementById('buying');
             var selling = document.getElementById('selling');
-
             buying.addEventListener('keyup', ()=>{
-                // alert(buying.value);
                 selling.value = buying.value * {{ app(App\Settings\StoreSettings::class)->sell_margin}}
             });
-
+            function previewImage(input) {
+                const preview = document.getElementById('imagePreview');
+                const img = document.getElementById('previewImg');
+                if (input.files && input.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = e => { img.src = e.target.result; preview.style.display = 'block'; };
+                    reader.readAsDataURL(input.files[0]);
+                }
+            }
         </script>
         <!-- /.content -->
     </div>

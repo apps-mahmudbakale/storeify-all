@@ -56,7 +56,12 @@
                                             @foreach($products as $product)
                                             <tr>
                                             <td>{{$loop->iteration}}</td>
-                                            <td>{{$product->name}}</td>
+                                            <td>
+                                                @if($product->image)
+                                                    <img src="{{ $product->image }}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;margin-right:6px;">
+                                                @endif
+                                                {{$product->name}}
+                                            </td>
                                             <td>{{$product->product_category ?? ''}}</td>
                                             <td>{!! app(App\Settings\StoreSettings::class)->currency !!} {{number_format($product->buying_price)}}</td>
                                             <td>{{$product->qty}}</td>

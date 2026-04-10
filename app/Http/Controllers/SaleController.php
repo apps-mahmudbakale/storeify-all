@@ -194,7 +194,9 @@ class  SaleController extends Controller
             ->get();
 
         $subtotal = $items->sum('amount');
-        $vat = $items->sum(fn($item) => $item->amount * ($item->vat_percentage / 100));
+        // Only apply 7.5% VAT on items that have vat_percentage set
+        $vatableAmount = $items->where('vat_percentage', '>', 0)->sum('amount');
+        $vat = round($vatableAmount * 0.075, 2);
         $total = $subtotal + $vat;
 
         $sum = (object)['sum' => $total, 'subtotal' => $subtotal, 'vat' => $vat];
