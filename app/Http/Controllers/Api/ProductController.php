@@ -16,7 +16,7 @@ class ProductController extends Controller
     {
         $query = Product::select(
             'id', 'name', 'barcode', 'product_category', 'unit',
-            'selling_price', 'buying_price', 'vat_percentage',
+            'selling_price', 'buying_price', 'vat_percentage','image',
             'qty', 'min_qty', 'expiry_date', 'created_at', 'updated_at'
         );
 
@@ -31,7 +31,15 @@ class ProductController extends Controller
 
         $perPage = min((int) $request->get('per_page', 20), 100);
 
-        return response()->json($query->paginate($perPage));
+        $results = $query->paginate($perPage);
+
+        // Add has_image flag to each item without loading the base64 data
+        $results->getCollection()->transform(function ($product) {
+            $product->has_image = !empty($product->image);
+            return $product;
+        });
+
+        return response()->json($results);
     }
 
     /**
@@ -41,7 +49,23 @@ class ProductController extends Controller
     {
         $product = Product::findOrFail($id);
 
-        return response()->json($product);
+        return response()->json([
+            'id'               => $product->id,
+            'name'             => $product->name,
+            'barcode'          => $product->barcode,
+            'product_category' => $product->product_category,
+            'unit'             => $product->unit,
+            'selling_price'    => $product->selling_price,
+            'buying_price'     => $product->buying_price,
+            'vat_percentage'   => $product->vat_percentage,
+            'qty'              => $product->qty,
+            'min_qty'          => $product->min_qty,
+            'expiry_date'      => $product->expiry_date,
+            'image'            => $product->image,
+            'has_image'        => !empty($product->image),
+            'created_at'       => $product->created_at,
+            'updated_at'       => $product->updated_at,
+        ]);
     }
 
     /**
