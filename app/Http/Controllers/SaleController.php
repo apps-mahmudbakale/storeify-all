@@ -62,7 +62,7 @@ class  SaleController extends Controller
                 echo '<li class="nav-item">
                 <a href="' . route('app.sales.cart', $url) . '" class="nav-link">
                   <strong>' . $product->name . '</strong>' . ($product->barcode ? ' <small class="text-muted">[' . $product->barcode . ']</small>' : '') . '
-                  <span class="float-right badge bg-primary">&#8358; ' . number_format($product->buying_price, 2) . '</span>
+                  <span class="float-right badge bg-primary">&#8358; ' . number_format($product->selling_price, 2) . '</span>
                 </a>
               </li>';
             }
