@@ -55,7 +55,6 @@
                             </thead>
                             <tbody>
                                 @foreach ($carts as $cart)
-                                {{-- {{dd($cart)}} --}}
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
                                         <input type='hidden' value='{{ $cart->product_id }}' id='prid{{ $cart->id }}'>
