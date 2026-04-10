@@ -58,7 +58,7 @@ class  SaleController extends Controller
         echo '<ul class="nav flex-column">';
         if ($products) {
             foreach ($products as $product) {
-                $url = base64_encode($product->id . ',' . session()->get('invoice') . ',' . $product->buying_price);
+                $url = base64_encode($product->id . ',' . session()->get('invoice') . ',' . $product->selling_price);
                 echo '<li class="nav-item">
                 <a href="' . route('app.sales.cart', $url) . '" class="nav-link">
                   <strong>' . $product->name . '</strong>' . ($product->barcode ? ' <small class="text-muted">[' . $product->barcode . ']</small>' : '') . '

@@ -74,7 +74,7 @@ Route::group(['prefix' => 'app', 'as' => 'app.', 'middleware' => 'auth'], functi
     Route::get('sales/print/{invoice}', [SaleController::class, 'saveSalePrint']);
     Route::get('sales/cancel/{invoice}', [SaleController::class, 'cancelSale']);
     Route::get('sales-print/{invoice}', [SaleController::class, 'printInvoice'])->name('sales.print');
-    Route::resource('sales', SaleController::class);
+    Route::resource('sales', SaleController::class)->except(['show']);
     Route::resource('returns', ReturnSaleController::class);
     Route::post('returns/approve', [ReturnSaleController::class, 'approve'])->name('returns.approve');
     Route::get('generalReport', [DashboardController::class, 'generalReport'])->name('general.report');
