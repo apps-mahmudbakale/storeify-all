@@ -46,6 +46,7 @@
                                             <th>Name</th>
                                             <th>Category</th>
                                             <th>Buying Price</th>
+                                            <th>Selling Price</th>
                                             <th>Quantity</th>
                                             <th>Unit</th>
                                             <th>Expiry</th>
@@ -64,10 +65,10 @@
                                             </td>
                                             <td>{{$product->product_category ?? ''}}</td>
                                             <td>{!! app(App\Settings\StoreSettings::class)->currency !!} {{number_format($product->buying_price)}}</td>
+                                            <td>{!! app(App\Settings\StoreSettings::class)->currency !!} {{number_format($product->selling_price)}}</td>
                                             <td>{{$product->qty}}</td>
                                             <td>{{ucfirst($product->unit)}}</td>
                                             <td>{{\Carbon\Carbon::parse($product->expiry_date)->diffForHumans()}}</td>
-                                            {{-- <td>{{$product->store->name}}</td> --}}
                                             <td>
                                                 <div class="btn-group">
                                                     <a href="{{route('app.products.history', $product->id)}}" class="btn btn-secondary btn-sm" title="History">
