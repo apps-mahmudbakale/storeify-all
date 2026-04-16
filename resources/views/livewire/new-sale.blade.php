@@ -35,7 +35,15 @@
                 <div class="card">
                     <div class="card-header">
                         <input type="text" class="form-control search_keyword" id="search_keyword" autofocus
-                            placeholder="Search....." style="width: 100%; border-radius: 3px;">
+                            placeholder="Search or scan barcode..." style="width: 100%; border-radius: 3px;"
+                            autocomplete="off">
+        <div id="search-loading" style="display:none; padding: 10px; text-align:center; border: 1px #CDCDCD solid; background:white;">
+                            <span style="display:inline-block; width:18px; height:18px; border:3px solid #ccc; border-top-color:#333; border-radius:50%; animation:spin 0.7s linear infinite; vertical-align:middle; margin-right:6px;"></span>
+                            Searching...
+                        </div>
+                        <style>
+                            @keyframes spin { to { transform: rotate(360deg); } }
+                        </style>
                         <div id="result" class=""></div>
                     </div>
                     <!-- /.card-header -->
@@ -371,35 +379,74 @@
     <!-- /.content-wrapper -->
     <script>
         $(() => {
-            $('#search_keyword').keyup(() => {
-                var search_keyword_value = $('#search_keyword').val();
-                // alert(search_keyword_value);
-                var dataString = 'search_keyword=' + search_keyword_value;
-                if (search_keyword_value !== '') {
+            let searchTimer = null;
+
+            // Prevent Enter key from submitting any form (barcode scanner sends Enter)
+            $('#search_keyword').on('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+            $('#search_keyword').on('keyup', function(e) {
+                // Ignore modifier keys and Enter
+                if (['Enter', 'Shift', 'Control', 'Alt', 'Meta', 'Tab'].includes(e.key)) {
+                    return false;
+                }
+
+                const value = $(this).val().trim();
+                const result = document.getElementById('result');
+                const loading = document.getElementById('search-loading');
+
+                // Clear previous timer (debounce)
+                clearTimeout(searchTimer);
+
+                if (value === '') {
+                    result.style.display = 'none';
+                    loading.style.display = 'none';
+                    result.innerHTML = '';
+                    return false;
+                }
+
+                // Show loading immediately
+                loading.style.display = 'block';
+                result.style.display = 'none';
+                result.innerHTML = '';
+
+                // Debounce the actual fetch by 500ms
+                searchTimer = setTimeout(() => {
                     const formData = new FormData();
-                    formData.append('search_keyword', search_keyword_value);
+                    formData.append('search_keyword', value);
                     formData.append('_token', "{{ csrf_token() }}");
 
                     fetch("{{ route('app.sales.search') }}", {
-                            method: 'POST',
-                            body: formData,
-                            cache: 'no-cache',
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest', // Add this header if needed
-                            },
-                        })
-                        .then(response => response.text())
-                        .then(html => {
-                            document.getElementById('result').innerHTML = html;
-                            document.getElementById('result').style.display = 'block';
-                            // console.log(html);
-                        })
-                        .catch(error => {
-                            console.error('Fetch error:', error);
-                        });
-                }
+                        method: 'POST',
+                        body: formData,
+                        cache: 'no-cache',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    })
+                    .then(response => response.text())
+                    .then(html => {
+                        loading.style.display = 'none';
+                        result.innerHTML = html;
+                        result.style.display = html.trim() !== '' ? 'block' : 'none';
+                    })
+                    .catch(error => {
+                        loading.style.display = 'none';
+                        console.error('Search error:', error);
+                    });
+                }, 500); // 500ms debounce — loader shows immediately, fetch waits
+
                 return false;
-            })
+            });
+
+            // Hide results when clicking outside
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('#search_keyword, #result').length) {
+                    document.getElementById('result').style.display = 'none';
+                }
+            });
         })
     </script>
 </div>

@@ -20,7 +20,41 @@
     <!-- Scripts -->
     {{-- @vite(['resources/css/app.css', 'resources/js/app.js']) --}}
     <link rel="stylesheet" href="{{ asset('css/sweetalert2.min.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
+    <style>
+        .select2-container .select2-selection--single {
+            height: 38px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            background-color: #fff;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 36px;
+            color: #495057;
+            padding-left: 12px;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 36px;
+            right: 6px;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: #6c757d;
+        }
+        .select2-dropdown {
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+        .select2-container--default .select2-search--dropdown .select2-search__field {
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            padding: 6px 10px;
+        }
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: #007bff;
+        }
+    </style>
     <script src="{{ asset('js/app.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 </head>
 <!-- ADD THE CLASS layout-top-nav TO REMOVE THE SIDEBAR. -->
 
@@ -49,25 +83,35 @@
         <div class="col-sm-12">
             <form action="{{route('app.custom.report')}}" method="POST" class="row">
                 @csrf
-                <div class="col-md-3">
+                <div class="col-md-2">
                     From
-                    <input type="date" name="from" class="form-control">
+                    <input type="date" name="from" value="{{ request('from') }}" class="form-control">
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     To
-                    <input type="date" name="to" class="form-control">
+                    <input type="date" name="to" value="{{ request('to') }}" class="form-control">
                 </div>
                 <div class="col-md-3">
-                    Buyer Name
-                    <input type="text" name="buyer_name" class="form-control" placeholder="Enter buyer name">
+                    User
+                    <select name="user" class="form-control select2" id="user-select">
+                        <option value="">-- All Users --</option>
+                        @foreach($users as $u)
+                            <option value="{{ $u->id }}" {{ request('user') == $u->id ? 'selected' : '' }}>{{ $u->name }}</option>
+                        @endforeach
+                    </select>
                 </div>
                 <div class="col-md-3">
-                    Buyer Department
-                    <input type="text" name="buyer_dept" class="form-control" placeholder="Enter buyer department">
+                    Product
+                    <select name="product" class="form-control select2" id="product-select">
+                        <option value="">-- All Products --</option>
+                        @foreach($products as $p)
+                            <option value="{{ $p->id }}" {{ request('product') == $p->id ? 'selected' : '' }}>{{ $p->name }}</option>
+                        @endforeach
+                    </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <br>
-                   <button type="submit" class="btn btn-success">Filter</button>
+                    <button type="submit" class="btn btn-success btn-block">Filter</button>
                 </div>
             </form>
         </div>
@@ -87,8 +131,6 @@
                             <th>Quantity</th>
                             <th>Sold Rate</th>
                             <th>Amount</th>
-                            <th>Staff Name</th>
-                            <th>Department</th>
                             <th>Sold By</th>
                             <th>Date</th>
                         </tr>
@@ -102,8 +144,6 @@
                         <td>{{$sale->quantity}}</td>
                         <td>{!! app(App\Settings\StoreSettings::class)->currency !!}  {{number_format($sale->price)}}</td>
                         <td>{!! app(App\Settings\StoreSettings::class)->currency !!}  {{number_format($sale->amount)}}</td>
-                        <td>{{$sale->buyer_name ?? 'N/A'}}</td>
-                        <td>{{$sale->buyer_dept ?? 'N/A'}}</td>
                         <td>{{$sale->user}}</td>
                         <td>{{\Carbon\Carbon::parse($sale->created_at)->toFormattedDayDateString()}}</td>
                         </tr>
@@ -167,5 +207,20 @@
         @endif
     </div>
 </body>
+
+<script>
+    $(document).ready(function() {
+        $('#user-select').select2({
+            placeholder: '-- All Users --',
+            allowClear: true,
+            width: '100%'
+        });
+        $('#product-select').select2({
+            placeholder: '-- All Products --',
+            allowClear: true,
+            width: '100%'
+        });
+    });
+</script>
 
 </html>

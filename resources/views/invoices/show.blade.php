@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Sahad Pharmaceuticals - Invoice #{{$invoice}}</title>
+    <title>Evlo Pharmacy - Invoice #{{$invoice}}</title>
 
     <link href="{{asset('all.min.css')}}" rel="stylesheet">
     <link href="{{asset('theme.min.css')}}" rel="stylesheet">
@@ -35,7 +35,7 @@
         <div class="col-12 col-sm-6 order-sm-last text-sm-right invoice-col right">
             <strong>Pay To</strong>
             <address class="small-text">
-                Sahad Pharmaceuticals <br>
+                Evlo Pharmacy <br>
                 (TIN: 32378872-0001)<br>
                 {{--                To transfer from your bank account, <br>--}}
                 {{--                choose either Paystack or Rave payment <br>--}}

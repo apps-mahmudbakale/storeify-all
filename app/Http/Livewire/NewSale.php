@@ -11,13 +11,24 @@ class NewSale extends Component
 {
     public function render()
     {
-        $invoice = session()->get('invoice');
+        $invoice = session()->get('invoice_' . auth()->id());
         $carts = DB::table('sales_order')
-            ->select('sales_order.*','products.id as product_id','products.name', 'products.selling_price')
+            ->select(
+                'sales_order.*',
+                'products.id as product_id',
+                'products.name',
+                'products.selling_price as db_selling_price',
+                'products.product_category'
+            )
             ->join('products', 'products.id', '=', 'sales_order.product_id')
             ->where('sales_order.invoice', $invoice)
             ->where('sales_order.user_id', auth()->user()->id)
-            ->get();
+            ->get()
+            ->map(function ($cart) {
+                // Always use the product's current selling price
+                $cart->price = $cart->db_selling_price;
+                return $cart;
+            });
         $getSum = DB::table('sales_order')
             ->selectRaw('sum(amount) as total')
             ->where('invoice', $invoice)

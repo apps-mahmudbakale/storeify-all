@@ -22,9 +22,8 @@ class  SaleController extends Controller
 
     public function createRandomPassword()
     {
-        $station = 'ALLIANCEMEDICAL';
-        $sum = DB::table('sales')->count() + 1;
-        $pass = substr($station, 0, 3) . "" . date('d') . "" . date('m') . "" . date('y') . "-" . sprintf('%04d', $sum);
+        $sum  = DB::table('sales')->count() + 1;
+        $pass = 'EVLO' . date('dmy') . '-' . sprintf('%04d', $sum);
         return strtoupper($pass);
     }
 
@@ -35,10 +34,13 @@ class  SaleController extends Controller
      */
     public function create()
     {
-        if (empty(session('invoice'))) {
-            session()->put('invoice', $this->createRandomPassword());
+        $sessionKey = 'invoice_' . auth()->id();
+
+        if (empty(session($sessionKey))) {
+            session()->put($sessionKey, $this->createRandomPassword());
         }
-        $invoice = session()->get('invoice');
+
+        $invoice = session()->get($sessionKey);
         return view('sales.create', compact('invoice'));
     }
 
@@ -58,7 +60,7 @@ class  SaleController extends Controller
         echo '<ul class="nav flex-column">';
         if ($products) {
             foreach ($products as $product) {
-                $url = base64_encode($product->id . ',' . session()->get('invoice') . ',' . $product->selling_price);
+                $url = base64_encode($product->id . ',' . session()->get('invoice_' . auth()->id()) . ',' . $product->selling_price);
                 echo '<li class="nav-item">
                 <a href="' . route('app.sales.cart', $url) . '" class="nav-link">
                   <strong>' . $product->name . '</strong>' . ($product->barcode ? ' <small class="text-muted">[' . $product->barcode . ']</small>' : '') . '
@@ -137,7 +139,7 @@ class  SaleController extends Controller
         ->where('invoice', $sale)
         ->where('user_id', auth()->user()->id)
         ->delete();
-        session()->forget('invoice');
+        session()->forget('invoice_' . auth()->id());
         return redirect()->route('app.sales.create')->with('success', 'Sales Saved');
     }
     public function saveSalePrint(Request $request, $invoice)
@@ -168,14 +170,14 @@ class  SaleController extends Controller
             'created_at' => now(),
         ]);
         DB::table('sales_order')->where('invoice', $invoice)->where('user_id',auth()->user()->id)->delete();
-        session()->forget('invoice');
+        session()->forget('invoice_' . auth()->id());
         return redirect()->route('app.sales.print', $invoice);
     }
 
     public function cancelSale($invoice)
     {
         DB::table('sales_order')->where('invoice', $invoice)->delete();
-        session()->forget('invoice');
+        session()->forget('invoice_' . auth()->id());
         return redirect()->route('app.sales.create');
     }
 

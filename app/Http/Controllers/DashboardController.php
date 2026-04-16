@@ -140,10 +140,13 @@ class DashboardController extends Controller
     public function customReport(Request $request, CustomReport $report)
     {
         $reports = $report->filter($request);
-        $words = $reports['words'];
-        $sales = $reports['filter'];
-        $sum = $reports['sum'];
-        return view('reports.custom', compact('sales', 'words', 'sum'));
+        $words   = $reports['words'];
+        $sales   = $reports['filter'];
+        $sum     = $reports['sum'];
+        $qty_sum = $reports['qty_sum'] ?? 0;
+        $products = Product::orderBy('name')->get();
+        $users    = User::where('name', '!=', 'Admin')->get();
+        return view('reports.custom', compact('sales', 'words', 'sum', 'qty_sum', 'products', 'users'));
     }
     public function customReportExcel($data)
     {
