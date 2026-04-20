@@ -58,46 +58,34 @@ class InvoiceController extends Controller
      */
     public function show(Invoice $invoice)
     {
-//        $items = DB::table('sales')
-//            ->select('sales.*', 'products.name as product', 'products.selling_price')
-//            ->join('products', 'products.id', '=', 'sales.product_id')
-//            ->where('sales.invoice', $invoice->invoice)
-//            // ->where('sales.user_id', auth()->user()->id)
-//            ->get();
-//        $sum = DB::table('sales')
-//            ->select(DB::raw('SUM(amount) as sum'))
-//            ->where('invoice', $invoice->invoice)
-//            // ->where('user_id', auth()->user()->id)
-//            ->first();
-//        $user = DB::table('sales')
-//            ->select('users.name')
-//            ->join('users', 'users.id', '=', 'sales.user_id')
-//            ->where('sales.invoice', $invoice->invoice)
-//            ->first();
-//            // dd($items);
-//        return view('invoices.show', compact('items', 'invoice', 'sum', 'user'));
+        $invoiceNumber = $invoice->invoice;
 
-
-
+        // Try invoice_orders first, fall back to sales table
         $items = DB::table('invoice_orders')
             ->select('invoice_orders.*', 'products.name as product', 'products.selling_price')
             ->join('products', 'products.id', '=', 'invoice_orders.product_id')
-            ->where('invoice_orders.invoice', $invoice->invoice)
-            ->where('invoice_orders.user_id', auth()->user()->id)
+            ->where('invoice_orders.invoice', $invoiceNumber)
             ->get();
-        $sum = DB::table('invoice_orders')
-            ->select(DB::raw('SUM(amount) as sum'))
-            ->where('invoice', $invoice->invoice)
-            ->where('user_id', auth()->user()->id)
-            ->first();
-        $user = DB::table('invoice_orders')
-            ->select('users.name')
-            ->join('users', 'users.id', '=', 'invoice_orders.user_id')
-            ->where('invoice_orders.invoice', $invoice)
-            ->first();
-        $invoice = $invoice->invoice;
 
-        return view('invoices.print', compact('items', 'invoice', 'sum', 'user'));
+        if ($items->isEmpty()) {
+            $items = DB::table('sales')
+                ->select('sales.*', 'products.name as product', 'products.selling_price')
+                ->join('products', 'products.id', '=', 'sales.product_id')
+                ->where('sales.invoice', $invoiceNumber)
+                ->get();
+        }
+
+        $sum  = (object)['sum' => $items->sum('amount')];
+        $user = DB::table('users')
+            ->join('sales', 'users.id', '=', 'sales.user_id')
+            ->where('sales.invoice', $invoiceNumber)
+            ->select('users.name')
+            ->first();
+
+        $hasUnpaidOrders = DB::table('invoice_orders')->where('invoice', $invoiceNumber)->exists();
+        $invoice = $invoiceNumber;
+
+        return view('invoices.print', compact('items', 'invoice', 'sum', 'user', 'hasUnpaidOrders'));
     }
 
     /**
@@ -144,28 +132,31 @@ class InvoiceController extends Controller
 
     public function invoicePrint($invoice)
     {
+        // Try invoice_orders first, fall back to sales table
         $items = DB::table('invoice_orders')
             ->select('invoice_orders.*', 'products.name as product', 'products.selling_price')
             ->join('products', 'products.id', '=', 'invoice_orders.product_id')
             ->where('invoice_orders.invoice', $invoice)
-            ->where('invoice_orders.user_id', auth()->user()->id)
             ->get();
-        $sum = DB::table('invoice_orders')
-            ->select(DB::raw('SUM(amount) as sum'))
-            ->where('invoice', $invoice)
-            ->where('user_id', auth()->user()->id)
-            ->first();
-        $user = DB::table('invoice_orders')
+
+        if ($items->isEmpty()) {
+            $items = DB::table('sales')
+                ->select('sales.*', 'products.name as product', 'products.selling_price')
+                ->join('products', 'products.id', '=', 'sales.product_id')
+                ->where('sales.invoice', $invoice)
+                ->get();
+        }
+
+        $sum  = (object)['sum' => $items->sum('amount')];
+        $user = DB::table('users')
+            ->join('sales', 'users.id', '=', 'sales.user_id')
+            ->where('sales.invoice', $invoice)
             ->select('users.name')
-            ->join('users', 'users.id', '=', 'invoice_orders.user_id')
-            ->where('invoice_orders.invoice', $invoice)
-            ->first();
-        $buyer = DB::table('invoices')
-            ->select('buyer_name', 'buyer_dept')
-            ->where('invoice', $invoice)
             ->first();
 
-        return view('invoices.print', compact('items', 'invoice', 'sum', 'user', 'buyer'));
+        $hasUnpaidOrders = DB::table('invoice_orders')->where('invoice', $invoice)->exists();
+
+        return view('invoices.print', compact('items', 'invoice', 'sum', 'user', 'hasUnpaidOrders'));
     }
 
     /**

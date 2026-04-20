@@ -180,4 +180,44 @@ class DashboardController extends Controller
     {
         return view('sync');
     }
+
+    public function vatReport(Request $request)
+    {
+        $query = DB::table('sales')
+            ->join('products', 'products.id', '=', 'sales.product_id')
+            ->join('users', 'users.id', '=', 'sales.user_id')
+            ->where('products.vat_percentage', '>', 0)
+            ->select(
+                'sales.invoice',
+                'products.name as product',
+                'products.vat_percentage',
+                'sales.quantity',
+                'sales.price',
+                'sales.amount',
+                DB::raw('ROUND(sales.amount * products.vat_percentage / 100, 2) as vat_amount'),
+                'users.name as user',
+                'sales.created_at'
+            );
+
+        if ($request->filled('from') && $request->filled('to')) {
+            $query->whereBetween('sales.created_at', [
+                \Carbon\Carbon::parse($request->from)->startOfDay(),
+                \Carbon\Carbon::parse($request->to)->endOfDay(),
+            ]);
+        }
+
+        $sales       = $query->orderBy('sales.created_at', 'desc')->get();
+        $totalSales  = $sales->sum('amount');
+        $totalVat    = $sales->sum('vat_amount');
+
+        return view('reports.vat', compact('sales', 'totalSales', 'totalVat'));
+    }
+
+    public function exportVatReportExcel(Request $request)
+    {
+        return Excel::download(
+            new \App\Exports\VatReportExport($request->all()),
+            'Evlo-VAT-Report-' . date('d-m-Y') . '.xlsx'
+        );
+    }
 }

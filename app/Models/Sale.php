@@ -16,6 +16,7 @@ class Sale extends Model implements AuditableInterface
         'product_id',
         'quantity',
         'amount',
+        'discount',
         'station_id',
         'user_id',
         'price',

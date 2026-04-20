@@ -244,7 +244,9 @@
                                             $('#save').click(() => {
                                                 var buyer_name = $('#buyer_name').val();
                                                 var buyer_dept = $('#buyer_dept').val();
-                                                var url = 'save/{{ $cart->invoice }}?buyer_name=' + encodeURIComponent(buyer_name) + '&buyer_dept=' + encodeURIComponent(buyer_dept);
+                                                var discount = $('#discount_amount').val() || 0;
+                                                var discount_type = $('#discount_type').val();
+                                                var url = 'save/{{ $cart->invoice }}?discount=' + discount + '&discount_type=' + discount_type;
                                                 Swal.fire({
                                                     title: 'Are you sure?',
                                                     text: "You won't be able to revert this!",
@@ -281,7 +283,9 @@
                                             $('#save_print').click(() => {
                                                 var buyer_name = $('#buyer_name').val();
                                                 var buyer_dept = $('#buyer_dept').val();
-                                                var url = 'print/{{ $cart->invoice }}?buyer_name=' + encodeURIComponent(buyer_name) + '&buyer_dept=' + encodeURIComponent(buyer_dept);
+                                                var discount = $('#discount_amount').val() || 0;
+                                                var discount_type = $('#discount_type').val();
+                                                var url = 'print/{{ $cart->invoice }}?discount=' + discount + '&discount_type=' + discount_type;
                                                 Swal.fire({
                                                     title: 'Are you sure?',
                                                     text: "You won't be able to revert this!",
@@ -333,31 +337,28 @@
                                         </strong>
                                     </td>
                                 </tr>
+                                <tr id="discount-row">
+                                    <td><strong style="font-size: 14px; color: #555;">Discount: </strong></td>
+                                    <td colspan="2">
+                                        <div class="input-group" style="max-width: 280px;">
+                                            <input type="number" id="discount_amount" min="0" step="0.01" value="0"
+                                                class="form-control" placeholder="0.00" style="max-width:120px;">
+                                            <div class="input-group-append">
+                                                <select id="discount_type" class="form-control">
+                                                    <option value="fixed">Fixed ({!! app(App\Settings\StoreSettings::class)->currency !!})</option>
+                                                    <option value="percent">Percent (%)</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong style="font-size: 16px; color: #c0392b;">Grand Total: </strong></td>
+                                    <td colspan="2"><strong style="font-size: 16px; color: #c0392b;">{!! app(App\Settings\StoreSettings::class)->currency !!} <span id="grand_total">{{ number_format($getSum->total, 2) }}</span></strong></td>
+                                </tr>
                             </tbody>
                         </table>
                         <br>
-
-                        <!-- Buyer Information Section -->
-                        <!-- <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="buyer_name"><strong>Staff Name:</strong></label>
-                                <select id="buyer_name" class="form-control">
-                                    <option value="">-- Select staff --</option>
-                                    @foreach($staff as $s)
-                                        <option value="{{ $s->name }}" {{ $s->name === auth()->user()->name ? 'selected' : '' }}>{{ $s->name }} ({{$s->staff_no}})</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="buyer_dept"><strong>Department:</strong></label>
-                                <select id="buyer_dept" class="form-control">
-                                    <option value="">-- Select department --</option>
-                                    @foreach($departments as $dept)
-                                        <option value="{{ $dept->name }}">{{ $dept->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div> -->
 
                         <br>
 
@@ -447,6 +448,18 @@
                     document.getElementById('result').style.display = 'none';
                 }
             });
+
+            // Discount grand total calculation
+            function recalcGrandTotal() {
+                var subtotal = parseFloat($('#total').text().replace(/,/g, '')) || 0;
+                var discount = parseFloat($('#discount_amount').val()) || 0;
+                var type = $('#discount_type').val();
+                var discountAmt = type === 'percent' ? (subtotal * discount / 100) : discount;
+                discountAmt = Math.min(discountAmt, subtotal);
+                var grand = subtotal - discountAmt;
+                $('#grand_total').text(grand.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+            }
+            $('#discount_amount, #discount_type').on('input change', recalcGrandTotal);
         })
     </script>
 </div>

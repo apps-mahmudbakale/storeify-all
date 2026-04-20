@@ -92,6 +92,9 @@ Route::group(['prefix' => 'app', 'as' => 'app.', 'middleware' => 'auth'], functi
     Route::post('categoryReport', [DashboardController::class, 'categoryReport'])->name('category.report');
     Route::get('categoryReport/excel', [DashboardController::class, 'exportCategoryReportExcel'])->name('category.report.excel');
     Route::get('categoryReport/pdf', [DashboardController::class, 'exportCategoryReportPdf'])->name('category.report.pdf');
+    Route::get('vatReport', [DashboardController::class, 'vatReport'])->name('vat.report');
+    Route::post('vatReport', [DashboardController::class, 'vatReport'])->name('vat.report.filter');
+    Route::get('vatReport/excel', [DashboardController::class, 'exportVatReportExcel'])->name('vat.report.excel');
     Route::get('invoice/{invoice}', [InvoiceController::class, 'invoice']);
     Route::get('invoice/print/{invoice}', [InvoiceController::class, 'invoicePrint'])->name('invoice.print');
     Route::post('invoice/confirm-payment/{invoice}', [InvoiceController::class, 'confirmPayment'])->name('invoice.confirm-payment');

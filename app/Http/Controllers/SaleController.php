@@ -109,69 +109,63 @@ class  SaleController extends Controller
 
     public function saveSale(Request $request, $sale)
     {
+        $subtotal = DB::table('sales_order')->where('invoice', $sale)->sum('amount');
+        $discount = $this->resolveDiscount($request, $subtotal);
 
-        $sales_order = DB::table('sales_order')
-            ->where('invoice', $sale)
-            ->get();
-            // dd($sales_order);
+        $sales_order = DB::table('sales_order')->where('invoice', $sale)->get();
         foreach ($sales_order as $order) {
-            $sales = Sale::create([
-                'invoice' => $sale,
+            Sale::create([
+                'invoice'    => $sale,
                 'product_id' => $order->product_id,
-                'quantity' => $order->quantity,
-                'amount' => $order->amount,
-                'user_id' => auth()->user()->id,
-                'price' => $order->price,
-                'buyer_name' => $request->input('buyer_name'),
-                'buyer_dept' => $request->input('buyer_dept')
+                'quantity'   => $order->quantity,
+                'amount'     => $order->amount,
+                'discount'   => $discount,
+                'user_id'    => auth()->user()->id,
+                'price'      => $order->price,
             ]);
-            $product = DB::table('products')
-                ->where('id',  $order->product_id)
+            DB::table('products')->where('id', $order->product_id)
                 ->update(['qty' => DB::raw('qty - ' . $order->quantity)]);
         }
-        $invoice = Invoice::create([
-            'invoice' => $sale,
-            'buyer_name' => $request->input('buyer_name'),
-            'buyer_dept' => $request->input('buyer_dept'),
-            'created_at' => now(),
-        ]);
-       $delete = DB::table('sales_order')
-        ->where('invoice', $sale)
-        ->where('user_id', auth()->user()->id)
-        ->delete();
+        Invoice::create(['invoice' => $sale, 'created_at' => now()]);
+        DB::table('sales_order')->where('invoice', $sale)->where('user_id', auth()->user()->id)->delete();
         session()->forget('invoice_' . auth()->id());
         return redirect()->route('app.sales.create')->with('success', 'Sales Saved');
     }
+
     public function saveSalePrint(Request $request, $invoice)
     {
+        $subtotal = DB::table('sales_order')->where('invoice', $invoice)->sum('amount');
+        $discount = $this->resolveDiscount($request, $subtotal);
+
         $sales_order = DB::table('sales_order')
-            ->where('invoice', $invoice)
-            ->where('user_id', auth()->user()->id)
-            ->get();
+            ->where('invoice', $invoice)->where('user_id', auth()->user()->id)->get();
         foreach ($sales_order as $order) {
-            $sales = Sale::create([
-                'invoice' => $invoice,
+            Sale::create([
+                'invoice'    => $invoice,
                 'product_id' => $order->product_id,
-                'quantity' => $order->quantity,
-                'amount' => $order->amount,
-                'user_id' => auth()->user()->id,
-                'price' => $order->price,
-                'buyer_name' => $request->input('buyer_name'),
-                'buyer_dept' => $request->input('buyer_dept')
+                'quantity'   => $order->quantity,
+                'amount'     => $order->amount,
+                'discount'   => $discount,
+                'user_id'    => auth()->user()->id,
+                'price'      => $order->price,
             ]);
-            $product = DB::table('products')
-                ->where('id',  $order->product_id)
+            DB::table('products')->where('id', $order->product_id)
                 ->update(['qty' => DB::raw('qty - ' . $order->quantity)]);
         }
-        $invoices = Invoice::create([
-            'invoice' => $invoice,
-            'buyer_name' => $request->input('buyer_name'),
-            'buyer_dept' => $request->input('buyer_dept'),
-            'created_at' => now(),
-        ]);
-        DB::table('sales_order')->where('invoice', $invoice)->where('user_id',auth()->user()->id)->delete();
+        Invoice::create(['invoice' => $invoice, 'created_at' => now()]);
+        DB::table('sales_order')->where('invoice', $invoice)->where('user_id', auth()->user()->id)->delete();
         session()->forget('invoice_' . auth()->id());
         return redirect()->route('app.sales.print', $invoice);
+    }
+
+    private function resolveDiscount(Request $request, float $subtotal): float
+    {
+        $amount = (float) $request->input('discount', 0);
+        $type   = $request->input('discount_type', 'fixed');
+        if ($type === 'percent') {
+            $amount = $subtotal * ($amount / 100);
+        }
+        return min(round($amount, 2), $subtotal);
     }
 
     public function cancelSale($invoice)
@@ -196,16 +190,17 @@ class  SaleController extends Controller
             ->get();
 
         $subtotal = $items->sum('amount');
+        $discount = DB::table('sales')->where('invoice', $invoice)->value('discount') ?? 0;
         // Only apply 7.5% VAT on items that have vat_percentage set
         $vatableAmount = $items->where('vat_percentage', '>', 0)->sum('amount');
-        $vat = round($vatableAmount * 0.075, 2);
-        $total = $subtotal + $vat;
+        $vat   = round($vatableAmount * 0.075, 2);
+        $total = $subtotal - $discount + $vat;
 
-        $sum = (object)['sum' => $total, 'subtotal' => $subtotal, 'vat' => $vat];
+        $sum = (object)['sum' => $total, 'subtotal' => $subtotal, 'vat' => $vat, 'discount' => $discount];
 
         $user = DB::table('sales')
             ->select('users.name')
-            ->join('users', 'users.id', '=', 'sales.user_id')
+            ->leftJoin('users', 'users.id', '=', 'sales.user_id')
             ->where('sales.invoice', $invoice)
             ->first();
 

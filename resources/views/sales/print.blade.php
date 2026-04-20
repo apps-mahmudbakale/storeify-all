@@ -63,6 +63,12 @@
                     <td colspan="3" style="font-weight:bold;text-align:right;">Subtotal:</td>
                     <td style="font-weight:bold;text-align:center;">{!! app(App\Settings\StoreSettings::class)->currency !!} {{ number_format($sum->subtotal ?? $sum->sum, 2) }}</td>
                 </tr>
+                @if(($sum->discount ?? 0) > 0)
+                <tr>
+                    <td colspan="3" style="font-weight:bold;text-align:right;color:#c0392b;">Discount:</td>
+                    <td style="font-weight:bold;text-align:center;color:#c0392b;">- {!! app(App\Settings\StoreSettings::class)->currency !!} {{ number_format($sum->discount, 2) }}</td>
+                </tr>
+                @endif
                 @if(($sum->vat ?? 0) > 0)
                 <tr>
                     <td colspan="3" style="font-weight:bold;text-align:right;">VAT (7.5%):</td>
@@ -77,18 +83,28 @@
         </table>
         <br>
         <p class="centered">Transaction Processed By
-            <br>{{ ucfirst($user->name) }}
+            <br>{{ ucfirst($user->name ?? 'N/A') }}
         </p>
         <p class="centered">Thanks for your purchase!
             <br>{!! app(App\Settings\StoreSettings::class)->store_name ?: 'Storeify' !!}
         </p>
     </div>
-    <button id="btnPrint" class="hidden-print">Print</button>
-    <button onclick="window.history.back()" class="hidden-print">Back</button>
+
+    <div class="hidden-print" style="text-align:center; margin: 16px 0; display: flex; gap: 8px; justify-content: center;">
+        <button onclick="window.print()" style="padding: 8px 20px; background:#28a745; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:13px;">
+            🖨 Print
+        </button>
+        <button onclick="window.close()" style="padding: 8px 20px; background:#6c757d; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:13px;">
+            ✕ Close
+        </button>
+    </div>
+
     <script>
-        // Auto-print when page loads
         window.onload = function() {
-            window.print();
+            // Auto-print only on first save, not on reprint
+            if (!window.location.search.includes('reprint=1')) {
+                window.print();
+            }
         };
     </script>
 </body>
