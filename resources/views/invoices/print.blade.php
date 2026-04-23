@@ -37,6 +37,22 @@
             <address class="small-text">
                Evlo Pharmacy <br>
                 (TIN: 32378872-0001)<br>
+                @php
+                    $settings = app(App\Settings\StoreSettings::class);
+                @endphp
+                @if($settings->bank_name || $settings->account_name || $settings->account_number)
+                    <br>
+                    <strong>Bank Details:</strong><br>
+                    @if($settings->bank_name)
+                        Bank: {{ $settings->bank_name }}<br>
+                    @endif
+                    @if($settings->account_name)
+                        Account Name: {{ $settings->account_name }}<br>
+                    @endif
+                    @if($settings->account_number)
+                        Account Number: {{ $settings->account_number }}<br>
+                    @endif
+                @endif
 {{--                To transfer from your bank account, <br>--}}
 {{--                choose either Paystack or Rave payment <br>--}}
 {{--                gateway and use the bank transfer option<br>--}}
