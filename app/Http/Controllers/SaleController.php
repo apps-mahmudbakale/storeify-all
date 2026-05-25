@@ -134,28 +134,39 @@ class  SaleController extends Controller
 
     public function saveSalePrint(Request $request, $invoice)
     {
-        $subtotal = DB::table('sales_order')->where('invoice', $invoice)->sum('amount');
-        $discount = $this->resolveDiscount($request, $subtotal);
+        try {
+            DB::beginTransaction();
+            
+            $subtotal = DB::table('sales_order')->where('invoice', $invoice)->sum('amount');
+            $discount = $this->resolveDiscount($request, $subtotal);
 
-        $sales_order = DB::table('sales_order')
-            ->where('invoice', $invoice)->where('user_id', auth()->user()->id)->get();
-        foreach ($sales_order as $order) {
-            Sale::create([
-                'invoice'    => $invoice,
-                'product_id' => $order->product_id,
-                'quantity'   => $order->quantity,
-                'amount'     => $order->amount,
-                'discount'   => $discount,
-                'user_id'    => auth()->user()->id,
-                'price'      => $order->price,
-            ]);
-            DB::table('products')->where('id', $order->product_id)
-                ->update(['qty' => DB::raw('qty - ' . $order->quantity)]);
+            $sales_order = DB::table('sales_order')
+                ->where('invoice', $invoice)->where('user_id', auth()->user()->id)->get();
+            
+            foreach ($sales_order as $order) {
+                Sale::create([
+                    'invoice'    => $invoice,
+                    'product_id' => $order->product_id,
+                    'quantity'   => $order->quantity,
+                    'amount'     => $order->amount,
+                    'discount'   => $discount,
+                    'user_id'    => auth()->user()->id,
+                    'price'      => $order->price,
+                ]);
+                DB::table('products')->where('id', $order->product_id)
+                    ->update(['qty' => DB::raw('qty - ' . $order->quantity)]);
+            }
+            Invoice::create(['invoice' => $invoice, 'created_at' => now()]);
+            DB::table('sales_order')->where('invoice', $invoice)->where('user_id', auth()->user()->id)->delete();
+            
+            DB::commit();
+            session()->forget('invoice_' . auth()->id());
+            return redirect()->route('app.sales.print', $invoice);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('app.sales.create')
+                ->with('error', 'An error occurred while saving the sale: ' . $e->getMessage());
         }
-        Invoice::create(['invoice' => $invoice, 'created_at' => now()]);
-        DB::table('sales_order')->where('invoice', $invoice)->where('user_id', auth()->user()->id)->delete();
-        session()->forget('invoice_' . auth()->id());
-        return redirect()->route('app.sales.print', $invoice);
     }
 
     private function resolveDiscount(Request $request, float $subtotal): float
@@ -188,6 +199,33 @@ class  SaleController extends Controller
             ->join('products', 'products.id', '=', 'sales.product_id')
             ->where('sales.invoice', $invoice)
             ->get();
+
+        // If no items found, retry with delay (race condition recovery)
+        if ($items->isEmpty()) {
+            // Try up to 3 times with 500ms delay between attempts
+            for ($attempt = 1; $attempt <= 3; $attempt++) {
+                usleep(500000); // 500ms delay
+                
+                $items = DB::table('sales')
+                    ->select('sales.*', 'products.name as product', 'products.selling_price', 'products.vat_percentage')
+                    ->join('products', 'products.id', '=', 'sales.product_id')
+                    ->where('sales.invoice', $invoice)
+                    ->get();
+                
+                if (!$items->isEmpty()) {
+                    break;
+                }
+            }
+            
+            // If still empty, check sales_order as fallback
+            if ($items->isEmpty()) {
+                $items = DB::table('sales_order')
+                    ->select('sales_order.*', 'products.name as product', 'products.selling_price')
+                    ->join('products', 'products.id', '=', 'sales_order.product_id')
+                    ->where('sales_order.invoice', $invoice)
+                    ->get();
+            }
+        }
 
         $subtotal = $items->sum('amount');
         $discount = DB::table('sales')->where('invoice', $invoice)->value('discount') ?? 0;

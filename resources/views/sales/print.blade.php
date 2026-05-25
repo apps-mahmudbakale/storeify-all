@@ -14,9 +14,51 @@
         .ticket { width: 155px; max-width: 155px; }
         img { max-width: inherit; width: inherit; }
         @media print { .hidden-print, .hidden-print * { display: none !important; } }
+        
+        /* Loading screen styles */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            flex-direction: column;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            font-size: 16px;
+            color: #333;
+            font-family: Arial, sans-serif;
+        }
     </style>
 </head>
 <body>
+    <!-- Loading Screen -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Processing your receipt...</div>
+    </div>
+
     <div class="ticket" align="center" style="max-width: 1000px; width: 328px;">
         <img src="{{ !empty(app(App\Settings\StoreSettings::class)->store_logo) ? asset('storage/store/' . app(App\Settings\StoreSettings::class)->store_logo) : asset('assets/img/logo.png') }}"
             alt="Logo" style="width: 100px">
@@ -101,10 +143,17 @@
 
     <script>
         window.onload = function() {
-            // Auto-print only on first save, not on reprint
-            if (!window.location.search.includes('reprint=1')) {
-                window.print();
-            }
+            // Hide loading overlay after 1.5 seconds
+            setTimeout(function() {
+                const overlay = document.getElementById('loadingOverlay');
+                if (overlay) {
+                    overlay.style.display = 'none';
+                }
+                // Auto-print only on first save, not on reprint
+                if (!window.location.search.includes('reprint=1')) {
+                    window.print();
+                }
+            }, 1500);
         };
     </script>
 </body>
