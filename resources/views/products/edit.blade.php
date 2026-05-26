@@ -47,7 +47,7 @@
                                     value="{{ old('barcode', isset($product) ? $product->barcode : '') }}" class="form-control"
                                     placeholder="Barcode">
                             </div>
-                            <div class="form-group">
+                            <!-- <div class="form-group">
                                 <label>Category</label>
                                 <select name="product_category" class="form-control">
                                     <option selected>{{ $product->product_category }}</option>
@@ -63,7 +63,7 @@
                                     <option>Stationaries</option>
                                     
                                 </select>
-                            </div>
+                            </div> -->
                             <div class="form-group">
                                 <label>Buying Price</label>
                                 <input type="number" name="buying_price" id="buying"

@@ -36,7 +36,7 @@ class ProductsImport implements ToCollection, WithHeadingRow
             $expiry   = $row['expiry_date'] ?? $row['expiry'] ?? null;
             $category = $row['category'] ?? null;
             $barcode  = !empty($row['barcode']) ? (string) $row['barcode'] : null;
-            $vat      = $row['vat_percentage'] ?? $row['vat'] ?? 0;
+            $vat      = $row['vat_percentage'] ?? $row['vat'] ?? 7.50;
 
             // Parse expiry: all formats are MM/YY, MM/YYYY — always use last day of month
             $parsedExpiry = null;
