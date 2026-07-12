@@ -21,7 +21,7 @@ class CheckServerSessionExpired
         $currentDate = now();
         
         // Create a date for July 17th of the current year
-        $blockDate = now()->setMonth(7)->setDay(11)->startOfDay();
+        $blockDate = now()->setMonth(7)->setDay(17)->startOfDay();
         
         // If we're on or after July 17th of any year, show the session expired page
         if ($currentDate->gte($blockDate)) {
