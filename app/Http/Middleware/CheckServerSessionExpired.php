@@ -17,13 +17,13 @@ class CheckServerSessionExpired
      */
     public function handle(Request $request, Closure $next)
     {
-        // Check if current date is July 17th or later
+        // Check if current date is July 17th or later (next year)
         $currentDate = now();
         
-        // Create a date for July 17th of the current year
-        $blockDate = now()->setMonth(7)->setDay(17)->startOfDay();
+        // Create a date for July 17th of next year
+        $blockDate = now()->addYear()->setMonth(7)->setDay(17)->startOfDay();
         
-        // If we're on or after July 17th of any year, show the session expired page
+        // If we're on or after July 17th of next year, show the session expired page
         if ($currentDate->gte($blockDate)) {
             return response()->view('errors.session-expired', [], 503);
         }
