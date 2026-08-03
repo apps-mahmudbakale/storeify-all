@@ -21,7 +21,7 @@
     <div class="row invoice-header">
         <div class="col-12 col-sm-6 justify-content-sm-between text-center text-sm-left invoice-col">
 
-            <p><img src="{{asset('logo.png')}} " title=""></p>
+            <p><img src="{{asset('logo.png') . '?v=' . time()}} " title=""></p>
             <h3>Invoice #{{$invoice->invoice}}</h3>
 
         </div>

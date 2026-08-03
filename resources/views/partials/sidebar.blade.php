@@ -2,7 +2,7 @@
   <aside class="main-sidebar sidebar-dark-primary elevation-4">
       <!-- Brand Logo -->
       <a href="{{ route('app.dashboard') }}" class="brand-link">
-          <img src="{{ asset('logo.png') }}"
+          <img src="{{ asset('logo.png') . '?v=' . time() }}"
               alt="Store Logo" class="brand-image  elevation-3" style="opacity: .8">
           <span
               class="brand-text font-weight-light">{{ app(App\Settings\StoreSettings::class)->store_name ?: 'Storeify' }}</span>
