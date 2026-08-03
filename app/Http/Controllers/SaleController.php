@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Sale;
 use App\Models\Invoice;
 use App\Models\Product;
+use App\Models\ProductHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -22,9 +23,21 @@ class  SaleController extends Controller
 
     public function createRandomPassword()
     {
-        $station = 'ALLIANCEMEDICAL';
+        $station = 'SAHAD';
         $sum = DB::table('sales')->count() + 1;
-        $pass = substr($station, 0, 3) . "" . date('d') . "" . date('m') . "" . date('y') . "-" . sprintf('%04d', $sum);
+        
+        // Get current logged-in user's initials
+        $user = auth()->user();
+        $userInitials = '';
+        if ($user && $user->name) {
+            $nameParts = explode(' ', $user->name);
+            $userInitials = strtoupper($nameParts[0][0] ?? '');
+            if (isset($nameParts[1])) {
+                $userInitials .= strtoupper($nameParts[1][0] ?? '');
+            }
+        }
+        
+        $pass = substr($station, 0, 3) . "" . $userInitials . "" . date('d') . "" . date('m') . "" . date('y') . "-" . sprintf('%04d', $sum);
         return strtoupper($pass);
     }
 
@@ -35,10 +48,9 @@ class  SaleController extends Controller
      */
     public function create()
     {
-        if (empty(session('invoice'))) {
-            session()->put('invoice', $this->createRandomPassword());
-        }
-        $invoice = session()->get('invoice');
+        // Always generate a fresh invoice for each new sale
+        $invoice = $this->createRandomPassword();
+        session()->put('invoice', $invoice);
         return view('sales.create', compact('invoice'));
     }
 
@@ -120,9 +132,29 @@ class  SaleController extends Controller
                 'buyer_name' => $request->input('buyer_name'),
                 'buyer_dept' => $request->input('buyer_dept')
             ]);
-            $product = DB::table('products')
+            
+            // Get product before update
+            $product = Product::find($order->product_id);
+            $qtyBefore = $product->qty;
+            $qtyAfter = $qtyBefore - $order->quantity;
+            
+            // Update product quantity
+            DB::table('products')
                 ->where('id',  $order->product_id)
                 ->update(['qty' => DB::raw('qty - ' . $order->quantity)]);
+            
+            // Record product history
+            ProductHistory::create([
+                'product_id' => $order->product_id,
+                'user_id' => auth()->user()->id,
+                'type' => 'sale',
+                'qty_before' => $qtyBefore,
+                'qty_after' => $qtyAfter,
+                'qty_changed' => $order->quantity,
+                'invoice' => $sale,
+                'buyer_name' => $request->input('buyer_name'),
+                'buyer_dept' => $request->input('buyer_dept'),
+            ]);
         }
         $invoice = Invoice::create([
             'invoice' => $sale,
@@ -154,9 +186,29 @@ class  SaleController extends Controller
                 'buyer_name' => $request->input('buyer_name'),
                 'buyer_dept' => $request->input('buyer_dept')
             ]);
-            $product = DB::table('products')
+            
+            // Get product before update
+            $product = Product::find($order->product_id);
+            $qtyBefore = $product->qty;
+            $qtyAfter = $qtyBefore - $order->quantity;
+            
+            // Update product quantity
+            DB::table('products')
                 ->where('id',  $order->product_id)
                 ->update(['qty' => DB::raw('qty - ' . $order->quantity)]);
+            
+            // Record product history
+            ProductHistory::create([
+                'product_id' => $order->product_id,
+                'user_id' => auth()->user()->id,
+                'type' => 'sale',
+                'qty_before' => $qtyBefore,
+                'qty_after' => $qtyAfter,
+                'qty_changed' => $order->quantity,
+                'invoice' => $invoice,
+                'buyer_name' => $request->input('buyer_name'),
+                'buyer_dept' => $request->input('buyer_dept'),
+            ]);
         }
         $invoices = Invoice::create([
             'invoice' => $invoice,

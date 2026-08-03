@@ -23,4 +23,9 @@ class Product extends Model implements Auditable
         'expiry_date'
     ];
 
+    public function histories()
+    {
+        return $this->hasMany(ProductHistory::class);
+    }
+
 }

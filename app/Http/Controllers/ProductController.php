@@ -123,6 +123,7 @@ class ProductController extends Controller
     public function history(Product $product)
     {
         $audits = $product->audits()->with('user')->orderBy('created_at', 'desc')->get();
-        return view('products.history', compact('product', 'audits'));
+        $productHistories = $product->histories()->with('user')->orderBy('created_at', 'desc')->get();
+        return view('products.history', compact('product', 'audits', 'productHistories'));
     }
 }
