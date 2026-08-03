@@ -23,7 +23,7 @@ class  SaleController extends Controller
 
     public function createRandomPassword()
     {
-        $station = 'SAHAD';
+        $station = 'KATSINADIALYSIS';
         $sum = DB::table('sales')->count() + 1;
         
         // Get current logged-in user's initials
