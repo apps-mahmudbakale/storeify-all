@@ -16,6 +16,7 @@ use App\Http\Controllers\RequestsController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReturnSaleController;
+use App\Http\Controllers\StockClosingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -99,6 +100,14 @@ Route::group(['prefix' => 'app', 'as' => 'app.', 'middleware' => 'auth'], functi
     Route::resource('settings', SettingsController::class)->except('store', 'update', 'edit', 'show', 'destroy');
     Route::post('settings', [SettingsController::class, 'updateStoreSettings'])->name('update.store.settings');
     Route::post('settings/currency', [SettingsController::class, 'updateStoreCurrency'])->name('update.store.currency');
+    
+    // Stock Closing Routes
+    Route::get('stock-closing', [StockClosingController::class, 'index'])->name('stock-closing.index');
+    Route::get('stock-closing/{product}/create', [StockClosingController::class, 'create'])->name('stock-closing.create');
+    Route::post('stock-closing/{product}', [StockClosingController::class, 'store'])->name('stock-closing.store');
+    Route::get('stock-closing/{product}/show', [StockClosingController::class, 'show'])->name('stock-closing.show');
+    Route::get('stock-closing-report', [StockClosingController::class, 'report'])->name('stock-closing.report');
+    
     Route::post('logout', [LogoutController::class, 'perform'])->name('logout');
 });
 // if (env('APP_ENV') === 'production') {
