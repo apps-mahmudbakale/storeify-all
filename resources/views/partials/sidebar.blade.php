@@ -147,6 +147,12 @@
                                       <p>Category Report</p>
                                   </a>
                               </li>
+                              <li class="nav-item">
+                                  <a href="{{ route('app.stock-closing.index') }}" class="nav-link">
+                                      <i class="fa fa-boxes nav-icon"></i>
+                                      <p>Stock Closing</p>
+                                  </a>
+                              </li>
                           </ul>
                       </li>
                   @endcan
