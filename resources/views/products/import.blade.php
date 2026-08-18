@@ -29,7 +29,15 @@
                 @if (session('import_success'))
                     <div class="alert alert-success alert-dismissible fade show">
                         <button type="button" class="close" data-dismiss="alert">&times;</button>
-                        <strong>Success!</strong> {{ session('import_success') }}
+                        <strong>✓ Success!</strong> {{ session('import_success') }}
+                    </div>
+                @endif
+                
+                <!-- Info Message -->
+                @if (session('import_info'))
+                    <div class="alert alert-info alert-dismissible fade show">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        <strong>ℹ Info:</strong> {{ session('import_info') }}
                     </div>
                 @endif
                 
@@ -37,7 +45,7 @@
                 @if (session('import_errors'))
                     <div class="alert alert-danger alert-dismissible fade show">
                         <button type="button" class="close" data-dismiss="alert">&times;</button>
-                        <strong>Import Errors:</strong>
+                        <strong>⚠ Import Errors:</strong>
                         <ul class="mt-2 mb-0">
                             @foreach (session('import_errors') as $error)
                                 <li>{{ $error }}</li>
