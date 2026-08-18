@@ -18,21 +18,26 @@ class ProductsImport implements ToCollection,  WithHeadingRow
                 continue;
             }
 
+            $productName = trim($row['product']);
             $sellingPrice = isset($row['selling_price']) && !empty($row['selling_price'])
-                ? $row['selling_price']
-                : $row['cost'] * app(StoreSettings::class)->sell_margin;
+                ? floatval($row['selling_price'])
+                : floatval($row['cost']) * app(StoreSettings::class)->sell_margin;
+
+            // Cast prices to ensure proper decimal format
+            $buyingPrice = floatval($row['cost']);
+            $quantity = intval($row['quantity']);
 
             Product::updateOrCreate(
-                ['name' => ucfirst($row['product'])],
+                ['name' => $productName],
                 [
-                    'buying_price' => $row['cost'],
+                    'buying_price' => $buyingPrice,
                     'selling_price' => $sellingPrice,
                     'expiry_date' => $row['expiry'],
                     'product_category' => $row['category'],
                 ]
             );
 
-            Product::where('name', ucfirst($row['product']))->increment('qty', $row['quantity']);
+            Product::where('name', $productName)->increment('qty', $quantity);
         }
     }
 }
