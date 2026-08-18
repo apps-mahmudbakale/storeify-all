@@ -17,6 +17,7 @@ class ProductsExport implements FromCollection, WithHeadings
         return [
             'Product',
             'Cost Price',
+            'Category',
             'Selling Price',
             'Quantity',
             'Expiry Date'
@@ -24,6 +25,6 @@ class ProductsExport implements FromCollection, WithHeadings
     }
     public function collection()
     {
-        return Product::query()->get(['name', 'buying_price', 'selling_price', 'qty', 'expiry_date']);
+        return Product::query()->get(['name', 'buying_price', 'product_category' ,'selling_price', 'qty', 'expiry_date']);
     }
 }
