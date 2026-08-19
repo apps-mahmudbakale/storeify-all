@@ -8,8 +8,6 @@
         <th>Quantity</th>
         <th>Sold Rate</th>
         <th>Amount</th>
-        <th>Staff Name</th>
-        <th>Department</th>
         <th>Sold By</th>
         <th>Date</th>
     </tr>
@@ -24,8 +22,6 @@
             <td>{{ $sale->quantity }}</td>
             <td>{{ $sale->price }}</td>
             <td>{{ $sale->amount }}</td>
-            <td>{{ $sale->buyer_name ?? 'N/A' }}</td>
-            <td>{{ $sale->buyer_dept ?? 'N/A' }}</td>
             <td>{{ $sale->user }}</td>
             <td>{{ \Carbon\Carbon::parse($sale->created_at)->toFormattedDayDateString() }}</td>
         </tr>

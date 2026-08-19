@@ -60,24 +60,6 @@
                     <input type="date" name="to" class="form-control" value="{{ request('to') }}">
                 </div>
                 <div class="col-md-2">
-                    Buyer Name
-                    <select name="buyer_name" class="form-control select2">
-                        <option value="">Select Buyer</option>
-                        @foreach($buyer_names as $name)
-                            <option value="{{ $name }}" {{ request('buyer_name') == $name ? 'selected' : '' }}>{{ $name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    Buyer Department
-                    <select name="buyer_dept" class="form-control select2">
-                        <option value="">Select Department</option>
-                        @foreach($buyer_depts as $dept)
-                            <option value="{{ $dept }}" {{ request('buyer_dept') == $dept ? 'selected' : '' }}>{{ $dept }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-2">
                     Product
                     <select name="product" class="form-control select2">
                         <option value="">Select Product</option>
@@ -128,8 +110,6 @@
                             <th>Quantity</th>
                             <th>Sold Rate</th>
                             <th>Amount</th>
-                            <th>Staff Name</th>
-                            <th>Department</th>
                             <th>Sold By</th>
                             <th>Date</th>
                         </tr>
@@ -144,8 +124,6 @@
                         <td>{{$sale->quantity}}</td>
                         <td>{!! app(App\Settings\StoreSettings::class)->currency !!}  {{number_format($sale->price)}}</td>
                         <td>{!! app(App\Settings\StoreSettings::class)->currency !!}  {{number_format($sale->amount)}}</td>
-                        <td>{{$sale->buyer_name ?? 'N/A'}}</td>
-                        <td>{{$sale->buyer_dept ?? 'N/A'}}</td>
                         <td>{{$sale->user}}</td>
                         <td>{{\Carbon\Carbon::parse($sale->created_at)->toFormattedDayDateString()}}</td>
                         </tr>

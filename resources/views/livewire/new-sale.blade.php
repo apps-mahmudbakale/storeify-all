@@ -235,9 +235,7 @@
                                             })
 
                                             $('#save').click(() => {
-                                                var buyer_name = $('#buyer_name').val();
-                                                var buyer_dept = $('#buyer_dept').val();
-                                                var url = 'save/{{ $cart->invoice }}?buyer_name=' + encodeURIComponent(buyer_name) + '&buyer_dept=' + encodeURIComponent(buyer_dept);
+                                                var url = 'save/{{ $cart->invoice }}';
                                                 Swal.fire({
                                                     title: 'Are you sure?',
                                                     text: "You won't be able to revert this!",
@@ -272,9 +270,7 @@
                                             });
 
                                             $('#save_print').click(() => {
-                                                var buyer_name = $('#buyer_name').val();
-                                                var buyer_dept = $('#buyer_dept').val();
-                                                var url = 'print/{{ $cart->invoice }}?buyer_name=' + encodeURIComponent(buyer_name) + '&buyer_dept=' + encodeURIComponent(buyer_dept);
+                                                var url = 'print/{{ $cart->invoice }}';
                                                 Swal.fire({
                                                     title: 'Are you sure?',
                                                     text: "You won't be able to revert this!",
@@ -292,9 +288,7 @@
                                             });
 
                                             $('#invoice').click(() => {
-                                                var buyer_name = $('#buyer_name').val();
-                                                var buyer_dept = $('#buyer_dept').val();
-                                                var url = '/app/invoice/{{ $cart->invoice }}?buyer_name=' + encodeURIComponent(buyer_name) + '&buyer_dept=' + encodeURIComponent(buyer_dept);
+                                                var url = '/app/invoice/{{ $cart->invoice }}';
                                                 Swal.fire({
                                                     title: 'Are you sure?',
                                                     text: "You won't be able to revert this!",
@@ -327,30 +321,6 @@
                                 </tr>
                             </tbody>
                         </table>
-                        <br>
-
-                        <!-- Buyer Information Section -->
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="buyer_name"><strong>Staff Name:</strong></label>
-                                <select id="buyer_name" class="form-control">
-                                    <option value="">-- Select staff --</option>
-                                    @foreach($staff as $s)
-                                        <option value="{{ $s->name }}" {{ $s->name === auth()->user()->name ? 'selected' : '' }}>{{ $s->name }} ({{$s->staff_no}})</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="buyer_dept"><strong>Department:</strong></label>
-                                <select id="buyer_dept" class="form-control">
-                                    <option value="">-- Select department --</option>
-                                    @foreach($departments as $dept)
-                                        <option value="{{ $dept->name }}">{{ $dept->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-
                         <br>
 
                         <div class="btn-group pull-right">
