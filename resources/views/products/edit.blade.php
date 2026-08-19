@@ -45,16 +45,10 @@
                                 <label>Category</label>
                                 <select name="product_category" class="form-control">
                                     <option selected>{{ $product->product_category }}</option>
-                                    <option>Bio Med</option>
-                                    <option>Medical Consumables</option>
-                                    <option>Dialysis Items</option>
-                                    <option>Laboratory Items</option>
-                                    <option>⁠Maintenance</option>
-                                    <option>⁠⁠Miscellaneous</option>
-                                    <option>Pharmacy</option>
-                                    <option>Radiology</option>
-                                    <option value="Sanitary">Sanitary</option>
-                                    <option>Stationaries</option>
+                                   <option>Drinks</option>
+                                    <option>Protein</option>
+                                    <option>Food</option>
+                                    <option>Snacks</option>
                                     
                                 </select>
                             </div>
@@ -77,6 +71,9 @@
                             <div class="form-group">
                                 <label>Unit</label>
                                 <select name="unit" class="form-control">
+                                    <option value="plate"
+                                        {{ old('unit', isset($product) ? $product->unit : '') === 'plate' ? 'selected' : '' }}>
+                                        Plate(s)</option>
                                     <option value="pcs"
                                         {{ old('unit', isset($product) ? $product->unit : '') === 'pcs' ? 'selected' : '' }}>
                                         Pieces (pcs)</option>
@@ -86,9 +83,6 @@
                                     <option value="bottles"
                                         {{ old('unit', isset($product) ? $product->unit : '') === 'bottles' ? 'selected' : '' }}>
                                         Bottles</option>
-                                    <option value="cartons"
-                                        {{ old('unit', isset($product) ? $product->unit : '') === 'cartons' ? 'selected' : '' }}>
-                                        Cartons</option>
                                 </select>
                             </div>
                             <div class="form-group">

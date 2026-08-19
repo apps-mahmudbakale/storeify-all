@@ -51,10 +51,10 @@
                                 <label>Buying Price</label>
                                 <input type="text" name="buying_price" id="buying" class="form-control" placeholder="Buying Price">
                             </div>
-                            {{-- <div class="form-group">
+                            <div class="form-group">
                                 <label>Selling Price</label>
                                 <input type="text" name="selling_price" id="selling"  class="form-control" placeholder="Selling Price">
-                            </div> --}}
+                            </div> 
                             <div class="form-group">
                                 <label>Quantity in Stock</label>
                                 <input type="number" name="qty" class="form-control" placeholder="Quantity in Stock">
