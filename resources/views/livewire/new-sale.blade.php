@@ -9,6 +9,36 @@
             border: 1px #CDCDCD solid;
             background-color: white;
         }
+        
+        .loader {
+            display: none;
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            z-index: 10;
+        }
+        
+        .loader.active {
+            display: block;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .search-wrapper {
+            position: relative;
+        }
     </style>
     <div class="content-wrapper">
         <!-- Content Header (Page header) -->
@@ -34,8 +64,13 @@
             <div class="container-fluid">
                 <div class="card">
                     <div class="card-header">
-                        <input type="text" class="form-control search_keyword" id="search_keyword" autofocus
-                            placeholder="Search....." style="width: 100%; border-radius: 3px;">
+                        <div class="search-wrapper">
+                            <input type="text" class="form-control search_keyword" id="search_keyword" autofocus
+                                placeholder="Search....." style="width: 100%; border-radius: 3px; padding-right: 40px;">
+                            <div class="loader" id="search_loader">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
                         <div id="result" class=""></div>
                     </div>
                     <!-- /.card-header -->
@@ -346,6 +381,9 @@
                 // alert(search_keyword_value);
                 var dataString = 'search_keyword=' + search_keyword_value;
                 if (search_keyword_value !== '') {
+                    // Show loader
+                    document.getElementById('search_loader').classList.add('active');
+                    
                     const formData = new FormData();
                     formData.append('search_keyword', search_keyword_value);
                     formData.append('_token', "{{ csrf_token() }}");
@@ -362,11 +400,18 @@
                         .then(html => {
                             document.getElementById('result').innerHTML = html;
                             document.getElementById('result').style.display = 'block';
+                            // Hide loader
+                            document.getElementById('search_loader').classList.remove('active');
                             // console.log(html);
                         })
                         .catch(error => {
                             console.error('Fetch error:', error);
+                            // Hide loader on error
+                            document.getElementById('search_loader').classList.remove('active');
                         });
+                } else {
+                    document.getElementById('result').style.display = 'none';
+                    document.getElementById('search_loader').classList.remove('active');
                 }
                 return false;
             })

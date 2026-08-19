@@ -67,11 +67,11 @@ class  SaleController extends Controller
         echo '<ul class="nav flex-column">';
         if ($products) {
             foreach ($products as $product) {
-                $url = base64_encode($product->id . ',' . session()->get('invoice') . ',' . $product->buying_price);
+                $url = base64_encode($product->id . ',' . session()->get('invoice') . ',' . $product->selling_price);
                 echo '<li class="nav-item">
                 <a href="' . route('app.sales.cart', $url) . '" class="nav-link">
                   <strong>' . $product->name . '</strong>
-                  <span class="float-right badge bg-primary">&#8358; ' . number_format($product->buying_price, 2) . '</span>
+                  <span class="float-right badge bg-primary">&#8358; ' . number_format($product->selling_price, 2) . '</span>
                 </a>
               </li>';
             }
