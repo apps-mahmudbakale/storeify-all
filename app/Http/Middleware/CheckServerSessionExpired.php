@@ -17,13 +17,13 @@ class CheckServerSessionExpired
      */
     public function handle(Request $request, Closure $next)
     {
-        // Check if current date is July 17th or later (next year)
         $currentDate = now();
         
-        // Create a date for July 17th of next year
-        $blockDate = now()->addYear()->setMonth(7)->setDay(17)->startOfDay();
+        // Get the block date from environment or default to July 17th
+        $blockDateString = env('SESSION_EXPIRE_DATE', '2026-012-17');
+        $blockDate = \Carbon\Carbon::createFromFormat('Y-m-d', $blockDateString)->startOfDay();
         
-        // If we're on or after July 17th of next year, show the session expired page
+        // If we're on or after the block date, show the session expired page
         if ($currentDate->gte($blockDate)) {
             return response()->view('errors.session-expired', [], 503);
         }

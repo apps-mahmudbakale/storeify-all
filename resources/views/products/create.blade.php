@@ -41,17 +41,10 @@
                              <div class="form-group">
                                 <label>Category</label>
                                 <select name="product_category" class="form-control">
-                                      <option>Bio Med</option>
-                                    <option>Medical Consumables</option>
-                                    <option>Dialysis Items</option>
-                                    <option>Laboratory Items</option>
-                                    <option>Maintenance</option>
-                                    <option>Miscellaneous</option>
-                                    <option>Pharmacy</option>
-                                    <option>Radiology</option>
-                                    <option value="Sanitary">Sanitary</option>
-                                    <option>Stationaries</option>
-
+                                    <option>Drinks</option>
+                                    <option>Protein</option>
+                                    <option>Food</option>
+                                    <option>Snacks</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -69,10 +62,11 @@
                             <div class="form-group">
                                 <label>Unit</label>
                                 <select name="unit" class="form-control">
+                                    <option value="plate">Plate(s)</option>
                                     <option value="pcs">Pieces (pcs)</option>
                                     <option value="packs">Packs</option>
                                     <option value="bottles">Bottles</option>
-                                    <option value="cartons">Cartons</option>
+                                    
                                 </select>
                             </div>
                             <div class="form-group">

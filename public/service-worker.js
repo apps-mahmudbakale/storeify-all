@@ -2,15 +2,13 @@ const CACHE_NAME = 'storeify-v1';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
-  '/css/app.css',
-  '/css/loader.css',
-  '/js/app.js',
   '/logo.png',
   '/favicon.png',
 ];
 
 // Install event - cache essential assets
 self.addEventListener('install', event => {
+  console.log('[Service Worker] Installing...');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
       console.log('[Service Worker] Caching assets');
@@ -18,13 +16,16 @@ self.addEventListener('install', event => {
         console.warn('[Service Worker] Some assets failed to cache:', err);
         // Don't fail installation if some assets aren't available
       });
+    }).then(() => {
+      console.log('[Service Worker] Installation complete');
+      return self.skipWaiting();
     })
   );
-  self.skipWaiting();
 });
 
 // Activate event - clean up old caches
 self.addEventListener('activate', event => {
+  console.log('[Service Worker] Activating...');
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
@@ -35,9 +36,8 @@ self.addEventListener('activate', event => {
           }
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 // Fetch event - network first, fallback to cache
@@ -47,9 +47,8 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Skip certain paths
-  if (event.request.url.includes('/app/') || 
-      event.request.url.includes('/api/')) {
+  // Skip dynamic app routes
+  if (event.request.url.includes('/app/')) {
     return;
   }
 
@@ -84,13 +83,6 @@ self.addEventListener('fetch', event => {
         });
       })
   );
-});
-
-// Handle messages from clients
-self.addEventListener('message', event => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
-  }
 });
 
 console.log('[Service Worker] Loaded and ready');
