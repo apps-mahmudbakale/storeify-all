@@ -96,6 +96,8 @@ Route::group(['prefix' => 'app', 'as' => 'app.', 'middleware' => 'auth'], functi
     Route::resource('invoices', InvoiceController::class);
     Route::get('invoice/{invoice}', [InvoiceController::class, 'invoice']);
     Route::get('invoice/print/{invoice}', [InvoiceController::class, 'invoicePrint'])->name('invoice.print');
+    Route::resource('customer-credits', \App\Http\Controllers\CustomerCreditController::class);
+    Route::post('customer-credits/{customerCredit}/mark-cleared', [\App\Http\Controllers\CustomerCreditController::class, 'markCleared'])->name('customer-credits.mark-cleared');
     Route::resource('settings', SettingsController::class)->except('store', 'update', 'edit', 'show', 'destroy');
     Route::post('settings', [SettingsController::class, 'updateStoreSettings'])->name('update.store.settings');
     Route::post('settings/currency', [SettingsController::class, 'updateStoreCurrency'])->name('update.store.currency');

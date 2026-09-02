@@ -113,6 +113,12 @@
 
                       </ul>
                   </li>
+                  <li class="nav-item">
+                      <a href="{{ route('app.customer-credits.index') }}" class="nav-link">
+                          <i class="nav-icon fas fa-money-bill-wave"></i>
+                          <p>Customer Credits</p>
+                      </a>
+                  </li>
                   @can('read-reports')
                       <li class="nav-item has-treeview">
                           <a href="#" class="nav-link">
@@ -150,14 +156,14 @@
                           </ul>
                       </li>
                   @endcan
-                  @can('read-invoices')
+                  <!-- @can('read-invoices')
                       <li class="nav-item">
                           <a href="{{ route('app.invoices.index') }}" class="nav-link">
                               <i class="nav-icon fa fa-file-invoice"></i>
                               <p>Invoices</p>
                           </a>
                       </li>
-                  @endcan
+                  @endcan -->
                   @can('read-settings')
                       <li class="nav-item">
                           <a href="{{ route('app.settings.index') }}" class="nav-link">
