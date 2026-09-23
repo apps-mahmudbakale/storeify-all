@@ -72,11 +72,36 @@
                       </li>
                   @endcan
                   @can('read-products')
-                      <li class="nav-item">
-                          <a href="{{ route('app.products.index') }}" class="nav-link">
+                      <li class="nav-item has-treeview">
+                          <a href="#" class="nav-link">
                               <i class="nav-icon fas fa-th"></i>
-                              <p>Products</p>
+                              <p>
+                                  Products
+                                  <i class="right fas fa-angle-left"></i>
+                              </p>
                           </a>
+                          <ul class="nav nav-treeview">
+                              <li class="nav-item">
+                                  <a href="{{ route('app.products.index') }}" class="nav-link">
+                                      <i class="fa fa-cube nav-icon"></i>
+                                      <p>All Products</p>
+                                  </a>
+                              </li>
+                              @can('create-products')
+                              <li class="nav-item">
+                                  <a href="{{ route('app.products.create') }}" class="nav-link">
+                                      <i class="fa fa-plus-circle nav-icon"></i>
+                                      <p>Add Product</p>
+                                  </a>
+                              </li>
+                              @endcan
+                              <li class="nav-item">
+                                  <a href="{{ route('app.batches.index') }}" class="nav-link">
+                                      <i class="fa fa-boxes nav-icon"></i>
+                                      <p>Batches</p>
+                                  </a>
+                              </li>
+                          </ul>
                       </li>
                   @endcan
                   <li class="nav-item has-treeview">
@@ -141,13 +166,19 @@
                                       <p>Custom Report</p>
                                   </a>
                               </li>
-                              <li class="nav-item">
-                                  <a href="{{ route('app.category.report.view') }}" class="nav-link">
-                                      <i class="fa fa-tags nav-icon"></i>
-                                      <p>Category Report</p>
-                                  </a>
-                              </li>
-                          </ul>
+<li class="nav-item">
+                                   <a href="{{ route('app.category.report.view') }}" class="nav-link">
+                                       <i class="fa fa-tags nav-icon"></i>
+                                       <p>Category Report</p>
+                                   </a>
+                               </li>
+                               <li class="nav-item">
+                                   <a href="{{ route('app.reports.closing-stock') }}" class="nav-link">
+                                       <i class="fa fa-warehouse nav-icon"></i>
+                                       <p>Closing Stock</p>
+                                   </a>
+                               </li>
+                           </ul>
                       </li>
                   @endcan
                   @can('read-invoices')

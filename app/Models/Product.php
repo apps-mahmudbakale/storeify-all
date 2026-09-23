@@ -28,4 +28,16 @@ class Product extends Model implements Auditable
         return $this->hasMany(ProductHistory::class);
     }
 
+    public function batches()
+    {
+        return $this->hasMany(ProductBatch::class);
+    }
+
+    /**
+     * Total quantity currently available for sale across all batches.
+     */
+    public function getBatchedQtyAttribute(): int
+    {
+        return (int) $this->batches()->sum('qty_remaining');
+    }
 }

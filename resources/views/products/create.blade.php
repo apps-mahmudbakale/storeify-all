@@ -64,7 +64,26 @@
                             </div> --}}
                             <div class="form-group">
                                 <label>Quantity in Stock</label>
-                                <input type="number" name="qty" class="form-control" placeholder="Quantity in Stock">
+                                <input type="number" name="qty" class="form-control" placeholder="Quantity in Stock" value="0" disabled>
+                                <small class="text-muted">Stock is assigned to batches. Total is shown here automatically.</small>
+                            </div>
+                            <div class="border rounded p-3 mt-3">
+                                <h5>Optional: Initial Batch</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Batch No.</label>
+                                            <input type="text" name="batch_no" class="form-control" placeholder="e.g. A1, B10">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Batch Quantity</label>
+                                            <input type="number" name="batch_qty" class="form-control" placeholder="e.g. 20">
+                                        </div>
+                                    </div>
+                                </div>
+                                <small class="text-muted">Leave empty to create the product without stock, then manage batches from the Batches menu.</small>
                             </div>
                             <div class="form-group">
                                 <label>Unit</label>

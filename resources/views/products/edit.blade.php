@@ -70,9 +70,8 @@
                             </div> --}}
                             <div class="form-group">
                                 <label>Quantity in Stock</label>
-                                <input type="number" name="qty"
-                                    value="{{ old('name', isset($product) ? $product->qty : '') }}" class="form-control"
-                                    placeholder="Quantity in Stock">
+                                <input type="number" class="form-control" value="{{ $product->qty }}" disabled>
+                                <small class="text-muted">Stock is managed through batches (Batches menu) and sales. This total is updated automatically.</small>
                             </div>
                             <div class="form-group">
                                 <label>Unit</label>

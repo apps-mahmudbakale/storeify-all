@@ -23,6 +23,11 @@ class Sale extends Model implements AuditableInterface
         'buyer_dept'
     ];
 
+    public function batchAllocations()
+    {
+        return $this->hasMany(SaleBatch::class);
+    }
+
 
 
 }

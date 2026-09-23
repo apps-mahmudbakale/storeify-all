@@ -23,6 +23,58 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header bg-primary">
+                                <h3 class="card-title">Stock Batches (FIFO)</h3>
+                                <div class="card-tools">
+                                    <span class="badge badge-light">Total in batches: {{ $batches->sum('qty_remaining') }}</span>
+                                </div>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Batch No.</th>
+                                                <th>Received</th>
+                                                <th>Initial Qty</th>
+                                                <th>Remaining</th>
+                                                <th>Cost (&#8358;)</th>
+                                                <th>Expiry</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @forelse ($batches as $batch)
+                                                <tr>
+                                                    <td><code>{{ $batch->batch_no }}</code></td>
+                                                    <td>{{ \Carbon\Carbon::parse($batch->received_at)->format('d M Y') }}</td>
+                                                    <td>{{ $batch->initial_qty }}</td>
+                                                    <td>
+                                                        <span class="badge {{ $batch->qty_remaining > 0 ? 'badge-success' : 'badge-danger' }}">{{ $batch->qty_remaining }}</span>
+                                                    </td>
+                                                    <td>{{ number_format($batch->buying_price, 2) }}</td>
+                                                    <td>
+                                                        @if ($batch->expiry_date)
+                                                            {{ \Carbon\Carbon::parse($batch->expiry_date)->format('d M Y') }}
+                                                        @else
+                                                            <span class="text-muted">N/A</span>
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="6" class="text-center text-muted">No batches created yet. New stock is auto-batched on product create, edit or import.</td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
                         <!-- The time line -->
                         <div class="timeline">
                             @php

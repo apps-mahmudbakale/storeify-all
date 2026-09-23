@@ -5,6 +5,7 @@ namespace App\Http\Livewire;
 use App\Models\Staff;
 use Livewire\Component;
 use App\Models\Department;
+use App\Models\ProductBatch;
 use Illuminate\Support\Facades\DB;
 
 class NewSale extends Component
@@ -29,11 +30,21 @@ class NewSale extends Component
         // departments as a simple static list (change to DB-backed if you prefer)
     $departments = Department::select('id', 'name')->orderBy('name')->get();
 
+        // Available batches per product for the dispense batch selector
+        $productIds = $carts->pluck('product_id')->unique()->filter();
+        $batchesByProduct = ProductBatch::whereIn('product_id', $productIds)
+            ->where('qty_remaining', '>', 0)
+            ->orderBy('received_at')
+            ->orderBy('batch_no')
+            ->get()
+            ->groupBy('product_id');
+
         return view('livewire.new-sale', [
             'carts' => $carts,
             'getSum' => $getSum,
             'staff' => $staff,
             'departments' => $departments,
+            'batchesByProduct' => $batchesByProduct,
         ]);
     }
 }

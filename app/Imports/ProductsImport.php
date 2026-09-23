@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use App\Models\Product;
+use App\Services\FifoBatchService;
 use App\Settings\StoreSettings;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
@@ -112,7 +113,7 @@ class ProductsImport implements ToCollection,  WithHeadingRow
                 }
 
                 // Create or update product
-                Product::updateOrCreate(
+                $product = Product::updateOrCreate(
                     ['name' => $productName],
                     [
                         'buying_price' => round($buyingPrice, 2),
@@ -123,7 +124,19 @@ class ProductsImport implements ToCollection,  WithHeadingRow
                 );
 
                 if ($quantity > 0) {
-                    Product::where('name', $productName)->increment('qty', $quantity);
+                    $qtyBeforeBatch = (int) $product->qty;
+                    $product->increment('qty', $quantity);
+
+                    // Each import row is a new stock batch for FIFO
+                    FifoBatchService::addBatch(
+                        $product,
+                        $quantity,
+                        [
+                            'buying_price' => round($buyingPrice, 2),
+                            'expiry_date' => $row['expiry'] ?? null,
+                        ],
+                        $qtyBeforeBatch
+                    );
                 }
                 
                 \Log::info('Product imported successfully', [

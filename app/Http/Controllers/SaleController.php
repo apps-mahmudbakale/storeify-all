@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Sale;
 use App\Models\Invoice;
 use App\Models\Product;
+use App\Models\ProductBatch;
 use App\Models\ProductHistory;
+use App\Services\FifoBatchService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -67,11 +69,20 @@ class  SaleController extends Controller
         echo '<ul class="nav flex-column">';
         if ($products) {
             foreach ($products as $product) {
-                $url = base64_encode($product->id . ',' . session()->get('invoice') . ',' . $product->buying_price);
+                // Default to the batch holding the most stock so a single
+                // dispense can usually come from one batch.
+                $defaultBatch = DB::table('product_batches')
+                    ->where('product_id', $product->id)
+                    ->where('qty_remaining', '>', 0)
+                    ->orderByDesc('qty_remaining')
+                    ->orderBy('received_at')
+                    ->first();
+                $url = base64_encode($product->id . ',' . session()->get('invoice') . ',' . $product->buying_price . ',' . ($defaultBatch ? $defaultBatch->id : 0));
                 echo '<li class="nav-item">
                 <a href="' . route('app.sales.cart', $url) . '" class="nav-link">
                   <strong>' . $product->name . '</strong>
                   <span class="float-right badge bg-primary">&#8358; ' . number_format($product->buying_price, 2) . '</span>
+                  <span class="badge bg-info">Available: ' . $product->qty . '</span>
                 </a>
               </li>';
             }
@@ -85,30 +96,52 @@ class  SaleController extends Controller
     public function cart($invoice)
     {
         $data = explode(',', base64_decode($invoice));
-        $qty = 1;
+        // data: [product_id, invoice, buying_price, batch_id]
+        $productId = (int) ($data[0] ?? 0);
+        $salesInvoice = $data[1] ?? null;
+        $price = $data[2] ?? null;
+        $batchId = isset($data[3]) ? (int) $data[3] : 0;
+
         $product = DB::table('products')
-            ->where('id', $data[0])
+            ->where('id', $productId)
             ->first();
 
-        $cart = DB::table('sales_order')
-            ->updateOrInsert(
-                ['product_id' => $data[0], 'invoice' => $data[1], 'price' => $data[2], 'user_id' => auth()->user()->id],
-                [
-                    // 'quantity' => DB::raw('quantity + ' . $qty),
-                    // 'amount' => DB::raw('amount + ' . $data[2]),
-                    'product_category' => $product->product_category,
-                    'created_at' => DB::raw('CURRENT_TIMESTAMP'),
-                    'updated_at' => DB::raw('CURRENT_TIMESTAMP'),
-                ]
-            );
+        $batch = $batchId
+            ? DB::table('product_batches')->where('id', $batchId)->where('product_id', $productId)->first()
+            : null;
 
-        DB::table('sales_order')
-            ->where('product_id', $data[0])
+        $existing = DB::table('sales_order')
+            ->where('product_id', $productId)
+            ->where('invoice', $salesInvoice)
             ->where('user_id', auth()->user()->id)
-            ->update([
-                'quantity' => DB::raw('quantity + 1'),
-                'amount' => DB::raw('amount + ' . $data[2])
+            ->where('product_batch_id', $batch ? $batch->id : null)
+            ->first();
+
+        if ($existing) {
+            $max = $batch ? (int) $batch->qty_remaining : PHP_INT_MAX;
+            $newQty = min($existing->quantity + 1, $max);
+
+            DB::table('sales_order')
+                ->where('id', $existing->id)
+                ->update([
+                    'quantity' => $newQty,
+                    'amount' => $existing->price * $newQty,
+                    'updated_at' => DB::raw('CURRENT_TIMESTAMP'),
+                ]);
+        } else {
+            DB::table('sales_order')->insert([
+                'invoice' => $salesInvoice,
+                'product_id' => $productId,
+                'product_batch_id' => $batch ? $batch->id : null,
+                'quantity' => 1,
+                'price' => $price,
+                'amount' => $price,
+                'product_category' => $product->product_category,
+                'user_id' => auth()->user()->id,
+                'created_at' => DB::raw('CURRENT_TIMESTAMP'),
+                'updated_at' => DB::raw('CURRENT_TIMESTAMP'),
             ]);
+        }
 
         return redirect()->route('app.sales.create');
     }
@@ -119,53 +152,76 @@ class  SaleController extends Controller
 
         $sales_order = DB::table('sales_order')
             ->where('invoice', $sale)
+            ->where('user_id', auth()->user()->id)
             ->get();
-            // dd($sales_order);
-        foreach ($sales_order as $order) {
-            $sales = Sale::create([
-                'invoice' => $sale,
-                'product_id' => $order->product_id,
-                'quantity' => $order->quantity,
-                'amount' => $order->amount,
-                'user_id' => auth()->user()->id,
-                'price' => $order->price,
-                'buyer_name' => $request->input('buyer_name'),
-                'buyer_dept' => $request->input('buyer_dept')
-            ]);
-            
-            // Get product before update
-            $product = Product::find($order->product_id);
-            $qtyBefore = $product->qty;
-            $qtyAfter = $qtyBefore - $order->quantity;
-            
-            // Update product quantity
-            DB::table('products')
-                ->where('id',  $order->product_id)
-                ->update(['qty' => DB::raw('qty - ' . $order->quantity)]);
-            
-            // Record product history
-            ProductHistory::create([
-                'product_id' => $order->product_id,
-                'user_id' => auth()->user()->id,
-                'type' => 'sale',
-                'qty_before' => $qtyBefore,
-                'qty_after' => $qtyAfter,
-                'qty_changed' => $order->quantity,
-                'invoice' => $sale,
-                'buyer_name' => $request->input('buyer_name'),
-                'buyer_dept' => $request->input('buyer_dept'),
-            ]);
+
+        try {
+            DB::transaction(function () use ($sales_order, $request, $sale) {
+                foreach ($sales_order as $order) {
+                    $batch = $order->product_batch_id ? ProductBatch::find($order->product_batch_id) : null;
+
+                    // Each line must be fully available in its selected batch.
+                    if ($batch && (int) $batch->qty_remaining < (int) $order->quantity) {
+                        throw new \Exception(
+                            "Insufficient stock in batch '{$batch->batch_no}' for product #{$order->product_id}. " .
+                            "Available: {$batch->qty_remaining}, requested: {$order->quantity}"
+                        );
+                    }
+
+                    $sales = Sale::create([
+                        'invoice' => $sale,
+                        'product_id' => $order->product_id,
+                        'quantity' => $order->quantity,
+                        'amount' => $order->amount,
+                        'user_id' => auth()->user()->id,
+                        'price' => $order->price,
+                        'buyer_name' => $request->input('buyer_name'),
+                        'buyer_dept' => $request->input('buyer_dept')
+                    ]);
+
+                    // Get product before update
+                    $product = Product::find($order->product_id);
+                    $qtyBefore = $product->qty;
+                    $qtyAfter = $qtyBefore - $order->quantity;
+                    
+                    // Update product quantity
+                    DB::table('products')
+                        ->where('id',  $order->product_id)
+                        ->update(['qty' => DB::raw('qty - ' . $order->quantity)]);
+                    
+                    // Dispense from the selected batch and record which batch was used
+                    if ($batch) {
+                        FifoBatchService::dispense($batch, (int) $order->quantity, $sales);
+                    }
+                    
+                    // Record product history
+                    ProductHistory::create([
+                        'product_id' => $order->product_id,
+                        'user_id' => auth()->user()->id,
+                        'type' => 'sale',
+                        'qty_before' => $qtyBefore,
+                        'qty_after' => $qtyAfter,
+                        'qty_changed' => $order->quantity,
+                        'invoice' => $sale,
+                        'buyer_name' => $request->input('buyer_name'),
+                        'buyer_dept' => $request->input('buyer_dept'),
+                    ]);
+                }
+                $invoice = Invoice::create([
+                    'invoice' => $sale,
+                    'buyer_name' => $request->input('buyer_name'),
+                    'buyer_dept' => $request->input('buyer_dept'),
+                    'created_at' => now(),
+                ]);
+               $delete = DB::table('sales_order')
+                ->where('invoice', $sale)
+                ->where('user_id', auth()->user()->id)
+                ->delete();
+            });
+        } catch (\Throwable $e) {
+            return redirect()->route('app.sales.create')->with('error', 'Sale could not be saved: ' . $e->getMessage());
         }
-        $invoice = Invoice::create([
-            'invoice' => $sale,
-            'buyer_name' => $request->input('buyer_name'),
-            'buyer_dept' => $request->input('buyer_dept'),
-            'created_at' => now(),
-        ]);
-       $delete = DB::table('sales_order')
-        ->where('invoice', $sale)
-        ->where('user_id', auth()->user()->id)
-        ->delete();
+
         session()->forget('invoice');
         return redirect()->route('app.sales.create')->with('success', 'Sales Saved');
     }
@@ -175,48 +231,68 @@ class  SaleController extends Controller
             ->where('invoice', $invoice)
             ->where('user_id', auth()->user()->id)
             ->get();
-        foreach ($sales_order as $order) {
-            $sales = Sale::create([
-                'invoice' => $invoice,
-                'product_id' => $order->product_id,
-                'quantity' => $order->quantity,
-                'amount' => $order->amount,
-                'user_id' => auth()->user()->id,
-                'price' => $order->price,
-                'buyer_name' => $request->input('buyer_name'),
-                'buyer_dept' => $request->input('buyer_dept')
-            ]);
-            
-            // Get product before update
-            $product = Product::find($order->product_id);
-            $qtyBefore = $product->qty;
-            $qtyAfter = $qtyBefore - $order->quantity;
-            
-            // Update product quantity
-            DB::table('products')
-                ->where('id',  $order->product_id)
-                ->update(['qty' => DB::raw('qty - ' . $order->quantity)]);
-            
-            // Record product history
-            ProductHistory::create([
-                'product_id' => $order->product_id,
-                'user_id' => auth()->user()->id,
-                'type' => 'sale',
-                'qty_before' => $qtyBefore,
-                'qty_after' => $qtyAfter,
-                'qty_changed' => $order->quantity,
-                'invoice' => $invoice,
-                'buyer_name' => $request->input('buyer_name'),
-                'buyer_dept' => $request->input('buyer_dept'),
-            ]);
+        try {
+            DB::transaction(function () use ($sales_order, $request, $invoice) {
+                foreach ($sales_order as $order) {
+                    $batch = $order->product_batch_id ? ProductBatch::find($order->product_batch_id) : null;
+
+                    if ($batch && (int) $batch->qty_remaining < (int) $order->quantity) {
+                        throw new \Exception(
+                            "Insufficient stock in batch '{$batch->batch_no}' for product #{$order->product_id}. " .
+                            "Available: {$batch->qty_remaining}, requested: {$order->quantity}"
+                        );
+                    }
+
+                    $sales = Sale::create([
+                        'invoice' => $invoice,
+                        'product_id' => $order->product_id,
+                        'quantity' => $order->quantity,
+                        'amount' => $order->amount,
+                        'user_id' => auth()->user()->id,
+                        'price' => $order->price,
+                        'buyer_name' => $request->input('buyer_name'),
+                        'buyer_dept' => $request->input('buyer_dept')
+                    ]);
+                    
+                    // Get product before update
+                    $product = Product::find($order->product_id);
+                    $qtyBefore = $product->qty;
+                    $qtyAfter = $qtyBefore - $order->quantity;
+                    
+                    // Update product quantity
+                    DB::table('products')
+                        ->where('id',  $order->product_id)
+                        ->update(['qty' => DB::raw('qty - ' . $order->quantity)]);
+                    
+                    // Dispense from the selected batch and record which batch was used
+                    if ($batch) {
+                        FifoBatchService::dispense($batch, (int) $order->quantity, $sales);
+                    }
+                    
+                    // Record product history
+                    ProductHistory::create([
+                        'product_id' => $order->product_id,
+                        'user_id' => auth()->user()->id,
+                        'type' => 'sale',
+                        'qty_before' => $qtyBefore,
+                        'qty_after' => $qtyAfter,
+                        'qty_changed' => $order->quantity,
+                        'invoice' => $invoice,
+                        'buyer_name' => $request->input('buyer_name'),
+                        'buyer_dept' => $request->input('buyer_dept'),
+                    ]);
+                }
+                $invoices = Invoice::create([
+                    'invoice' => $invoice,
+                    'buyer_name' => $request->input('buyer_name'),
+                    'buyer_dept' => $request->input('buyer_dept'),
+                    'created_at' => now(),
+                ]);
+                DB::table('sales_order')->where('invoice', $invoice)->where('user_id',auth()->user()->id)->delete();
+            });
+        } catch (\Throwable $e) {
+            return redirect()->route('app.sales.create')->with('error', 'Sale could not be saved: ' . $e->getMessage());
         }
-        $invoices = Invoice::create([
-            'invoice' => $invoice,
-            'buyer_name' => $request->input('buyer_name'),
-            'buyer_dept' => $request->input('buyer_dept'),
-            'created_at' => now(),
-        ]);
-        DB::table('sales_order')->where('invoice', $invoice)->where('user_id',auth()->user()->id)->delete();
         session()->forget('invoice');
         return redirect()->route('app.sales.print', $invoice);
     }
@@ -228,9 +304,9 @@ class  SaleController extends Controller
         return redirect()->route('app.sales.create');
     }
 
-    public function removeProduct($product)
+    public function removeProduct($salesOrder)
     {
-        DB::table('sales_order')->where('product_id', $product)->delete();
+        DB::table('sales_order')->where('id', $salesOrder)->delete();
         return redirect()->route('app.sales.create');
     }
 

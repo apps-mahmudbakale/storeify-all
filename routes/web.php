@@ -16,6 +16,7 @@ use App\Http\Controllers\RequestsController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReturnSaleController;
+use App\Http\Controllers\ReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -49,6 +50,13 @@ Route::group(['prefix' => 'app', 'as' => 'app.', 'middleware' => 'auth'], functi
     Route::resource('products', ProductController::class);
     Route::get('product/import', [ProductController::class, 'importView'])->name('products.import');
     Route::get('product/export', [ProductController::class, 'export'])->name('products.export');
+
+    /* Batch (FIFO) management */
+    Route::get('batches', [\App\Http\Controllers\BatchController::class, 'index'])->name('batches.index');
+    Route::get('batches/create', [\App\Http\Controllers\BatchController::class, 'create'])->name('batches.create');
+    Route::post('batches', [\App\Http\Controllers\BatchController::class, 'store'])->name('batches.store');
+    Route::post('batches/stock', [\App\Http\Controllers\BatchController::class, 'stock'])->name('batches.stock');
+    Route::delete('batches/{batch}', [\App\Http\Controllers\BatchController::class, 'destroy'])->name('batches.destroy');
 
     /* Department and Staff Management */
     Route::resource('departments', \App\Http\Controllers\DepartmentController::class);
@@ -93,6 +101,7 @@ Route::group(['prefix' => 'app', 'as' => 'app.', 'middleware' => 'auth'], functi
     Route::post('categoryReport', [DashboardController::class, 'categoryReport'])->name('category.report');
     Route::get('categoryReport/excel', [DashboardController::class, 'exportCategoryReportExcel'])->name('category.report.excel');
     Route::get('categoryReport/pdf', [DashboardController::class, 'exportCategoryReportPdf'])->name('category.report.pdf');
+    Route::get('reports/closing-stock', [ReportController::class, 'closingStock'])->name('reports.closing-stock');
     Route::resource('invoices', InvoiceController::class);
     Route::get('invoice/{invoice}', [InvoiceController::class, 'invoice']);
     Route::get('invoice/print/{invoice}', [InvoiceController::class, 'invoicePrint'])->name('invoice.print');

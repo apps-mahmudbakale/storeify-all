@@ -39,7 +39,20 @@
                         <div id="result" class=""></div>
                     </div>
                     <!-- /.card-header -->
-                    <div id="status"><br></div>
+                    <div id="status"><br>
+                        @if(session('error'))
+                            <div class="alert alert-danger alert-dismissible">
+                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                                {{ session('error') }}
+                            </div>
+                        @endif
+                        @if(session('success'))
+                            <div class="alert alert-success alert-dismissible">
+                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                                {{ session('success') }}
+                            </div>
+                        @endif
+                    </div>
                     <div class="card-body">
                         <table class="table  table-striped">
                             <thead>
@@ -49,6 +62,7 @@
                                     <th>Category</th>
                                     <th>Selling Price</th>
                                     <th>Quantity</th>
+                                    <th>Batch</th>
                                     <th>Amount</th>
                                     <th></th>
                                 </tr>
@@ -64,6 +78,17 @@
                                         <td>&#8358; <input type='number' id='price{{$cart->id}}' value='{{ $cart->price }}' style='width:110px; display:inherit;' class='form-control'></td>
                                         <td><input type='number' id="qty{{ $cart->id }}" style='width:69px;'
                                                 class='form-control' value='{{ $cart->quantity }}'></td>
+                                        <td>
+                                            <select id="batch{{ $cart->id }}" class="form-control" style="width:140px;">
+                                                @forelse (($batchesByProduct[$cart->product_id] ?? collect()) as $b)
+                                                    <option value="{{ $b->id }}" {{ $cart->product_batch_id == $b->id ? 'selected' : '' }}>
+                                                        {{ $b->batch_no }} ({{ $b->qty_remaining }})
+                                                    </option>
+                                                @empty
+                                                    <option value="0">No stock</option>
+                                                @endforelse
+                                            </select>
+                                        </td>
                                         <td>&#8358; <span
                                                 id="m{{ $cart->id }}">{{ number_format($cart->amount, 2) }}</span>
                                         </td>
@@ -74,7 +99,7 @@
                                                 <button id="minus{{ $cart->id }}"
                                                     class='btn btn-warning text-white btn-sm delete'><i
                                                         class='fa fa-minus-circle'></i></button>
-                                                <a href="remove/{{$cart->product_id}}"
+                                                <a href="remove/{{$cart->id}}"
                                                     class='btn btn-danger btn-sm delete'><i
                                                         class='fa fa-times-circle'></i></a>
                                             </div>
@@ -83,6 +108,27 @@
                                     <script>
                                         $(() => {
                                             var item = $('#item{{ $cart->id }}').text()
+                                            var soid = '{{ $cart->id }}';
+                                            var getBatch = function() {
+                                                return $('#batch{{ $cart->id }}').val();
+                                            };
+                                            var applyResponse = function(json) {
+                                                if (!json) return;
+                                                $('#m{{ $cart->id }}').text(json.amount);
+                                                $('#qty{{ $cart->id }}').val(json.qty);
+                                                $('#total').html(json.total);
+                                                $('#text').html(json.text);
+                                                if (json.msg == 'excess') {
+                                                    Swal.fire({
+                                                        position: 'center',
+                                                        icon: 'error',
+                                                        title: 'Only ' + json.qty + ' available for "' + item +
+                                                            '" in the selected batch. Add another line from a different batch for the rest.',
+                                                        showConfirmButton: true,
+                                                        timer: 5000
+                                                    })
+                                                }
+                                            };
                                             $('#plus{{ $cart->id }}').click(() => {
                                                 var qty = $('#qty{{ $cart->id }}').val();
                                                 var prid = $('#prid{{ $cart->id }}').val();
@@ -101,7 +147,9 @@
                                                         invoice: invoice,
                                                         prid: prid,
                                                         user: user,
-                                                        price: price
+                                                        price: price,
+                                                        soid: soid,
+                                                        batch_id: getBatch()
 
                                                     },
                                                     cache: false,
@@ -109,22 +157,7 @@
                                                         console.log(html)
                                                         var json = html;
                                                         if (json) {
-                                                            $('#m{{ $cart->id }}').text(json.amount);
-                                                            $('#total').html(json.total);
-                                                            $('#text').html(json.text);
-
-                                                            if (json.msg == 'success') {
-
-                                                            } else if (json.msg == 'excess') {
-                                                                Swal.fire({
-                                                                    position: 'center',
-                                                                    icon: 'error',
-                                                                    title: 'Quantity ' + item +
-                                                                        ' is greater than Available',
-                                                                    showConfirmButton: true,
-                                                                    timer: 3500
-                                                                })
-                                                            }
+                                                            applyResponse(json);
                                                         }
                                                     }
                                                 });
@@ -135,6 +168,7 @@
                                                 var prid = $('#prid{{ $cart->id }}').val();
                                                 var price = $('#price{{$cart->id}}').val();
                                                 var a = --qty;
+                                                if (a < 0) a = 0;
                                                 var invoice = '{{ $cart->invoice }}';
                                                 var user = '{{auth()->user()->id}}';
                                                 $('#qty{{ $cart->id }}').val(a);
@@ -147,16 +181,16 @@
                                                         invoice: invoice,
                                                         prid: prid,
                                                         user:user,
-                                                        price:price
+                                                        price:price,
+                                                        soid: soid,
+                                                        batch_id: getBatch()
                                                     },
                                                     cache: false,
                                                     success: function(html) {
                                                         console.log(html)
                                                         var json = html;
                                                         if (json) {
-                                                            $('#m{{ $cart->id }}').text(json.amount);
-                                                            $('#total').html(json.total);
-                                                            $('#text').html(json.text);
+                                                            applyResponse(json);
                                                         }
                                                     }
                                                 });
@@ -176,16 +210,44 @@
                                                         invoice: invoice,
                                                         prid: prid,
                                                         user:user,
-                                                        price:price
+                                                        price:price,
+                                                        soid: soid,
+                                                        batch_id: getBatch()
                                                     },
                                                     cache: false,
                                                     success: function(html) {
                                                         console.log(html)
                                                         var json = html;
                                                         if (json) {
-                                                            $('#m{{ $cart->id }}').text(json.amount);
-                                                            $('#total').html(json.total);
-                                                            $('#text').html(json.text);
+                                                            applyResponse(json);
+                                                        }
+                                                    }
+                                                });
+                                            })
+                                            $('#batch{{ $cart->id }}').change(() => {
+                                                var qty = $('#qty{{ $cart->id }}').val();
+                                                var prid = $('#prid{{ $cart->id }}').val();
+                                                var invoice = '{{ $cart->invoice }}';
+                                                var user = '{{auth()->user()->id}}';
+                                                var price = $('#price{{$cart->id}}').val();
+                                                $.ajax({
+                                                    type: "POST",
+                                                    url: "/api/getPrice",
+                                                    data: {
+                                                        qty: qty,
+                                                        invoice: invoice,
+                                                        prid: prid,
+                                                        user: user,
+                                                        price: price,
+                                                        soid: soid,
+                                                        batch_id: getBatch()
+                                                    },
+                                                    cache: false,
+                                                    success: function(html) {
+                                                        console.log(html)
+                                                        var json = html;
+                                                        if (json) {
+                                                            applyResponse(json);
                                                         }
                                                     }
                                                 });
@@ -204,31 +266,16 @@
                                                         invoice: invoice,
                                                         prid: prid,
                                                         user:user,
-                                                        price: price
+                                                        price: price,
+                                                        soid: soid,
+                                                        batch_id: getBatch()
                                                     },
                                                     cache: false,
                                                     success: function(html) {
                                                         var json = html;
                                                         if (json) {
-                                                            $('#m{{ $cart->id }}').text(json.amount);
-                                                            $('#total').html(json.total);
-                                                            $('#text').html(json.text);
-
+                                                            applyResponse(json);
                                                             console.log(json.msg);
-
-                                                            if (json.msg == 'success') {
-
-                                                            } else if (json.msg == 'excess') {
-                                                                Swal.fire({
-                                                                    position: 'center',
-                                                                    icon: 'error',
-                                                                    title: 'Quantity ' + item +
-                                                                        ' is greater than Available',
-                                                                    showConfirmButton: true,
-                                                                    timer: 3500
-                                                                })
-                                                            }
-
                                                         }
                                                     }
                                                 });

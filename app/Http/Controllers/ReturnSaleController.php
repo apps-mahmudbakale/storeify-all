@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\Sale;
+use App\Services\FifoBatchService;
 
 class ReturnSaleController extends Controller
 {
@@ -49,30 +51,40 @@ class ReturnSaleController extends Controller
                         'updated_at' => now()
                     ]);
 
-                    $sales = DB::table('sales')
-                                ->where('invoice', $request->invoice)
-                                ->where('product_id', $request->items[$index])
+                    $productId = $request->items[$index];
+                    $returnQty = (int) $request->rqty[$index];
+                    $sale = Sale::where('invoice', $request->invoice)
+                                ->where('product_id', $productId)
                                 ->first();
-                    if($sales->quantity == 1){
+
+                    if ($sale && $sale->quantity == 1) {
+                        // Credit the returned unit back to the original batch
+                        FifoBatchService::credit($sale, 1);
+
                         DB::table('sales')
-                                ->where('invoice', $request->invoice)
-                                ->where('product_id', $request->items[$index])
+                                ->where('id', $sale->id)
                                 ->delete();
-                        $data = DB::table('return_request')->where('product_id', $request->items[$index])->first();
+                        $data = DB::table('return_request')->where('product_id', $productId)->first();
                         DB::table('products')
-                            ->where('id', $request->items[$index])
+                            ->where('id', $productId)
                             ->update(['qty' => DB::raw('qty + 1')]);
                     }else{
-                    $product = DB::table('products')
-                                ->where('id', $request->items[$index])->first();
-                    DB::table('sales')
-                            ->where('invoice', $request->invoice)
-                            ->where('product_id', $request->items[$index])
-                            ->update(['quantity' => DB::raw('quantity -'.$request->rqty[$index]), 'amount' => round($product->selling_price * $request->rqty[$index])]);
-                    $data = DB::table('return_request')->where('product_id', $request->items[$index])->first();
-                    DB::table('products')
-                        ->where('id', $request->items[$index])
-                        ->update(['qty' => DB::raw('qty +'.$request->rqty[$index])]);
+                        $product = DB::table('products')
+                                    ->where('id', $productId)->first();
+
+                        // Credit the returned quantity back to the original batches
+                        if ($sale) {
+                            FifoBatchService::credit($sale, $returnQty);
+                        }
+
+                        DB::table('sales')
+                                ->where('invoice', $request->invoice)
+                                ->where('product_id', $productId)
+                                ->update(['quantity' => DB::raw('quantity -'.$returnQty), 'amount' => round($product->selling_price * $returnQty)]);
+                        $data = DB::table('return_request')->where('product_id', $productId)->first();
+                        DB::table('products')
+                            ->where('id', $productId)
+                            ->update(['qty' => DB::raw('qty +'.$returnQty)]);
                     }
 
             }

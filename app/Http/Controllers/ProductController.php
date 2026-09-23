@@ -7,6 +7,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Exports\ProductsExport;
 use App\Imports\ProductsImport;
+use App\Services\FifoBatchService;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Requests\ProductsFormRequest;
 
@@ -49,7 +50,34 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         // dd(array_merge($request->except('expiry_date'), ['expiry_date' => date($request->expiry_date)]));
-        $products = Product::create(array_merge($request->except('expiry_date'), ['expiry_date' => date($request->expiry_date), 'selling_price' => $request->selling_price ?? 0]));
+        $products = Product::create(array_merge($request->except('expiry_date', 'qty'), [
+            'expiry_date' => date($request->expiry_date),
+            'selling_price' => $request->selling_price ?? 0,
+            'qty' => 0,
+        ]));
+
+        // Optional: place the new product's initial stock into a named batch
+        $batchQty = (int) $request->input('batch_qty', 0);
+        if ($batchQty > 0) {
+            $products->increment('qty', $batchQty);
+
+            $batchAttributes = [
+                'buying_price' => $products->buying_price,
+                'expiry_date' => $products->expiry_date,
+                'received_at' => now()->format('Y-m-d'),
+            ];
+            if ($request->input('batch_no')) {
+                $batchAttributes['batch_no'] = $request->input('batch_no');
+            }
+
+            FifoBatchService::addBatch(
+                $products,
+                $batchQty,
+                $batchAttributes,
+                0,
+                true
+            );
+        }
 
         return redirect()->route('app.products.index')->with('success', 'Product Added');
     }
@@ -102,7 +130,9 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product)
     {
-        $product->update($request->all());
+        // Stock is managed through batches, not the product edit page.
+        // Ignore any qty value submitted so only product details are updated.
+        $product->update($request->except('qty'));
 
         return redirect()->route('app.products.index')->with('success', 'Product Updated');
     }
@@ -124,6 +154,7 @@ class ProductController extends Controller
     {
         $audits = $product->audits()->with('user')->orderBy('created_at', 'desc')->get();
         $productHistories = $product->histories()->with('user')->orderBy('created_at', 'desc')->get();
-        return view('products.history', compact('product', 'audits', 'productHistories'));
+        $batches = $product->batches()->orderBy('received_at')->orderBy('id')->get();
+        return view('products.history', compact('product', 'audits', 'productHistories', 'batches'));
     }
 }
