@@ -98,6 +98,142 @@ class FifoBatchService
     }
 
     /**
+     * Reconcile a product's stock to a counted quantity (stock take).
+     *
+     * Any surplus lands in a new "Stock take" batch so it is still FIFO-tracked;
+     * any shortfall is consumed from the oldest batches first. Keeps products.qty
+     * and the sum of batch quantities in agreement.
+     *
+     * @return int absolute size of the correction applied
+     */
+    public static function reconcile(Product $product, int $countedQty): int
+    {
+        $countedQty = max(0, $countedQty);
+
+        // Read the current figure from the database, not the in-memory model:
+        // callers may hold a product instance loaded before other changes.
+        $product = Product::findOrFail($product->id);
+
+        $qtyBefore = (int) $product->qty;
+        $delta = $countedQty - $qtyBefore;
+
+        if ($delta === 0) {
+            return 0;
+        }
+
+        DB::transaction(function () use ($product, $countedQty, $delta, $qtyBefore) {
+            DB::table('products')
+                ->where('id', $product->id)
+                ->update(['qty' => $countedQty]);
+
+            if ($delta > 0) {
+                $batch = ProductBatch::query()
+                    ->where('product_id', $product->id)
+                    ->orderByDesc('received_at')
+                    ->orderByDesc('id')
+                    ->first();
+
+                // Prefer topping up the newest batch so the count stays on stock
+                // already received rather than inventing a new expiry window.
+                if ($batch) {
+                    DB::table('product_batches')
+                        ->where('id', $batch->id)
+                        ->increment('qty_remaining', $delta);
+                    DB::table('product_batches')
+                        ->where('id', $batch->id)
+                        ->increment('initial_qty', $delta);
+                } else {
+                    ProductBatch::create([
+                        'product_id' => $product->id,
+                        'batch_no' => 'TAKE-' . now()->format('Ymd-His'),
+                        'initial_qty' => $delta,
+                        'qty_remaining' => $delta,
+                        'buying_price' => $product->buying_price,
+                        'expiry_date' => $product->expiry_date,
+                        'received_at' => now()->format('Y-m-d'),
+                        'notes' => 'Stock take surplus',
+                    ]);
+                }
+            } else {
+                // Surplus on hand is a write-off: pull it out of the oldest batches.
+                $shortfall = abs($delta);
+
+                foreach (self::allocate($product, $shortfall) as $allocation) {
+                    DB::table('product_batches')
+                        ->where('id', $allocation['batch']->id)
+                        ->decrement('qty_remaining', $allocation['qty']);
+
+                    $shortfall -= $allocation['qty'];
+
+                    if ($shortfall <= 0) {
+                        break;
+                    }
+                }
+            }
+
+            ProductHistory::create([
+                'product_id' => $product->id,
+                'user_id' => self::resolveUserId(),
+                'type' => 'adjustment',
+                'qty_before' => $qtyBefore,
+                'qty_after' => $countedQty,
+                'qty_changed' => $delta,
+                'notes' => 'Stock take counted ' . $countedQty,
+            ]);
+        });
+
+        return abs($delta);
+    }
+
+    /**
+     * Remove stock from a specific batch (manual adjustments, damage, write-offs).
+     *
+     * Keeps the product stock in sync with the batch and records an adjustment
+     * history entry. Throws when the requested qty exceeds what the batch holds.
+     *
+     * @throws \InvalidArgumentException
+     */
+    public static function reduceBatch(ProductBatch $batch, int $qty): ProductBatch
+    {
+        if ($qty <= 0) {
+            throw new \InvalidArgumentException('Quantity must be at least 1.');
+        }
+
+        $available = (int) $batch->fresh()->qty_remaining;
+
+        if ($qty > $available) {
+            throw new \InvalidArgumentException(
+                'Batch "' . $batch->batch_no . '" only has ' . $available . ' left.'
+            );
+        }
+
+        $product = $batch->product;
+        $qtyBefore = (int) $product->qty;
+
+        DB::transaction(function () use ($batch, $product, $qty, $qtyBefore) {
+            DB::table('product_batches')
+                ->where('id', $batch->id)
+                ->decrement('qty_remaining', $qty);
+
+            DB::table('products')
+                ->where('id', $product->id)
+                ->decrement('qty', $qty);
+
+            ProductHistory::create([
+                'product_id' => $product->id,
+                'user_id' => self::resolveUserId(),
+                'type' => 'adjustment',
+                'qty_before' => $qtyBefore,
+                'qty_after' => $qtyBefore - $qty,
+                'qty_changed' => $qty,
+                'notes' => 'Removed ' . $qty . ' from batch ' . $batch->batch_no,
+            ]);
+        });
+
+        return $batch->fresh();
+    }
+
+    /**
      * Credit a returned quantity back into the batches it was sold from.
      *
      * @return int quantity actually restored to batches

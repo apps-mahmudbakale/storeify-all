@@ -27,6 +27,12 @@
                         {{ session('success') }}
                     </div>
                 @endif
+                @if(session('error'))
+                    <div class="alert alert-danger alert-dismissible">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                        {{ session('error') }}
+                    </div>
+                @endif
                 @if($errors->any())
                     <div class="alert alert-danger alert-dismissible">
                         <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
@@ -60,7 +66,7 @@
                                     <th>Cost (&#8358;)</th>
                                     <th>Expiry</th>
                                     <th>Received</th>
-                                    <th style="width: 220px;">Actions</th>
+                                    <th style="width: 260px;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -85,11 +91,12 @@
                                         <td>{{ \Carbon\Carbon::parse($batch->received_at)->format('d M Y') }}</td>
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                <form action="{{ route('app.batches.stock') }}" method="POST" class="form-inline" style="flex:1;">
+                                                <form action="{{ route('app.batches.stock') }}" method="POST" class="form-inline" style="flex:1;" data-batch-qty-form data-confirm="{verb} this quantity on batch {{ $batch->batch_no }}?">
                                                     @csrf
                                                     <input type="hidden" name="batch_id" value="{{ $batch->id }}">
+                                                    <button formaction="{{ route('app.batches.reduce') }}" data-verb="Remove" class="btn btn-warning btn-sm mr-1" title="Remove stock from this batch" {{ $batch->qty_remaining < 1 ? 'disabled' : '' }}><i class="fa fa-minus"></i></button>
                                                     <input type="number" name="qty" min="1" placeholder="Qty" class="form-control form-control-sm mr-1" style="width:70px;" required>
-                                                    <button class="btn btn-info btn-sm" title="Add stock to this batch"><i class="fa fa-plus"></i></button>
+                                                    <button formaction="{{ route('app.batches.stock') }}" data-verb="Add" class="btn btn-info btn-sm" title="Add stock to this batch"><i class="fa fa-plus"></i></button>
                                                 </form>
                                                 <form action="{{ route('app.batches.destroy', $batch->id) }}" method="POST" class="ml-1" onsubmit="return confirm('Delete batch {{ $batch->batch_no }}? Remaining qty ({{ $batch->qty_remaining }}) will be removed from stock.');">
                                                     @csrf
@@ -118,3 +125,24 @@
         </section>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        // One form per row: the qty input is shared, the +/- buttons pick the
+        // target route via formaction. Confirm names the pressed action.
+        document.addEventListener('submit', function (event) {
+            var form = event.target;
+
+            if (!form.hasAttribute('data-batch-qty-form')) {
+                return;
+            }
+
+            var submitter = event.submitter;
+            var verb = (submitter && submitter.dataset.verb) || 'Apply';
+
+            if (!confirm(form.dataset.confirm.replace('{verb}', verb))) {
+                event.preventDefault();
+            }
+        });
+    </script>
+@endpush

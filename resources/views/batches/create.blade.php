@@ -1,5 +1,10 @@
 @extends('layouts.app')
 
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('plugins/select2/css/select2.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css') }}">
+@endpush
+
 @section('content')
     <div class="content-wrapper">
         <div class="content-header">
@@ -41,7 +46,7 @@
 
                             <div class="form-group">
                                 <label>Product</label>
-                                <select name="product_id" class="form-control" required>
+                                <select name="product_id" id="product_id" class="form-control" required>
                                     <option value="">-- Select product --</option>
                                     @foreach ($products as $product)
                                         <option value="{{ $product->id }}" {{ old('product_id') == $product->id ? 'selected' : '' }}>
@@ -49,6 +54,7 @@
                                         </option>
                                     @endforeach
                                 </select>
+                                <small class="form-text text-muted">Type to filter the list.</small>
                             </div>
 
                             <div class="row">
@@ -96,3 +102,26 @@
         </section>
     </div>
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('plugins/select2/js/select2.min.js') }}"></script>
+    <script>
+        $(function () {
+            $('#product_id').select2({
+                theme: 'bootstrap4',
+                width: '100%',
+                placeholder: '-- Select product --',
+                // Keep matching forgiving: names differ by case/spacing a lot.
+                matcher: function (params, data) {
+                    var term = $.trim(params.term).toLowerCase();
+
+                    if (term === '') {
+                        return data;
+                    }
+
+                    return data.text.toLowerCase().indexOf(term) > -1 ? data : null;
+                }
+            });
+        });
+    </script>
+@endpush

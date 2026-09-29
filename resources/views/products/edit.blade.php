@@ -70,8 +70,13 @@
                             </div> --}}
                             <div class="form-group">
                                 <label>Quantity in Stock</label>
-                                <input type="number" class="form-control" value="{{ $product->qty }}" disabled>
-                                <small class="text-muted">Stock is managed through batches (Batches menu) and sales. This total is updated automatically.</small>
+                                <input type="number" name="qty" min="0" class="form-control"
+                                    value="{{ old('qty', $product->qty) }}">
+                                <small class="text-muted">
+                                    Sales and the Batches menu normally update this automatically. Enter a
+                                    different number to record a stock take &mdash; batches are adjusted to match.
+                                    Across batches right now: {{ $product->batched_qty }}.
+                                </small>
                             </div>
                             <div class="form-group">
                                 <label>Unit</label>

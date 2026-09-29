@@ -36,6 +36,7 @@
             background-color: lightgoldenrodyellow;
         }
     </style>
+    @stack('styles')
     <!-- Scripts -->
     {{-- @vite(['resources/css/app.css', 'resources/js/app.js']) --}}
     <link rel="stylesheet" href="{{ asset('css/sweetalert2.min.css') }}">
@@ -49,6 +50,7 @@
         @yield('content')
     </div>
     @livewireScripts
+    @stack('scripts')
     <script src="{{ asset('js/sweetalert2.min.js') }}"></script>
     <script src="{{asset('js/localbase.dev.js')}}"></script>
     <form id="logoutform" action="{{ route('app.logout') }}" method="POST" style="display: none;">

@@ -101,6 +101,27 @@ class BatchController extends Controller
     }
 
     /**
+     * Remove stock from an existing batch.
+     */
+    public function reduce(Request $request)
+    {
+        $data = $request->validate([
+            'batch_id' => 'required|exists:product_batches,id',
+            'qty' => 'required|integer|min:1',
+        ]);
+
+        $batch = ProductBatch::with('product')->findOrFail($data['batch_id']);
+
+        try {
+            FifoBatchService::reduceBatch($batch, (int) $data['qty']);
+        } catch (\InvalidArgumentException $e) {
+            return redirect()->route('app.batches.index')->with('error', $e->getMessage());
+        }
+
+        return redirect()->route('app.batches.index')->with('success', 'Removed ' . $data['qty'] . ' from batch "' . $batch->batch_no . '"');
+    }
+
+    /**
      * Delete a batch. Any remaining qty is removed from the product stock.
      */
     public function destroy($id)

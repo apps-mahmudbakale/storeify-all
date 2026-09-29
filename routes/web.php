@@ -56,6 +56,7 @@ Route::group(['prefix' => 'app', 'as' => 'app.', 'middleware' => 'auth'], functi
     Route::get('batches/create', [\App\Http\Controllers\BatchController::class, 'create'])->name('batches.create');
     Route::post('batches', [\App\Http\Controllers\BatchController::class, 'store'])->name('batches.store');
     Route::post('batches/stock', [\App\Http\Controllers\BatchController::class, 'stock'])->name('batches.stock');
+    Route::post('batches/reduce', [\App\Http\Controllers\BatchController::class, 'reduce'])->name('batches.reduce');
     Route::delete('batches/{batch}', [\App\Http\Controllers\BatchController::class, 'destroy'])->name('batches.destroy');
 
     /* Department and Staff Management */

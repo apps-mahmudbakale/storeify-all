@@ -130,9 +130,23 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product)
     {
-        // Stock is managed through batches, not the product edit page.
-        // Ignore any qty value submitted so only product details are updated.
+        $data = $request->validate([
+            'qty' => 'sometimes|required|integer|min:0',
+        ]);
+
+        // Stock is otherwise managed through batches, but the edit page also
+        // accepts a counted quantity. It is applied as a stock take so the
+        // batch totals stay in step with products.qty.
         $product->update($request->except('qty'));
+
+        if ($request->has('qty')) {
+            $changed = FifoBatchService::reconcile($product, (int) $data['qty']);
+
+            if ($changed > 0) {
+                return redirect()->route('app.products.index')
+                    ->with('success', 'Product Updated. Stock take applied a correction of ' . $changed . '.');
+            }
+        }
 
         return redirect()->route('app.products.index')->with('success', 'Product Updated');
     }
